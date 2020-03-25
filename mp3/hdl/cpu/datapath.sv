@@ -1,5 +1,5 @@
 import rv32i_types::*;
-
+import control_word_types::*;
 
 module datapath
 {
