@@ -18,6 +18,8 @@ module datapath
     output d_mem_read,
     output d_mem_write,
 
+    output [3:0] mem_byte_en
+
 };
 
 
