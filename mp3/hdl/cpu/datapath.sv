@@ -22,7 +22,10 @@ module datapath
 
 };
 
+rv32i_word pc_plus4;
+logic true;
 
+assign true = 1'b1;
 /********************************Control Unit********************************/
 
 
@@ -39,127 +42,167 @@ module datapath
 //5 stage registers
 //IF/ID
 register pc_IF_ID(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(pc_plus4),
+    .out(pc_IF_ID_out)
 );
 
 register ir_IF_ID(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(i_mem_rdata),
+    .out(ir_IF_ID_out)
 ); 
 
 //ID/EX
 
-register control_word_ID_EX(
-
-//I'll do this later
-
+register #(CONTROL_WORD_SIZE) control_word_ID_EX(
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(control_unit_out),
+    .out(control_word_EX)
 ); 
 
-register pc_IF_ID(
-
-//I'll do this later
-
+register pc_ID_EX(
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(pc_plus4),
+    .out(pc_ID_EX_out)
 );
 
 register read_data1_ID_EX(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(regfile_out_srca),
+    .out(read_data1_EX)
 );
 
 register read_data2_ID_EX(
-    
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(regfile_out_srcb),
+    .out(read_data2_EX)
 );
 
-register imm_ID_EX(
-    
-//I'll do this later
-
+register #(IMM_SIZE) imm_ID_EX(
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(imm),
+    .out(imm_EX)
 );
 
 //EX/MEM
-register control_word_EX_MEM(
-
-//I'll do this later
-
+register #(CONTROL_WORD_SIZE) control_word_EX_MEM(
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(control_word_EX),
+    .out(control_word_MEM)
 ); 
 
 register pc_EX_MEM(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(pc_EX),
+    .out(pc_MEM)
 );
 
-register br_en_EX_MEM(
-
-//I'll do this later
-
+register #(1) br_en_EX_MEM(
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(br_en),
+    .out(br_en_MEM)
 );
 
 register pc_offset_EX_MEM(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(pc_EX),
+    .out(pc_MEM)
 );
 
 register read_data2_EX_MEM(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(read_data2_EX),
+    .out(read_data2_MEM)
 );
 
 register imm_EX_MEM(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(imm_EX),
+    .out(imm_MEM)
 );
 
 register ALUout_EX_MEM(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(alu_out),
+    .out(aluout_MEM)
 );
 
 //MEM/WB
 register control_word_MEM_WB(
-
-//I'll do this later
-
+   .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(control_word_MEM),
+    .out(control_word_EX)
 ); 
 
 register br_en_MEM_WB(
-
-//I'll do this later
-
+   .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(br_en_MEM),
+    .out(br_en_WB)
 ); 
 
 register pc_offset_MEM_WB(
-
-//I'll do this later
-
+   .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(pc_MEM),
+    .out(pc_WB)
 );
 
 register data_out_MEM_WB(
-
-//I'll do this later
-
+   .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(data_out),
+    .out(data_out_WB)
 );
 
 register alu_out_MEM_WB(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(alu_out),
+    .out(aluout_WB)
 );
 
 register imm_MEM_WB(
-
-//I'll do this later
-
+    .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(imm_MEM),
+    .out(imm_WB)
 );
 
 
