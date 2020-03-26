@@ -1,3 +1,5 @@
+`define CONTROL_WORD_SIZE 28
+
 import rv32i_types::*;
 import control_word_types::*;
 
@@ -39,7 +41,41 @@ rv32i_word b_imm;
 rv32i_word u_imm;
 rv32i_word j_imm;
 logic [4:0] rd;
-
+control_word control_unit_out;
+control_word control_word_EX;
+rv32i_word pc_EX;
+rv32i_word regfile_out_srca;
+rv32i_word read_data1_EX;
+rv32i_word regfile_out_srcb;
+rv32i_word read_data2_EX;
+rv32i_word i_imm;
+rv32i_word imm_EX;
+control_word control_word_EX;
+control_word control_word_MEM;
+rv32i_word pc_EX;
+rv32i_word pc_MEM;
+logic br_en;
+logic br_en_MEM;
+rv32i_word pc_EX;
+rv32i_word pc_MEM;
+rv32i_word read_data2_EX;
+rv32i_word read_data2_MEM;
+rv32i_word imm_EX;
+rv32i_word imm_MEM;
+rv32i_word alu_out;
+rv32i_word aluout_MEM;
+control_word control_word_MEM;
+control_word control_word_WB;
+logic br_en_MEM;
+logic br_en_WB;
+rv32i_word pc_MEM;
+rv32i_word pc_WB;
+rv32i_word data_out;
+rv32i_word data_out_WB;
+rv32i_word alu_out_MEM;
+rv32i_word aluout_WB;
+rv32i_word imm_MEM;
+rv32i_word imm_WB;
 
 
 assign true = 1'b1;
@@ -81,7 +117,7 @@ register pc_IF_ID(
 ir ir_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(load_ir),
+    .load(true),
     .in(i_mem_rdata),
     .funct3(funct3),
     .funct7(funct7),
@@ -110,7 +146,7 @@ register pc_ID_EX(
     .rst(rst),
     .load(true),
     .in(pc_plus4),
-    .out(pc_ID_EX_out)
+    .out(pc_EX)
 );
 
 register read_data1_ID_EX(
@@ -129,11 +165,11 @@ register read_data2_ID_EX(
     .out(read_data2_EX)
 );
 
-register #(IMM_SIZE) imm_ID_EX(
+register imm_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(imm),
+    .in(i_imm),
     .out(imm_EX)
 );
 
@@ -200,7 +236,7 @@ register control_word_MEM_WB(
     .rst(rst),
     .load(true),
     .in(control_word_MEM),
-    .out(control_word_EX)
+    .out(control_word_WB)
 ); 
 
 register br_en_MEM_WB(
@@ -231,7 +267,7 @@ register alu_out_MEM_WB(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(alu_out),
+    .in(alu_out_MEM),
     .out(aluout_WB)
 );
 
