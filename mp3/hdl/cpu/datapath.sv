@@ -24,8 +24,27 @@ module datapath
 
 rv32i_word pc_plus4;
 logic true;
+rv32i_word pcmux_out;
+rv32i_word pc_ID;
+logic load_pc;
+rv32i_word pc_out;
+rv32i_opcode opcode;
+logic [2:0] funct3;
+logic [6:0] funct7;
+logic [4:0] rs1;
+logic [4:0] rs2;
+rv32i_word i_imm;
+rv32i_word s_imm;
+rv32i_word b_imm;
+rv32i_word u_imm;
+rv32i_word j_imm;
+logic [4:0] rd;
+
+
 
 assign true = 1'b1;
+assign pc_plus4 = pc_out + 4;
+
 /********************************Control Unit********************************/
 
 
@@ -39,6 +58,16 @@ assign true = 1'b1;
 //Other registers
 //pcreg
 
+
+
+pc_register pc(
+    .clk(clk),
+    .rst(rst),
+    .load(load_pc),
+    .in(pcmux_out),
+    .out(pc_out)
+);
+
 //5 stage registers
 //IF/ID
 register pc_IF_ID(
@@ -46,17 +75,26 @@ register pc_IF_ID(
     .rst(rst),
     .load(true),
     .in(pc_plus4),
-    .out(pc_IF_ID_out)
+    .out(pc_ID)
 );
 
-register ir_IF_ID(
+ir ir_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(load_ir),
     .in(i_mem_rdata),
-    .out(ir_IF_ID_out)
-); 
-
+    .funct3(funct3),
+    .funct7(funct7),
+    .opcode(opcode),
+    .i_imm(i_imm),
+    .s_imm(s_imm),
+    .b_imm(b_imm),
+    .u_imm(u_imm),
+    .j_imm(j_imm),
+    .rs1(rs1),
+    .rs2(rs2),
+    .rd(rd)
+);
 //ID/EX
 
 register #(CONTROL_WORD_SIZE) control_word_ID_EX(
