@@ -1,4 +1,4 @@
-import rv32i_types::*;
+package control_word_types;
 
 
 typedef struct packed {
@@ -13,3 +13,5 @@ typedef struct packed {
     logic [4:0] dest;
     
 } control_word;
+
+endpackage : control_word_types
