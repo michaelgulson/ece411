@@ -1,3 +1,6 @@
+import rv32i_types::*;
+import control_word_types::*;
+
 module datapath
 {
     input clk,
@@ -15,7 +18,9 @@ module datapath
     output d_mem_read,
     output d_mem_write,
 
-}
+    output [3:0] mem_byte_en
+
+};
 
 
 /********************************Control Unit********************************/
@@ -28,17 +33,148 @@ module datapath
 
 
 /********************************Registers***********************************/
+//Other registers
+//pcreg
+
+//5 stage registers
+//IF/ID
+register pc_IF_ID(
+
+//I'll do this later
+
+);
+
+register ir_IF_ID(
+
+//I'll do this later
+
+); 
+
+//ID/EX
+
+register control_word_ID_EX(
+
+//I'll do this later
+
+); 
+
+register pc_IF_ID(
+
+//I'll do this later
+
+);
+
+register read_data1_ID_EX(
+
+//I'll do this later
+
+);
+
+register read_data2_ID_EX(
+    
+//I'll do this later
+
+);
+
+register imm_ID_EX(
+    
+//I'll do this later
+
+);
+
+//EX/MEM
+register control_word_EX_MEM(
+
+//I'll do this later
+
+); 
+
+register pc_EX_MEM(
+
+//I'll do this later
+
+);
+
+register br_en_EX_MEM(
+
+//I'll do this later
+
+);
+
+register pc_offset_EX_MEM(
+
+//I'll do this later
+
+);
+
+register read_data2_EX_MEM(
+
+//I'll do this later
+
+);
+
+register imm_EX_MEM(
+
+//I'll do this later
+
+);
+
+register ALUout_EX_MEM(
+
+//I'll do this later
+
+);
+
+//MEM/WB
+register control_word_MEM_WB(
+
+//I'll do this later
+
+); 
+
+register br_en_MEM_WB(
+
+//I'll do this later
+
+); 
+
+register pc_offset_MEM_WB(
+
+//I'll do this later
+
+);
+
+register data_out_MEM_WB(
+
+//I'll do this later
+
+);
+
+register alu_out_MEM_WB(
+
+//I'll do this later
+
+);
+
+register imm_MEM_WB(
+
+//I'll do this later
+
+);
 
 
 /****************************************************************************/
 
 
 
-/*******************************ALU and CMP(if needed)************************/
-
-
-
-
+/*******************************ALU and CMP in one module********************/
+alu ALU(
+    .aluop(aluop), //controls the operation of the ALU
+    .a(alu_mux1_out), //this is the output of the mux for input 1 of ALU
+    .b(alu_mux2_out), //this is the output of the mux for input 2 of ALU
+    .f(alu_out) //output of the ALU
+    .z(br_en) //br_en output 
+);
 /*****************************************************************************/
 
 
