@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-=======
 `define CONTROL_WORD_SIZE 28
 
->>>>>>> michael
 import rv32i_types::*;
 import control_word_types::*;
 
@@ -80,6 +77,10 @@ rv32i_word alu_out_MEM;
 rv32i_word aluout_WB;
 rv32i_word imm_MEM;
 rv32i_word imm_WB;
+//ALU
+rv32i_word alu_mux1_out;
+rv32i_word alu_mux2_out;
+alu_ops aluop;
 
 
 assign true = 1'b1;
@@ -313,8 +314,6 @@ load_masking data_mem_masking(
 
 /*****************************************************************************/
 
-<<<<<<< HEAD
-=======
 
 /*********************************Muxes***************************************/
 always_comb begin : MUXES
@@ -371,5 +370,4 @@ always_comb begin : MUXES
 
 
 end
->>>>>>> michael
 /*****************************************************************************/
