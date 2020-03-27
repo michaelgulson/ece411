@@ -1,4 +1,6 @@
+`define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
 `define CONTROL_WORD_SIZE 28
+`define true 1'b1
 
 import rv32i_types::*;
 import control_word_types::*;
@@ -22,72 +24,86 @@ module datapath
     output logic data_write
 };
 
+//IF stage
 rv32i_word pc_plus4;
-logic true;
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
 logic load_pc;
 rv32i_word pc_out;
-rv32i_opcode opcode;
-logic [2:0] funct3;
-logic [6:0] funct7;
-logic [4:0] rs1;
-logic [4:0] rs2;
+logic [1:0] pcmux_sel;
 rv32i_word i_imm;
 rv32i_word s_imm;
 rv32i_word b_imm;
 rv32i_word u_imm;
 rv32i_word j_imm;
-logic [4:0] rd;
-control_word control_unit_out;
-control_word control_word_EX;
-rv32i_word pc_EX;
-rv32i_word regfile_out_srca;
-rv32i_word read_data1_EX;
-rv32i_word regfile_out_srcb;
-rv32i_word read_data2_EX;
-rv32i_word i_imm;
-rv32i_word imm_EX;
-control_word control_word_EX;
-control_word control_word_MEM;
-rv32i_word pc_EX;
-rv32i_word pc_MEM;
-logic br_en;
-logic br_en_MEM;
-rv32i_word pc_EX;
-rv32i_word pc_MEM;
-rv32i_word read_data2_EX;
-rv32i_word read_data2_MEM;
-rv32i_word imm_EX;
-rv32i_word imm_MEM;
-rv32i_word alu_out;
-rv32i_word aluout_MEM;
-control_word control_word_MEM;
-control_word control_word_WB;
-logic br_en_MEM;
-logic br_en_WB;
-rv32i_word pc_MEM;
-rv32i_word pc_WB;
-rv32i_word data_out;
-rv32i_word data_out_WB;
-rv32i_word alu_out_MEM;
-rv32i_word aluout_WB;
-rv32i_word imm_MEM;
-rv32i_word imm_WB;
-rv32i_word data_rdata_w;
-logic [15:0] data_rdata_h;
-logic [7:0] data_rdata_b;
 
-assign true = 1'b1;
-assign pc_plus4 = pc_out + 4;
+//ID stage
+rv32i_word regfile_out_srca;
+rv32i_word regfile_out_srcb;
+control_word control_unit_out;
+logic [4:0] rd;
+logic [4:0] rs1;
+logic [4:0] rs2;
+logic [2:0] funct3;
+logic [6:0] funct7;
+rv32i_opcode opcode;
+rv32i_control_word ctrl_word;
+
+//EX stage
+rv32i_word alu_out;
+rv32i_word read_data1_EX;
+rv32i_word read_data2_EX;
+rv32i_word pc_EX;
+logic br_en;
+control_word control_word_EX;
+rv32i_word imm_EX;
+rv32i_word alu_mux1_out; //ALU
+rv32i_word alu_mux2_out; //ALU
+alu_ops aluop; //ALU
+logic [1:0] alumux1_sel;
+rv32i_word alumux1_out;
+logic [2:0] alumux2_sel;
+rv32i_word alumux2_out;
+rv32i_word pc_offset;
+
+//MEM stage
+rv32i_word imm_MEM;
+rv32i_word alu_out_MEM;
+rv32i_word data_out;
+rv32i_word pc_MEM;
+rv32i_word pc_offset_MEM;
+control_word control_word_MEM;
+rv32i_word aluout_MEM;
+rv32i_word read_data2_MEM;
+logic br_en_MEM;
+
+//WB stage
+rv32i_word imm_WB;
+rv32i_word aluout_WB;
+rv32i_word data_out_WB;
+rv32i_word pc_WB;
+logic br_en_WB;
+control_word control_word_WB;
+logic [3:0] regfilemux_sel;
+rv32i_word regfilemux_out;
+rv32i_word dm_mask_b;
+rv32i_word dm_mask_h;
+rv32i_word dm_mask_w;
+
+
+//assigned variables
+assign pc_plus4 = pc_out + 4; //IF stage
+assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
 
 /********************************Control Unit********************************/
-
-
-
+control_unit Control_Unit(
+    .opcode(opcode),
+    .funct3(funct3),
+    .funct7(funct7),
+    .addr_01(MEM_ADDR), // <-----FIX THIS
+    .ctrl_word(ctrl_word)
+);
 /****************************************************************************/
-
-
 
 
 /********************************Registers***********************************/
@@ -129,8 +145,8 @@ ir ir_IF_ID(
     .rs2(rs2),
     .rd(rd)
 );
-//ID/EX
 
+//ID/EX
 register #(CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
@@ -265,7 +281,7 @@ register data_out_MEM_WB(
    .clk(clk),
     .rst(rst),
     .load(true),
-    .in(data_out),
+    .in(data_rdata),
     .out(data_out_WB)
 );
 
@@ -284,7 +300,6 @@ register imm_MEM_WB(
     .in(imm_MEM),
     .out(imm_WB)
 );
-
 /****************************************************************************/
 
 /*******************************ALU and CMP in one module********************/
@@ -300,15 +315,12 @@ alu ALU(
 /*******************************Other modules*********************************/
 load_masking data_mem_masking(
     .rmask(rmask),
-    .mdrreg_out(data_rdata),
-    .mdr_mask_h(data_rdata_h),
-    .mdr_mask_b(data_rdata_b),
-    .mdr_mask_w(data_rdata_w)
+    .mdrreg_out(data_out_WB),
+    .mdr_mask_h(dm_mask_h),
+    .mdr_mask_b(dm_mask_b),
+    .mdr_mask_w(dm_mask_w)
 );
-
-
 /*****************************************************************************/
-
 
 /*********************************Muxes***************************************/
 always_comb begin : MUXES
@@ -345,24 +357,21 @@ always_comb begin : MUXES
         regfilemux::lw:         regfilemux_out = data_rdata_w;
         regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
         regfilemux::lb:     begin
-                            if(data_rdata_b[7]==1'b1)
-                                regfilemux_out = {24'b111111111111111111111111, data_rdata_b[7:0]};    
+                            if(dm_mask_b[7]==1'b1)
+                                regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
                             else
-                                regfilemux_out = {24'b000000000000000000000000, data_rdata_b[7:0]};    
+                                regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};    
                             end
-        regfilemux::lbu:   regfilemux_out = {24'b000000000000000000000000, data_rdata_b[7:0]};//fix later
+        regfilemux::lbu:    regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};//fix later
         regfilemux::lh:     begin
-                            if(data_rdata_h[15]==1'b1)
-                                regfilemux_out = {16'b1111111111111111, data_rdata_h[15:0]};
+                            if(dm_mask_h[15]==1'b1)
+                                regfilemux_out = {16'b1111111111111111, dm_mask_h[15:0]};
                             else
-                                regfilemux_out = {16'b0000000000000000, data_rdata_h[15:0]};
+                                regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
                             end
-        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, data_rdata_h[15:0]};
+        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
         default: regfilemux_out = alu_out;
     endcase
-
-
-
 
 end
 /*****************************************************************************/
