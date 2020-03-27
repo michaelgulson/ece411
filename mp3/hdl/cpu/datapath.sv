@@ -1,5 +1,6 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
 `define CONTROL_WORD_SIZE 28
+`define true 1'b1
 
 import rv32i_types::*;
 import control_word_types::*;
@@ -61,7 +62,6 @@ rv32i_word pc_EX;
 rv32i_word pc_MEM;
 rv32i_word read_data2_EX;
 rv32i_word read_data2_MEM;
-rv32i_word imm_EX;
 rv32i_word imm_MEM;
 rv32i_word alu_out;
 rv32i_word aluout_MEM;
@@ -77,22 +77,41 @@ rv32i_word alu_out_MEM;
 rv32i_word aluout_WB;
 rv32i_word imm_MEM;
 rv32i_word imm_WB;
+rv32i_word pc_offset;
 //ALU
 rv32i_word alu_mux1_out;
 rv32i_word alu_mux2_out;
 alu_ops aluop;
+//muxes
+logic [1:0] pcmux_sel;
+logic [1:0] alumux1_sel;
+rv32i_word alumux1_out;
+logic [2:0] alumux2_sel;
+rv32i_word alumux2_out;
+logic [3:0] regfilemux_sel;
+rv32i_word regfilemux_out;
+//masking
+rv32i_word dm_mask_b;
+rv32i_word dm_mask_h;
+rv32i_word dm_mask_w;
+//control word
+rv32i_control_word ctrl_word;
+//pc_offset
+rv32i_word pc_offset_MEM;
 
-
-assign true = 1'b1;
+//assigned variables
 assign pc_plus4 = pc_out + 4;
+assign pc_offset = pc_offset_MEM + imm_EX;
 
 /********************************Control Unit********************************/
-
-
-
+control_unit Control_Unit(
+    .opcode(opcode),
+    .funct3(funct3),
+    .funct7(funct7),
+    .addr_01(FIX ME),   //<---- what is this for?
+    .ctrl_word(ctrl_word)
+);
 /****************************************************************************/
-
-
 
 
 /********************************Registers***********************************/
@@ -306,12 +325,10 @@ alu ALU(
 load_masking data_mem_masking(
     .rmask(rmask),
     .mdrreg_out(mdrreg_out),
-    .mdr_mask_h(mdr_mask_h),
-    .mdr_mask_b(mdr_mask_b),
-    .mdr_mask_w(mdr_mask_w)
+    .mdr_mask_h(dm_mask_h),
+    .mdr_mask_b(dm_mask_b),
+    .mdr_mask_w(dm_mask_w)
 );
-
-
 /*****************************************************************************/
 
 
@@ -350,24 +367,21 @@ always_comb begin : MUXES
         regfilemux::lw:         regfilemux_out = mdrreg_out;
         regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
         regfilemux::lb:     begin
-                            if(mdr_mask_b[7]==1'b1)
-                            regfilemux_out = {24'b111111111111111111111111, mdr_mask_b[7:0]};    
+                            if(dm_mask_b[7]==1'b1)
+                            regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
                             else
-                            regfilemux_out = {24'b000000000000000000000000, mdr_mask_b[7:0]};    
+                            regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};    
                             end
-        regfilemux::lbu:    regfilemux_out = {24'b000000000000000000000000, mdr_mask_b[7:0]};//fix later
+        regfilemux::lbu:    regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};//fix later
         regfilemux::lh:     begin
-                            if(mdr_mask_h[15]==1'b1)
-                                regfilemux_out = {16'b1111111111111111, mdr_mask_h[15:0]};
+                            if(dm_mask_h[15]==1'b1)
+                                regfilemux_out = {16'b1111111111111111, dm_mask_h[15:0]};
                             else
-                                regfilemux_out = {16'b0000000000000000, mdr_mask_h[15:0]};
+                                regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
                             end
-        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, mdr_mask_h[15:0]};
+        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
         default: regfilemux_out = alu_out;
     endcase
-
-
-
 
 end
 /*****************************************************************************/
