@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-`define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-=======
 `define CONTROL_WORD_SIZE 28
 
->>>>>>> michael
 import rv32i_types::*;
 import control_word_types::*;
 
@@ -313,8 +309,6 @@ load_masking data_mem_masking(
 
 /*****************************************************************************/
 
-<<<<<<< HEAD
-=======
 
 /*********************************Muxes***************************************/
 always_comb begin : MUXES
@@ -371,5 +365,4 @@ always_comb begin : MUXES
 
 
 end
->>>>>>> michael
 /*****************************************************************************/
