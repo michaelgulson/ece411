@@ -355,7 +355,7 @@ always_comb begin : MUXES
         regfilemux::alu_out:    regfilemux_out = alu_out;
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en};
         regfilemux::u_imm:      regfilemux_out = u_imm;
-        regfilemux::lw:         regfilemux_out = mdrreg_out;
+        regfilemux::lw:         regfilemux_out = d_mem_rdata_w;
         regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
         regfilemux::lb:     begin
                             if(dm_mask_b[7]==1'b1)
