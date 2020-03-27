@@ -7,21 +7,22 @@ import control_word_types::*;
 
 module datapath
 {
-    input logic clk,
-    input logic rst,
+    input clk,
+    input rst,
 
-    input rv32i_word inst_rdata,
-    output rv32i_word inst_addr,
-    output logic inst_read,
-    input logic inst_resp, 
+    input rv32i_word i_mem_rdata,
+    output rv32i_word i_mem_wdata, // signal used by RVFI Monitor
+    output rv32i_word i_mem_address,
+    output i_mem_read,
+    output i_mem_write, 
 
-    input rv32i_word data_rdata,
-    input logic data_resp,
-    output rv32i_word data_wdata, // signal used by RVFI Monitor
-    output rv32i_word data_addr,
-    output logic [3:0] data_mbe,
-    output logic data_read,
-    output logic data_write
+    input rv32i_word d_mem_rdata,
+    output rv32i_word d_mem_wdata, // signal used by RVFI Monitor
+    output rv32i_word d_mem_address,
+    output d_mem_read,
+    output d_mem_write,
+
+    output [3:0] mem_byte_en
 };
 
 //IF stage
@@ -105,11 +106,9 @@ control_unit Control_Unit(
 );
 /****************************************************************************/
 
-
 /********************************Registers***********************************/
 //Other registers
 //pcreg
-
 pc_register pc(
     .clk(clk),
     .rst(rst),
@@ -132,7 +131,7 @@ ir ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(inst_rdata),
+    .in(i_mem_rdata),
     .funct3(funct3),
     .funct7(funct7),
     .opcode(opcode),
@@ -281,7 +280,7 @@ register data_out_MEM_WB(
    .clk(clk),
     .rst(rst),
     .load(true),
-    .in(data_rdata),
+    .in(data_out),
     .out(data_out_WB)
 );
 
@@ -325,42 +324,42 @@ load_masking data_mem_masking(
 /*********************************Muxes***************************************/
 always_comb begin : MUXES
     unique case (pcmux_sel)
-        pcmux::pc_plus4: pcmux_out = pc_out + 4;
-        pcmux::alu_out:  pcmux_out = alu_out;
+        pcmux::pc_plus4: pcmux_out = pc_out + 4;  //fix this
+        pcmux::alu_out:  pcmux_out = alu_out; //fix this
         pcmux::alu_mod2:  pcmux_out = {alu_out[31:1],1'b0}; //alu_mod2 fix later
         // etc.
-        default: pcmux_out = pc_out + 4;
+        default: pcmux_out = pc_out + 4; //fix this
     endcase
 
     unique case (alumux1_sel)
-        alumux::rs1_out:  alumux1_out = rs1_out;
-        alumux::pc_out:   alumux1_out = pc_out;
+        alumux::rs1_out:  alumux1_out = rs1_out; //fix this
+        alumux::pc_out:   alumux1_out = pc_out; //fix this
     
-        default: alumux1_out = rs1_out;
+        default: alumux1_out = rs1_out; //fix this
     endcase
 
     unique case (alumux2_sel)
-        alumux::i_imm: alumux2_out = i_imm;
-        alumux::u_imm: alumux2_out = u_imm;
-        alumux::b_imm: alumux2_out = b_imm;
-        alumux::s_imm: alumux2_out = s_imm;
-        alumux::j_imm: alumux2_out = j_imm;
-        alumux::rs2_out: alumux2_out = rs2_out;
+        alumux::i_imm: alumux2_out = i_imm; //fix this 
+        alumux::u_imm: alumux2_out = u_imm; //fix this
+        alumux::b_imm: alumux2_out = b_imm; //fix this
+        alumux::s_imm: alumux2_out = s_imm; //fix this
+        alumux::j_imm: alumux2_out = j_imm; //fix this
+        alumux::rs2_out: alumux2_out = rs2_out; //fix this
 
-        default: alumux2_out = i_imm;
+        default: alumux2_out = i_imm; //fix this
     endcase
 
     unique case (regfilemux_sel)
-        regfilemux::alu_out:    regfilemux_out = alu_out;
-        regfilemux::br_en:      regfilemux_out = {31'b0, br_en};
-        regfilemux::u_imm:      regfilemux_out = u_imm;
-        regfilemux::lw:         regfilemux_out = data_rdata_w;
-        regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
+        regfilemux::alu_out:    regfilemux_out = alu_out; //fix this
+        regfilemux::br_en:      regfilemux_out = {31'b0, br_en}; //fix this
+        regfilemux::u_imm:      regfilemux_out = u_imm; //fix this
+        regfilemux::lw:         regfilemux_out = d_mem_rdata_w;
+        regfilemux::pc_plus4:  regfilemux_out = pc_out +4; //fix this
         regfilemux::lb:     begin
                             if(dm_mask_b[7]==1'b1)
-                                regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
+                            regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
                             else
-                                regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};    
+                            regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};    
                             end
         regfilemux::lbu:    regfilemux_out = {24'b000000000000000000000000, dm_mask_b[7:0]};//fix later
         regfilemux::lh:     begin
@@ -370,10 +369,8 @@ always_comb begin : MUXES
                                 regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
                             end
         regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
-        default: regfilemux_out = alu_out;
+        default: regfilemux_out = alu_out; //fix this
     endcase
 
 end
 /*****************************************************************************/
-
-endmodule: datapath
