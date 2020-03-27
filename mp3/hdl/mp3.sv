@@ -11,3 +11,17 @@ module mp3
     output rv32i_word pmem_address,
     output [63:0] pmem_wdata
 );
+cpu cpu(
+
+);
+cache i_cache(
+
+); 
+cache d_cache(
+
+);
+cache l2_cache(
+
+);
+
+endmodule : mp3

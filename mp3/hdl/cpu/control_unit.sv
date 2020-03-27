@@ -93,7 +93,6 @@ begin : trap_check
                 default: ctrl_word.trap = 1;
             endcase
         end
-
         default: ctrl_word.trap = 1;
     endcase
 end
@@ -138,8 +137,7 @@ always_comb begin
         ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
         ctrl_word.load_regfile = 1'b1;
         ctrl_word.alu_muxsel1 = alumux::rs1_out;
-        ctrl_word.alu_muxsel2 = alumux::i_imm;
-        
+        ctrl_word.alu_muxsel2 = alumux::i_imm;   
     end
     op_br:
     begin
@@ -162,33 +160,128 @@ always_comb begin
             lhu: ctrl_word.regfile_mux_sel = regfilemux::lhu;
             lb:ctrl_word.regfile_mux_sel = regfilemux::lb;
             lbu:ctrl_word.regfile_mux_sel = regfilemux::lbu;
-            default: //#########
+            default: ;//#########
+        endcase
     end
     op_store:
     begin
-    ctrl_word.alu_op = alu_add;
-    ctrl_word.mem_write = 1'b1;
-    ctrl_word.alu_muxsel1 = alumux::rs1_out;
-    ctrl_word.alu_muxsel2 = alumux::s_imm;   
+        ctrl_word.alu_op = alu_add;
+        ctrl_word.mem_write = 1'b1;
+        ctrl_word.alu_muxsel1 = alumux::rs1_out;
+        ctrl_word.alu_muxsel2 = alumux::s_imm;   
     end
     op_imm:
     begin
-    ctrl_word.load_regfile = 1'b1;
+        ctrl_word.load_regfile = 1'b1;
     case(arith_funct3)
         slt:
+        begin
             ctrl_word.regfile_mux_sel = regfilemux::br_en;
+        end
+        sltu:
+        begin
+            ctrl_word.regfile_mux_sel = regfilemux::br_en;
+        end
+        sr:
+        begin
+            ctrl_word.regfile_mux_sel = regfile_mux_sel::alu_out;
+            ctrl_word.alu_muxsel1 = alumux::rs1_out;
+            ctrl_word.alu_muxsel2 = alumux::i_imm;
+            ctrl_word.load_regfile = 1'b1;
+            
+            if (funct7 == 7'b0000000) //SRLI
+            begin
+                ctrl_word.alu_op = alu_ops'(funct3);
+            end
+            if (funct7 == 7'b0100000) //SRAI
+            begin
+                ctrl_word.alu_op = alu_sra;
+            end
+        end
 //########Not done yet here 
         default:
+        begin
             ctrl_word.regfile_mux_sel = 1'b1;
             ctrl_word.alu_op = alu_ops'(funct3);
-    end
+            ctrl_word.alu_muxsel1 = alumux::rs1_out;
+            ctrl_word.alu_muxsel2 = alumux::i_imm;
+        end
+    endcase
 
     op_reg:
     begin
-        
+        ctrl_word.regfile_mux_sel = regfile_mux_sel:::alu_out;
+        ctrl_word.load_regfile = 1'b1;
+        case(arith_funct3)
+            add:
+            begin
+                if(funct7 == 7'b0000000)
+                begin
+                    ctrl_word.alu_op = alu_add;
+                    ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                    ctrl_word.alu_muxsel2 = alumux::rs2_out;
+                end
+                if(funct7 == 7'b0100000)
+                begin
+                    ctrl_word.alu_op = alu_sub;
+                    ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                    ctrl_word.alu_muxsel2 = alumux::rs2_out;
+                end
+            end
+            sll:
+            begin
+                ctrl_word.alu_op = alu_sll;
+                ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                ctrl_word.alu_muxsel2 = alumux::rs2_out;
+            end
+            slt:
+            begin
+                ctrl_word.regfile_mux_sel = regfilemux::br_en;
+            end
+            sltu:
+            begin
+                ctrl_word.regfile_mux_sel = regfilemux::br_en;
+            end
+            axor:
+            begin
+                ctrl_word.alu_op = alu_xor;
+                ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                ctrl_word.alu_muxsel2 = alumux::rs2_out;
+            end
+            sr:
+            begin
+                if(funct7 == 7'b0000000)
+                begin
+                    ctrl_word.alu_op = alu_srl;
+                    ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                    ctrl_word.alu_muxsel2 = alumux::rs2_out;
+                end
+                if(funct7 == 7'b0100000)
+                begin
+                    ctrl_word.alu_op = alu_sra;
+                    ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                    ctrl_word.alu_muxsel2 = alumux::rs2_out;
+                end
+            end
+            aor:
+            begin
+                ctrl_word.alu_op = alu_or;
+                ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                ctrl_word.alu_muxsel2 = alumux::rs2_out;
+            end
+            aand:
+            begin
+                ctrl_word.alu_op = alu_and;
+                ctrl_word.alu_muxsel1 = alumux::rs1_out;
+                ctrl_word.alu_muxsel2 = alumux::rs2_out;
+            end
+            default: `BAD_MUX_SEL;
+        endcase
     end
     default: ;
     endcase
 end
-
 endmodule: control_unit
+
+
+
