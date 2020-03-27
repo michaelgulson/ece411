@@ -23,92 +23,85 @@ module datapath
     output d_mem_write,
 
     output [3:0] mem_byte_en
-
 };
 
+//IF stage
 rv32i_word pc_plus4;
-logic true;
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
 logic load_pc;
 rv32i_word pc_out;
-rv32i_opcode opcode;
-logic [2:0] funct3;
-logic [6:0] funct7;
-logic [4:0] rs1;
-logic [4:0] rs2;
+logic [1:0] pcmux_sel;
 rv32i_word i_imm;
 rv32i_word s_imm;
 rv32i_word b_imm;
 rv32i_word u_imm;
 rv32i_word j_imm;
-logic [4:0] rd;
-control_word control_unit_out;
-control_word control_word_EX;
-rv32i_word pc_EX;
+
+//ID stage
 rv32i_word regfile_out_srca;
-rv32i_word read_data1_EX;
 rv32i_word regfile_out_srcb;
-rv32i_word read_data2_EX;
-rv32i_word i_imm;
-rv32i_word imm_EX;
-control_word control_word_EX;
-control_word control_word_MEM;
-rv32i_word pc_EX;
-rv32i_word pc_MEM;
-logic br_en;
-logic br_en_MEM;
-rv32i_word pc_EX;
-rv32i_word pc_MEM;
-rv32i_word read_data2_EX;
-rv32i_word read_data2_MEM;
-rv32i_word imm_MEM;
+control_word control_unit_out;
+logic [4:0] rd;
+logic [4:0] rs1;
+logic [4:0] rs2;
+logic [2:0] funct3;
+logic [6:0] funct7;
+rv32i_opcode opcode;
+rv32i_control_word ctrl_word;
+
+//EX stage
 rv32i_word alu_out;
-rv32i_word aluout_MEM;
-control_word control_word_MEM;
-control_word control_word_WB;
-logic br_en_MEM;
-logic br_en_WB;
-rv32i_word pc_MEM;
-rv32i_word pc_WB;
-rv32i_word data_out;
-rv32i_word data_out_WB;
-rv32i_word alu_out_MEM;
-rv32i_word aluout_WB;
-rv32i_word imm_MEM;
-rv32i_word imm_WB;
-rv32i_word pc_offset;
-//ALU
-rv32i_word alu_mux1_out;
-rv32i_word alu_mux2_out;
-alu_ops aluop;
-//muxes
-logic [1:0] pcmux_sel;
+rv32i_word read_data1_EX;
+rv32i_word read_data2_EX;
+rv32i_word pc_EX;
+logic br_en;
+control_word control_word_EX;
+rv32i_word imm_EX;
+rv32i_word alu_mux1_out; //ALU
+rv32i_word alu_mux2_out; //ALU
+alu_ops aluop; //ALU
 logic [1:0] alumux1_sel;
 rv32i_word alumux1_out;
 logic [2:0] alumux2_sel;
 rv32i_word alumux2_out;
+rv32i_word pc_offset;
+
+//MEM stage
+rv32i_word imm_MEM;
+rv32i_word alu_out_MEM;
+rv32i_word data_out;
+rv32i_word pc_MEM;
+rv32i_word pc_offset_MEM;
+control_word control_word_MEM;
+rv32i_word aluout_MEM;
+rv32i_word read_data2_MEM;
+logic br_en_MEM;
+
+//WB stage
+rv32i_word imm_WB;
+rv32i_word aluout_WB;
+rv32i_word data_out_WB;
+rv32i_word pc_WB;
+logic br_en_WB;
+control_word control_word_WB;
 logic [3:0] regfilemux_sel;
 rv32i_word regfilemux_out;
-//masking
 rv32i_word dm_mask_b;
 rv32i_word dm_mask_h;
 rv32i_word dm_mask_w;
-//control word
-rv32i_control_word ctrl_word;
-//pc_offset
-rv32i_word pc_offset_MEM;
+
 
 //assigned variables
-assign pc_plus4 = pc_out + 4;
-assign pc_offset = pc_offset_MEM + imm_EX;
+assign pc_plus4 = pc_out + 4; //IF stage
+assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
 
 /********************************Control Unit********************************/
 control_unit Control_Unit(
     .opcode(opcode),
     .funct3(funct3),
     .funct7(funct7),
-    .addr_01(FIX ME),   //<---- what is this for?
+    .addr_01(MEM_ADDR), // <-----FIX THIS
     .ctrl_word(ctrl_word)
 );
 /****************************************************************************/
@@ -153,8 +146,8 @@ ir ir_IF_ID(
     .rs2(rs2),
     .rd(rd)
 );
-//ID/EX
 
+//ID/EX
 register #(CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
@@ -308,7 +301,6 @@ register imm_MEM_WB(
     .in(imm_MEM),
     .out(imm_WB)
 );
-
 /****************************************************************************/
 
 /*******************************ALU and CMP in one module********************/
@@ -324,13 +316,12 @@ alu ALU(
 /*******************************Other modules*********************************/
 load_masking data_mem_masking(
     .rmask(rmask),
-    .mdrreg_out(mdrreg_out),
+    .mdrreg_out(data_out_WB),
     .mdr_mask_h(dm_mask_h),
     .mdr_mask_b(dm_mask_b),
     .mdr_mask_w(dm_mask_w)
 );
 /*****************************************************************************/
-
 
 /*********************************Muxes***************************************/
 always_comb begin : MUXES
