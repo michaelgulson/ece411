@@ -304,10 +304,10 @@ alu ALU(
 /*******************************Other modules*********************************/
 load_masking data_mem_masking(
     .rmask(rmask),
-    .mdrreg_out(mdrreg_out),
-    .mdr_mask_h(mdr_mask_h),
-    .mdr_mask_b(mdr_mask_b),
-    .mdr_mask_w(mdr_mask_w)
+    .mdrreg_out(d_mem_rdata),
+    .mdr_mask_h(d_mem_rdata_h),
+    .mdr_mask_b(d_mem_rdata_b),
+    .mdr_mask_w(d_mem_rdata_w)
 );
 
 
@@ -348,22 +348,22 @@ always_comb begin : MUXES
         regfilemux::alu_out:    regfilemux_out = alu_out;
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en};
         regfilemux::u_imm:      regfilemux_out = u_imm;
-        regfilemux::lw:         regfilemux_out = mdrreg_out;
+        regfilemux::lw:         regfilemux_out = d_mem_rdata_w;
         regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
         regfilemux::lb:     begin
                             if(mdr_mask_b[7]==1'b1)
-                            regfilemux_out = {24'b111111111111111111111111, mdr_mask_b[7:0]};    
+                                regfilemux_out = {24'b111111111111111111111111, d_mem_rdata_b[7:0]};    
                             else
-                            regfilemux_out = {24'b000000000000000000000000, mdr_mask_b[7:0]};    
+                                regfilemux_out = {24'b000000000000000000000000, d_mem_rdata_b[7:0]};    
                             end
-        regfilemux::lbu:    regfilemux_out = {24'b000000000000000000000000, mdr_mask_b[7:0]};//fix later
+        regfilemux::lbu:   regfilemux_out = {24'b000000000000000000000000, d_mem_rdata_b[7:0]};//fix later
         regfilemux::lh:     begin
                             if(mdr_mask_h[15]==1'b1)
-                                regfilemux_out = {16'b1111111111111111, mdr_mask_h[15:0]};
+                                regfilemux_out = {16'b1111111111111111, d_mem_rdata_h[15:0]};
                             else
-                                regfilemux_out = {16'b0000000000000000, mdr_mask_h[15:0]};
+                                regfilemux_out = {16'b0000000000000000, d_mem_rdata_h[15:0]};
                             end
-        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, mdr_mask_h[15:0]};
+        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, d_mem_rdata_h[15:0]};
         default: regfilemux_out = alu_out;
     endcase
 
