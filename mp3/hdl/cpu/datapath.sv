@@ -94,8 +94,6 @@ assign pc_plus4 = pc_out + 4;
 //Other registers
 //pcreg
 
-
-
 pc_register pc(
     .clk(clk),
     .rst(rst),
@@ -202,8 +200,8 @@ register pc_offset_EX_MEM(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(pc_EX),
-    .out(pc_MEM)
+    .in(pc_offset),
+    .out(pc_offset_MEM)
 );
 
 register read_data2_EX_MEM(
@@ -247,12 +245,20 @@ register br_en_MEM_WB(
     .out(br_en_WB)
 ); 
 
-register pc_offset_MEM_WB(
+register pc_MEM_WB(
    .clk(clk),
     .rst(rst),
     .load(true),
     .in(pc_MEM),
     .out(pc_WB)
+);
+
+register pc_offset_MEM_WB(
+   .clk(clk),
+    .rst(rst),
+    .load(true),
+    .in(pc_offset_MEM),
+    .out(pc_offset_WB)
 );
 
 register data_out_MEM_WB(
@@ -279,10 +285,7 @@ register imm_MEM_WB(
     .out(imm_WB)
 );
 
-
 /****************************************************************************/
-
-
 
 /*******************************ALU and CMP in one module********************/
 alu ALU(
@@ -294,9 +297,72 @@ alu ALU(
 );
 /*****************************************************************************/
 
+/*******************************Other modules*********************************/
+load_masking data_mem_masking(
+    .rmask(rmask),
+    .mdrreg_out(mdrreg_out),
+    .mdr_mask_h(mdr_mask_h),
+    .mdr_mask_b(mdr_mask_b),
+    .mdr_mask_w(mdr_mask_w)
+);
+
+
+/*****************************************************************************/
+
 
 /*********************************Muxes***************************************/
+always_comb begin : MUXES
+    unique case (pcmux_sel)
+        pcmux::pc_plus4: pcmux_out = pc_out + 4;
+        pcmux::alu_out:  pcmux_out = alu_out;
+        pcmux::alu_mod2:  pcmux_out = {alu_out[31:1],1'b0}; //alu_mod2 fix later
+        // etc.
+        default: pcmux_out = pc_out + 4;
+    endcase
+
+    unique case (alumux1_sel)
+        alumux::rs1_out:  alumux1_out = rs1_out;
+        alumux::pc_out:   alumux1_out = pc_out;
+    
+        default: alumux1_out = rs1_out;
+    endcase
+
+    unique case (alumux2_sel)
+        alumux::i_imm: alumux2_out = i_imm;
+        alumux::u_imm: alumux2_out = u_imm;
+        alumux::b_imm: alumux2_out = b_imm;
+        alumux::s_imm: alumux2_out = s_imm;
+        alumux::j_imm: alumux2_out = j_imm;
+        alumux::rs2_out: alumux2_out = rs2_out;
+
+        default: alumux2_out = i_imm;
+    endcase
+
+    unique case (regfilemux_sel)
+        regfilemux::alu_out:    regfilemux_out = alu_out;
+        regfilemux::br_en:      regfilemux_out = {31'b0, br_en};
+        regfilemux::u_imm:      regfilemux_out = u_imm;
+        regfilemux::lw:         regfilemux_out = mdrreg_out;
+        regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
+        regfilemux::lb:     begin
+                            if(mdr_mask_b[7]==1'b1)
+                            regfilemux_out = {24'b111111111111111111111111, mdr_mask_b[7:0]};    
+                            else
+                            regfilemux_out = {24'b000000000000000000000000, mdr_mask_b[7:0]};    
+                            end
+        regfilemux::lbu:    regfilemux_out = {24'b000000000000000000000000, mdr_mask_b[7:0]};//fix later
+        regfilemux::lh:     begin
+                            if(mdr_mask_h[15]==1'b1)
+                                regfilemux_out = {16'b1111111111111111, mdr_mask_h[15:0]};
+                            else
+                                regfilemux_out = {16'b0000000000000000, mdr_mask_h[15:0]};
+                            end
+        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, mdr_mask_h[15:0]};
+        default: regfilemux_out = alu_out;
+    endcase
 
 
 
+
+end
 /*****************************************************************************/
