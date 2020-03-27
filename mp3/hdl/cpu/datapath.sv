@@ -5,23 +5,21 @@ import control_word_types::*;
 
 module datapath
 {
-    input clk,
-    input rst,
+    input logic clk,
+    input logic rst,
 
-    input rv32i_word i_mem_rdata,
-    output rv32i_word i_mem_wdata, // signal used by RVFI Monitor
-    output rv32i_word i_mem_address,
-    output i_mem_read,
-    output i_mem_write, 
+    input rv32i_word inst_rdata,
+    output rv32i_word inst_addr,
+    output logic inst_read,
+    input logic inst_resp, 
 
-    input rv32i_word d_mem_rdata,
-    output rv32i_word d_mem_wdata, // signal used by RVFI Monitor
-    output rv32i_word d_mem_address,
-    output d_mem_read,
-    output d_mem_write,
-
-    output [3:0] mem_byte_en
-
+    input rv32i_word data_rdata,
+    input logic data_resp,
+    output rv32i_word data_wdata, // signal used by RVFI Monitor
+    output rv32i_word data_addr,
+    output logic [3:0] data_mbe,
+    output logic data_read,
+    output logic data_write
 };
 
 rv32i_word pc_plus4;
@@ -76,7 +74,9 @@ rv32i_word alu_out_MEM;
 rv32i_word aluout_WB;
 rv32i_word imm_MEM;
 rv32i_word imm_WB;
-
+rv32i_word data_rdata_w;
+logic [15:0] data_rdata_h;
+logic [7:0] data_rdata_b;
 
 assign true = 1'b1;
 assign pc_plus4 = pc_out + 4;
@@ -116,7 +116,7 @@ ir ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(i_mem_rdata),
+    .in(inst_rdata),
     .funct3(funct3),
     .funct7(funct7),
     .opcode(opcode),
@@ -300,10 +300,10 @@ alu ALU(
 /*******************************Other modules*********************************/
 load_masking data_mem_masking(
     .rmask(rmask),
-    .mdrreg_out(d_mem_rdata),
-    .mdr_mask_h(d_mem_rdata_h),
-    .mdr_mask_b(d_mem_rdata_b),
-    .mdr_mask_w(d_mem_rdata_w)
+    .mdrreg_out(data_rdata),
+    .mdr_mask_h(data_rdata_h),
+    .mdr_mask_b(data_rdata_b),
+    .mdr_mask_w(data_rdata_w)
 );
 
 
@@ -342,22 +342,22 @@ always_comb begin : MUXES
         regfilemux::alu_out:    regfilemux_out = alu_out;
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en};
         regfilemux::u_imm:      regfilemux_out = u_imm;
-        regfilemux::lw:         regfilemux_out = d_mem_rdata_w;
+        regfilemux::lw:         regfilemux_out = data_rdata_w;
         regfilemux::pc_plus4:  regfilemux_out = pc_out +4;
         regfilemux::lb:     begin
-                            if(mdr_mask_b[7]==1'b1)
-                                regfilemux_out = {24'b111111111111111111111111, d_mem_rdata_b[7:0]};    
+                            if(data_rdata_b[7]==1'b1)
+                                regfilemux_out = {24'b111111111111111111111111, data_rdata_b[7:0]};    
                             else
-                                regfilemux_out = {24'b000000000000000000000000, d_mem_rdata_b[7:0]};    
+                                regfilemux_out = {24'b000000000000000000000000, data_rdata_b[7:0]};    
                             end
-        regfilemux::lbu:   regfilemux_out = {24'b000000000000000000000000, d_mem_rdata_b[7:0]};//fix later
+        regfilemux::lbu:   regfilemux_out = {24'b000000000000000000000000, data_rdata_b[7:0]};//fix later
         regfilemux::lh:     begin
-                            if(mdr_mask_h[15]==1'b1)
-                                regfilemux_out = {16'b1111111111111111, d_mem_rdata_h[15:0]};
+                            if(data_rdata_h[15]==1'b1)
+                                regfilemux_out = {16'b1111111111111111, data_rdata_h[15:0]};
                             else
-                                regfilemux_out = {16'b0000000000000000, d_mem_rdata_h[15:0]};
+                                regfilemux_out = {16'b0000000000000000, data_rdata_h[15:0]};
                             end
-        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, d_mem_rdata_h[15:0]};
+        regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, data_rdata_h[15:0]};
         default: regfilemux_out = alu_out;
     endcase
 
@@ -366,3 +366,5 @@ always_comb begin : MUXES
 
 end
 /*****************************************************************************/
+
+endmodule: datapath
