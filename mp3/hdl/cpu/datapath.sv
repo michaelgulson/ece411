@@ -132,7 +132,7 @@ ir ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(i_mem_rdata),
+    .in(inst_rdata),
     .funct3(funct3),
     .funct7(funct7),
     .opcode(opcode),
