@@ -5,24 +5,22 @@
 import rv32i_types::*;
 import control_word_types::*;
 
-module datapath
-(
-    input clk,
-    input rst,
+module datapath(
+    input logic clk,
+    input logic rst,
 
-    input rv32i_word i_mem_rdata,
-    output rv32i_word i_mem_wdata, // signal used by RVFI Monitor
-    output rv32i_word i_mem_address,
-    output i_mem_read,
-    output i_mem_write, 
+    input rv32i_word inst_rdata,
+    output rv32i_word inst_addr,
+    output logic inst_read,
+    input logic inst_resp, 
 
-    input rv32i_word d_mem_rdata,
-    output rv32i_word d_mem_wdata, // signal used by RVFI Monitor
-    output rv32i_word d_mem_address,
-    output d_mem_read,
-    output d_mem_write,
-
-    output [3:0] mem_byte_en
+    input rv32i_word data_rdata,
+    input logic data_resp,
+    output rv32i_word data_wdata, // signal used by RVFI Monitor
+    output rv32i_word data_addr,
+    output logic [3:0] data_mbe,
+    output logic data_read,
+    output logic data_write
 );
 
 //IF stage
