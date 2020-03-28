@@ -11,8 +11,9 @@ typedef struct packed {
     logic alu_muxsel1;
     logic [2:0] alu_muxsel2;
     logic [4:0] dest;
-    logic trap;
+    logic [3:0] rmask;
     logic [3:0] wmask;
+    logic trap;
 } rv32i_control_word;
 
 endpackage : control_word_types
