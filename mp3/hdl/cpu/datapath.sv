@@ -38,7 +38,6 @@ rv32i_word j_imm;
 //ID stage
 rv32i_word regfile_out_srca;
 rv32i_word regfile_out_srcb;
-rv32i_control_word control_unit_out;
 logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
@@ -124,7 +123,7 @@ register pc_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(pc_plus4),
+    .in(pc_out),
     .out(pc_ID)
 );
 
@@ -159,7 +158,7 @@ register pc_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(pc_plus4),
+    .in(pc_ID),
     .out(pc_EX)
 );
 
