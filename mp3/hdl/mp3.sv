@@ -3,25 +3,44 @@ import rv32i_types::*;
 
 module mp3
 (
-    input rst,
-    input pmem_resp,
-    input [63:0] pmem_rdata,
-    output logic pmem_read,
-    output logic pmem_write,
-    output rv32i_word pmem_address,
-    output [63:0] pmem_wdata
-);
-cpu cpu(
+    input logic clk,
+    input logic rst,
 
-);
-cache i_cache(
+    /* I Cache Ports */
+    output logic inst_read,
+    output logic [31:0] inst_addr,
+    input logic inst_resp,
+    input [31:0] inst_rdata,
 
-); 
-cache d_cache(
-
-);
-cache l2_cache(
-
+    /* D Cache Ports */
+    output logic data_read,
+    output logic data_write,
+    output logic [3:0] data_mbe,
+    output logic [31:0] data_addr,
+    output logic [31:0] data_wdata,
+    input logic data_resp,
+    input logic [31:0] data_rdata
 );
 
-endmodule : mp3
+
+datapath pipeline_datapath(
+    .clk(clk),
+    .rst(rst),
+
+    /* I Cache Ports */
+    .inst_read(inst_read),
+    .inst_addr(inst_addr),
+    .inst_resp(inst_resp),
+    .inst_rdata(inst_rdata),
+
+    /* D Cache Ports */
+    .data_read(data_read),
+    .data_write(data_write),
+    .data_mbe(data_mbe),
+    .data_addr(data_addr),
+    .data_wdata(data_wdata),
+    .data_resp(data_rest),
+    .data_rdata(data_rdata)
+);
+
+endmodule: mp3
