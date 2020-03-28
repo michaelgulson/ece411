@@ -40,7 +40,7 @@ always_comb begin
         end
         alu_and_bgeu: begin
             f = a & b;
-            z = br_en = a >= b;
+            z = a >= b;
         end
     endcase
 end

@@ -21,8 +21,7 @@ assign branch_funct3 = branch_funct3_t'(funct3);
 assign load_funct3 = load_funct3_t'(funct3);
 assign store_funct3 = store_funct3_t'(funct3);
 
-always_comb
-begin : trap_check
+always_comb begin : trap_check
     ctrl_word.trap = 0;
     ctrl_word.rmask = '0;
     ctrl_word.wmask = '0;
@@ -105,89 +104,78 @@ always_comb begin
     ctrl_word.mem_write = 1'b0;
     ctrl_word.regfile_mux_sel = regfilemux::alu_out; 
     ctrl_word.load_regfile = 1'b0;
-    ctrl_word.pc_mux_sel = 
+    ctrl_word.pc_mux_sel = 2'b00; //<-- fix this
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
     ctrl_word.dest = 
 
     case (opcode)
-    op_lui:
-    begin
-       ctrl_word.load_regfile  = 1'b1;
-       ctrl_word.regfile_mux_sel = regfilemux::u_imm; 
-    end
-    op_auipc:
-    begin
-        ctrl_word.alu_op = alu_add;
-        ctrl_word.regfile_mux_sel = regfilemux::alu_out;
-        ctrl_word.load_regfile = 1'b1;
-        ctrl_word.alu_muxsel1 = alumux::pc_out;
-        ctrl_word.alu_muxsel2 = alumux::u_imm;
-    end
-    op_jal:
-    begin
-        ctrl_word.alu_op = alu_add;
-        ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
-        ctrl_word.load_regfile = 1'b1;
-        ctrl_word.alu_muxsel1 = alumux::pc_out;
-        ctrl_word.alu_muxsel2 = alumux::j_imm;
-    end
-    op_jalr:
-    begin
-        ctrl_word.alu_op = alu_add;
-        ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
-        ctrl_word.load_regfile = 1'b1;
-        ctrl_word.alu_muxsel1 = alumux::rs1_out;
-        ctrl_word.alu_muxsel2 = alumux::i_imm;
+        op_lui: begin
+            ctrl_word.load_regfile  = 1'b1;
+            ctrl_word.regfile_mux_sel = regfilemux::u_imm; 
+        end
+        op_auipc: begin
+            ctrl_word.alu_op = alu_add;
+            ctrl_word.regfile_mux_sel = regfilemux::alu_out;
+            ctrl_word.load_regfile = 1'b1;
+            ctrl_word.alu_muxsel1 = alumux::pc_out;
+            ctrl_word.alu_muxsel2 = alumux::u_imm;
+        end
+        op_jal: begin
+            ctrl_word.alu_op = alu_add;
+            ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
+            ctrl_word.load_regfile = 1'b1;
+            ctrl_word.alu_muxsel1 = alumux::pc_out;
+            ctrl_word.alu_muxsel2 = alumux::j_imm;
+        end
+        op_jalr: begin
+            ctrl_word.alu_op = alu_add;
+            ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
+            ctrl_word.load_regfile = 1'b1;
+            ctrl_word.alu_muxsel1 = alumux::rs1_out;
+            ctrl_word.alu_muxsel2 = alumux::i_imm;
+        end
+        op_br: begin
+            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_muxsel1 = alumux::pc_out;
+            ctrl_word.alu_muxsel2 = alumux::b_imm;
+        end
+        op_load: begin
+            ctrl_word.alu_op = alu_add;
+            ctrl_word.mem_read = 1'b1;
+            ctrl_word.load_regfile = 1'b1;
+            ctrl_word.alu_muxsel1 = alumux::rs1_out;
+            ctrl_word.alu_muxsel2 = alumux::i_imm;
+            case(load_funct3)
+                lw: ctrl_word.regfile_mux_sel = regfilemux::lb;
+                lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
+                lhu: ctrl_word.regfile_mux_sel = regfilemux::lhu;
+                lb:ctrl_word.regfile_mux_sel = regfilemux::lb;
+                lbu:ctrl_word.regfile_mux_sel = regfilemux::lbu;
+                default:    //#########
+            endcase
+        end
+        op_store: begin
+            ctrl_word.alu_op = alu_add;
+            ctrl_word.mem_write = 1'b1;
+            ctrl_word.alu_muxsel1 = alumux::rs1_out;
+            ctrl_word.alu_muxsel2 = alumux::s_imm;   
+        end
+        op_imm: begin
+            ctrl_word.load_regfile = 1'b1;
+            case(arith_funct3)
+                slt: ctrl_word.regfile_mux_sel = regfilemux::br_en;
+                //########Not done yet here 
+                default: begin
+                    ctrl_word.regfile_mux_sel = 1'b1;
+                    ctrl_word.alu_op = alu_ops'(funct3);
+                end
+            endcase
+        end
+        op_reg: begin
         
-    end
-    op_br:
-    begin
-        ctrl_word.alu_op = alu_add;
-        ctrl_word.alu_muxsel1 = alumux::pc_out;
-        ctrl_word.alu_muxsel2 = alumux::b_imm;
-        
-    end
-    op_load:
-    begin
-        ctrl_word.alu_op = alu_add;
-        ctrl_word.mem_read = 1'b1;
-        ctrl_word.load_regfile = 1'b1;
-        ctrl_word.alu_muxsel1 = alumux::rs1_out;
-        ctrl_word.alu_muxsel2 = alumux::i_imm;
-        
-        case(load_funct3)
-            lw: ctrl_word.regfile_mux_sel = regfilemux::lb;
-            lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
-            lhu: ctrl_word.regfile_mux_sel = regfilemux::lhu;
-            lb:ctrl_word.regfile_mux_sel = regfilemux::lb;
-            lbu:ctrl_word.regfile_mux_sel = regfilemux::lbu;
-            default: //#########
-    end
-    op_store:
-    begin
-    ctrl_word.alu_op = alu_add;
-    ctrl_word.mem_write = 1'b1;
-    ctrl_word.alu_muxsel1 = alumux::rs1_out;
-    ctrl_word.alu_muxsel2 = alumux::s_imm;   
-    end
-    op_imm:
-    begin
-    ctrl_word.load_regfile = 1'b1;
-    case(arith_funct3)
-        slt:
-            ctrl_word.regfile_mux_sel = regfilemux::br_en;
-//########Not done yet here 
-        default:
-            ctrl_word.regfile_mux_sel = 1'b1;
-            ctrl_word.alu_op = alu_ops'(funct3);
-    end
-
-    op_reg:
-    begin
-        
-    end
-    default: ;
+        end
+        default: ;
     endcase
 end
 
