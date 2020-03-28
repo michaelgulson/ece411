@@ -38,7 +38,6 @@ rv32i_word j_imm;
 //ID stage
 rv32i_word regfile_out_srca;
 rv32i_word regfile_out_srcb;
-rv32i_control_word control_unit_out;
 logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
@@ -107,6 +106,17 @@ control_unit Control_Unit(
 );
 /****************************************************************************/
 
+/********************************Regfile*************************************/
+regfile regfile(
+    .clk(clk),
+    .rst(rst),
+    .load(control_word_WB.load_regfile),
+    .in(regfilemux_out),
+    .src_a(rs1), .src_b(rs2), .dest(control_word_WB.dest),
+    .reg_a(rs1_out), .reg_b(rs2_out)
+);
+/****************************************************************************/
+
 /********************************Registers***********************************/
 //Other registers
 //pcreg
@@ -124,7 +134,7 @@ register pc_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(pc_plus4),
+    .in(pc_out),
     .out(pc_ID)
 );
 
@@ -159,7 +169,7 @@ register pc_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(pc_plus4),
+    .in(pc_ID),
     .out(pc_EX)
 );
 
@@ -376,4 +386,5 @@ always_comb begin : MUXES
 
 end
 /*****************************************************************************/
-endmodule
+
+endmodule: datapath
