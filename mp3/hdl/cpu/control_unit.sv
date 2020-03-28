@@ -106,7 +106,7 @@ always_comb begin
     ctrl_word.pc_mux_sel = 2'b00; //<-- fix this
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
-    ctrl_word.dest = 
+    ctrl_word.dest = 1'b0; //<-- fix this
 
     case (opcode)
         op_lui: begin
@@ -151,7 +151,7 @@ always_comb begin
                 lhu: ctrl_word.regfile_mux_sel = regfilemux::lhu;
                 lb:ctrl_word.regfile_mux_sel = regfilemux::lb;
                 lbu:ctrl_word.regfile_mux_sel = regfilemux::lbu;
-                default:    //#########
+                default:;    //#########
             endcase
         end
         op_store: begin

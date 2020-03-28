@@ -306,7 +306,7 @@ alu ALU(
     .aluop(aluop), //controls the operation of the ALU
     .a(alu_mux1_out), //this is the output of the mux for input 1 of ALU
     .b(alu_mux2_out), //this is the output of the mux for input 2 of ALU
-    .f(alu_out) //output of the ALU
+    .f(alu_out), //output of the ALU
     .z(br_en) //br_en output 
 );
 /*****************************************************************************/
