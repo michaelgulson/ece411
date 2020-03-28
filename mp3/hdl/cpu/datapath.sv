@@ -5,8 +5,7 @@
 import rv32i_types::*;
 import control_word_types::*;
 
-module datapath
-{
+module datapath (
     input logic clk,
     input logic rst,
 
@@ -22,7 +21,7 @@ module datapath
     output logic [3:0] data_mbe,
     output logic data_read,
     output logic data_write
-};
+);
 
 //IF stage
 rv32i_word pc_plus4;
@@ -100,7 +99,7 @@ control_unit Control_Unit(
     .opcode(opcode),
     .funct3(funct3),
     .funct7(funct7),
-    .addr_01(MEM_ADDR), // <-----FIX THIS
+    .addr_01(pc_offset_MEM[1:0]), // <-----FIX THIS
     .ctrl_word(ctrl_word)
 );
 /****************************************************************************/
@@ -323,6 +322,7 @@ load_masking data_mem_masking(
 /*****************************************************************************/
 
 /*********************************Muxes***************************************/
+//fix this, variables are not correct to their stages.
 always_comb begin : MUXES
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
