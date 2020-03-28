@@ -39,7 +39,7 @@ datapath pipeline_datapath(
     .data_mbe(data_mbe),
     .data_addr(data_addr),
     .data_wdata(data_wdata),
-    .data_resp(data_rest),
+    .data_resp(data_resp),
     .data_rdata(data_rdata)
 );
 

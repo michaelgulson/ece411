@@ -52,7 +52,7 @@ typedef enum bit [2:0] {
     aand = 3'b111
 } arith_funct3_t;
 
-// typedef enum bit [2:0] {
+// typedef enum bit [2:0] { //use alu_ops equivalent instead of branch_funct3_t;
 //     beq  = 3'b000,
 //     bne  = 3'b001,
 //     blt  = 3'b100,

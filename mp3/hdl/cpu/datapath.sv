@@ -1,11 +1,10 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
 `define CONTROL_WORD_SIZE 28
-`define true 1'b1
 
 import rv32i_types::*;
 import control_word_types::*;
 
-module datapath (
+module datapath(
     input logic clk,
     input logic rst,
 
@@ -88,7 +87,11 @@ rv32i_word regfilemux_out;
 rv32i_word dm_mask_b;
 rv32i_word dm_mask_h;
 rv32i_word dm_mask_w;
+rv32i_word pc_offset_WB;
 
+//need this for true values. Gives you a warning if you define it. 
+logic true;
+assign true = 1'b1;
 
 //assigned variables
 assign pc_plus4 = pc_out + 4; //IF stage
@@ -129,7 +132,7 @@ ir ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(i_mem_rdata),
+    .in(inst_rdata),
     .funct3(funct3),
     .funct7(funct7),
     .opcode(opcode),
@@ -148,7 +151,7 @@ register #(CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(control_unit_out),
+    .in(ctrl_word),
     .out(control_word_EX)
 ); 
 
@@ -278,7 +281,7 @@ register data_out_MEM_WB(
    .clk(clk),
     .rst(rst),
     .load(true),
-    .in(data_out),
+    .in(data_rdata),
     .out(data_out_WB)
 );
 
@@ -311,7 +314,7 @@ alu ALU(
 
 /*******************************Other modules*********************************/
 load_masking data_mem_masking(
-    .rmask(rmask),
+    .rmask(control_word_WB.rmask),
     .mdrreg_out(data_out_WB),
     .mdr_mask_h(dm_mask_h),
     .mdr_mask_b(dm_mask_b),
@@ -352,7 +355,7 @@ always_comb begin : MUXES
         regfilemux::alu_out:    regfilemux_out = alu_out; //fix this
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en}; //fix this
         regfilemux::u_imm:      regfilemux_out = u_imm; //fix this
-        regfilemux::lw:         regfilemux_out = d_mem_rdata_w;
+        regfilemux::lw:         regfilemux_out = data_rdata;
         regfilemux::pc_plus4:  regfilemux_out = pc_out +4; //fix this
         regfilemux::lb:     begin
                             if(dm_mask_b[7]==1'b1)
@@ -373,3 +376,4 @@ always_comb begin : MUXES
 
 end
 /*****************************************************************************/
+endmodule
