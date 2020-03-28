@@ -112,7 +112,7 @@ regfile regfile(
     .clk(clk),
     .rst(rst),
     .load(control_word_WB.load_regfile),
-    .in(regfilemux_out)
+    .in(regfilemux_out),
     .src_a(rs1), .src_b(rs2), .dest(control_word_WB.dest),
     .reg_a(rs1_out), .reg_b(rs2_out)
 );
