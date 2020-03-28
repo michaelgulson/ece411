@@ -376,4 +376,5 @@ always_comb begin : MUXES
 
 end
 /*****************************************************************************/
-endmodule
+
+endmodule: datapath
