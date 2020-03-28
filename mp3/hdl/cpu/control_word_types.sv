@@ -13,6 +13,6 @@ typedef struct packed {
     logic [4:0] dest;
     logic [3:0] rmask;
     logic [3:0] wmask;
-} control_word;
+} rv32i_control_word;
 
 endpackage : control_word_types
