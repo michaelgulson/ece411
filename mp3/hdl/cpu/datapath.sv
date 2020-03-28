@@ -151,7 +151,7 @@ register #(CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(control_unit_out),
+    .in(ctrl_word),
     .out(control_word_EX)
 ); 
 
