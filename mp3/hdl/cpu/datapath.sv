@@ -1,6 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
 `define CONTROL_WORD_SIZE 28
-`define true 1'b1
 
 import rv32i_types::*;
 import control_word_types::*;
@@ -91,6 +90,10 @@ rv32i_word dm_mask_b;
 rv32i_word dm_mask_h;
 rv32i_word dm_mask_w;
 rv32i_word pc_offset_WB;
+
+//need this for true values. Gives you a warning if you define it. 
+logic true;
+assign true = 1'b1;
 
 //assigned variables
 assign pc_plus4 = pc_out + 4; //IF stage
