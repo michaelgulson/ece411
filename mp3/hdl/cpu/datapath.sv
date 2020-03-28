@@ -90,7 +90,7 @@ rv32i_word regfilemux_out;
 rv32i_word dm_mask_b;
 rv32i_word dm_mask_h;
 rv32i_word dm_mask_w;
-
+rv32i_word pc_offset_WB;
 
 //assigned variables
 assign pc_plus4 = pc_out + 4; //IF stage
@@ -313,7 +313,7 @@ alu ALU(
 
 /*******************************Other modules*********************************/
 load_masking data_mem_masking(
-    .rmask(rmask),
+    .rmask(control_word_WB.rmask),
     .mdrreg_out(data_out_WB),
     .mdr_mask_h(dm_mask_h),
     .mdr_mask_b(dm_mask_b),
