@@ -46,7 +46,7 @@ logic [4:0] rs2;
 logic [2:0] funct3;
 logic [6:0] funct7;
 rv32i_opcode opcode;
-rv32i_control_word ctrl_word;
+control_word ctrl_word;
 
 //EX stage
 rv32i_word alu_out;

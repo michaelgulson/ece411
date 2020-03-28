@@ -7,17 +7,18 @@ module control_unit
     input logic[2:0] funct3,
     input logic[6:0] funct7,
     input logic [1:0] addr_01,
-    output rv32i_control_word ctrl_word
+    output control_word ctrl_word
 );
 
 
-branch_funct3_t branch_funct3;
+//branch_funct3_t branch_funct3;
+alu_ops branch_funct3;
 store_funct3_t store_funct3;
 load_funct3_t load_funct3;
 arith_funct3_t arith_funct3;
 
 assign arith_funct3 = arith_funct3_t'(funct3);
-assign branch_funct3 = branch_funct3_t'(funct3);
+assign branch_funct3 = alu_ops'(funct3);
 assign load_funct3 = load_funct3_t'(funct3);
 assign store_funct3 = store_funct3_t'(funct3);
 
@@ -30,9 +31,9 @@ always_comb begin : trap_check
         op_lui, op_auipc, op_imm, op_reg, op_jal, op_jalr:;
 
         op_br: begin
-            case (branch_funct3)
-                beq, bne, blt, bge, bltu, bgeu:;
-                default: ctrl_word.trap = 1;
+				case(branch_funct3)
+                alu_add_beq, alu_sll_bne, alu_xor_blt, alu_srl_bge, alu_or_bltu, alu_and_bgeu:;
+                default: ctrl_word.trap = 1;			 
             endcase
         end
 		op_load: begin
@@ -114,33 +115,33 @@ always_comb begin
             ctrl_word.regfile_mux_sel = regfilemux::u_imm; 
         end
         op_auipc: begin
-            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_op = alu_add_beq;
             ctrl_word.regfile_mux_sel = regfilemux::alu_out;
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::u_imm;
         end
         op_jal: begin
-            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_op = alu_add_beq;
             ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::j_imm;
         end
         op_jalr: begin
-            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_op = alu_add_beq;
             ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::i_imm;
         end
         op_br: begin
-            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_op = alu_add_beq;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::b_imm;
         end
         op_load: begin
-            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_op = alu_add_beq;
             ctrl_word.mem_read = 1'b1;
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
@@ -155,7 +156,7 @@ always_comb begin
             endcase
         end
         op_store: begin
-            ctrl_word.alu_op = alu_add;
+            ctrl_word.alu_op = alu_add_beq;
             ctrl_word.mem_write = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::s_imm;   
