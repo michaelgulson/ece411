@@ -281,7 +281,7 @@ register data_out_MEM_WB(
    .clk(clk),
     .rst(rst),
     .load(true),
-    .in(data_out),
+    .in(data_rdata),
     .out(data_out_WB)
 );
 
