@@ -25,8 +25,6 @@ typedef enum bit [6:0] {
     op_csr   = 7'b1110011  //control and status register (I type)
 } rv32i_opcode;
 
-
-
 typedef enum bit [2:0] {
     lb  = 3'b000,
     lh  = 3'b001,
