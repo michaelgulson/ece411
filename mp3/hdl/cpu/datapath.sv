@@ -6,7 +6,7 @@ import rv32i_types::*;
 import control_word_types::*;
 
 module datapath
-{
+(
     input clk,
     input rst,
 
@@ -23,7 +23,7 @@ module datapath
     output d_mem_write,
 
     output [3:0] mem_byte_en
-};
+);
 
 //IF stage
 rv32i_word pc_plus4;
@@ -375,3 +375,4 @@ always_comb begin : MUXES
 
 end
 /*****************************************************************************/
+endmodule
