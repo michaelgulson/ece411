@@ -39,7 +39,7 @@ rv32i_word j_imm;
 //ID stage
 rv32i_word regfile_out_srca;
 rv32i_word regfile_out_srcb;
-control_word control_unit_out;
+rv32i_control_word control_unit_out;
 logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
@@ -54,7 +54,7 @@ rv32i_word read_data1_EX;
 rv32i_word read_data2_EX;
 rv32i_word pc_EX;
 logic br_en;
-control_word control_word_EX;
+rv32i_control_word control_word_EX;
 rv32i_word imm_EX;
 rv32i_word alu_mux1_out; //ALU
 rv32i_word alu_mux2_out; //ALU
@@ -71,7 +71,7 @@ rv32i_word alu_out_MEM;
 rv32i_word data_out;
 rv32i_word pc_MEM;
 rv32i_word pc_offset_MEM;
-control_word control_word_MEM;
+rv32i_control_word control_word_MEM;
 rv32i_word aluout_MEM;
 rv32i_word read_data2_MEM;
 logic br_en_MEM;
@@ -82,7 +82,7 @@ rv32i_word aluout_WB;
 rv32i_word data_out_WB;
 rv32i_word pc_WB;
 logic br_en_WB;
-control_word control_word_WB;
+rv32i_control_word control_word_WB;
 logic [3:0] regfilemux_sel;
 rv32i_word regfilemux_out;
 rv32i_word dm_mask_b;
