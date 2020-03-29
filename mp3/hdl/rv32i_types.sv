@@ -81,10 +81,10 @@ typedef struct packed {
     logic trap;
 
     //muxes
-    regfilemux_sel_t regfile_mux_sel;
-    pcmux_sel_t pc_mux_sel;
-    alumux1_sel_t alu_muxsel1;
-    alumux2_sel_t alu_muxsel2;
+    regfilemux::regfilemux_sel_t    regfile_mux_sel;
+    pcmux::pcmux_sel_t              pc_mux_sel;
+    alumux::alumux1_sel_t           alu_muxsel1;
+    alumux::alumux2_sel_t           alu_muxsel2;
 } rv32i_control_word;
 
 

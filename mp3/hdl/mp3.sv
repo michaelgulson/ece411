@@ -1,5 +1,5 @@
 //insert top level for mp3 here
-import rv32i_types::*;
+// import rv32i_types::*;
 
 module mp3
 (
@@ -21,8 +21,6 @@ module mp3
     input logic data_resp,
     input logic [31:0] data_rdata
 );
-
-//logic clk;
 
 datapath pipeline_datapath(
     .clk(clk),
