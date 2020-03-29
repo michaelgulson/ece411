@@ -25,7 +25,7 @@ module datapath(
 //IF stage
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
-logic load_pc;
+//logic load_pc;
 rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 rv32i_word i_imm;
@@ -127,7 +127,7 @@ regfile regfile(
 pc_register pc(
     .clk(clk),
     .rst(rst),
-    .load(load_pc),
+    .load(true),
     .in(pcmux_out),
     .out(pc_out)
 );
