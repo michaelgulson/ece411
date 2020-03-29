@@ -1,5 +1,5 @@
 //insert top level for mp3 here
-import rv32i_types::*; 
+import rv32i_types::*;
 
 module mp3
 (
@@ -10,7 +10,7 @@ module mp3
     output logic inst_read,
     output logic [31:0] inst_addr,
     input logic inst_resp,
-    input [31:0] inst_rdata,
+    input logic [31:0] inst_rdata,
 
     /* D Cache Ports */
     output logic data_read,

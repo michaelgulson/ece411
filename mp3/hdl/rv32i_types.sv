@@ -74,16 +74,17 @@ typedef struct packed {
     alu_ops alu_op;
     logic mem_read;
     logic mem_write;
-    logic regfile_mux_sel;
-    //regfilemux::regfilemux_sel_t regfile_mux_sel;
     logic [3:0] load_regfile;
-    logic pc_mux_sel;
-    logic alu_muxsel1;
-    logic [2:0] alu_muxsel2;
     logic [4:0] dest;
     logic [3:0] rmask;
     logic [3:0] wmask;
     logic trap;
+
+    //muxes
+    regfilemux_sel_t regfile_mux_sel;
+    pcmux_sel_t pc_mux_sel;
+    alumux1_sel_t alu_muxsel1;
+    alumux2_sel_t alu_muxsel2;
 } rv32i_control_word;
 
 
