@@ -22,8 +22,6 @@ module mp3
     input logic [31:0] data_rdata
 );
 
-logic clk;
-
 datapath pipeline_datapath(
     .clk(clk),
     .rst(rst),

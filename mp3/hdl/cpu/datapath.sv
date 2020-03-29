@@ -23,7 +23,6 @@ module datapath(
 );
 
 //IF stage
-rv32i_word pcplus4;
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
 logic load_pc;
@@ -94,10 +93,7 @@ logic true;
 assign true = 1'b1;
 
 //assigned variables
-assign pcplus4 = pc_out + 4; //IF stage
 assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
-assign 
-
 
 /********************************Control Unit********************************/
 control_unit Control_Unit(
@@ -340,7 +336,7 @@ load_masking data_mem_masking(
 always_comb begin : MUXES
     //IF stage
     unique case (pcmux_sel)
-        pcmux::pc_plus4: pcmux_out = pcplus4;
+        pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out:  pcmux_out = aluout_MEM;
         pcmux::alu_mod2:  pcmux_out = {aluout_MEM[31:1],1'b0};
         default: pcmux_out = pc_out;
