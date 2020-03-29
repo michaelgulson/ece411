@@ -74,7 +74,7 @@ typedef struct packed {
     alu_ops alu_op;
     logic mem_read;
     logic mem_write;
-    logic [3:0] load_regfile;
+    logic load_regfile;
     logic [4:0] dest;
     logic [3:0] rmask;
     logic [3:0] wmask;
