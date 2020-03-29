@@ -27,7 +27,7 @@ rv32i_word pcmux_out;
 rv32i_word pc_ID;
 logic load_pc;
 rv32i_word pc_out;
-pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
+pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 rv32i_word i_imm;
 rv32i_word s_imm;
 rv32i_word b_imm;
@@ -360,12 +360,12 @@ always_comb begin : MUXES
     endcase
 
     //WB stage
-    unique case (control_word_WB.regfilemux_sel)
+    unique case (control_word_WB.regfile_mux_sel)
         regfilemux::alu_out:    regfilemux_out = alu_out; //fix this
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en}; //fix this
         regfilemux::u_imm:      regfilemux_out = u_imm; //fix this
         regfilemux::lw:         regfilemux_out = data_rdata;
-        regfilemux::pc_plus4:  regfilemux_out = pcout_WB +4; //fix this
+        regfilemux::pc_plus4:  regfilemux_out = pc_WB +4; //fix this
         regfilemux::lb:     begin
                             if(dm_mask_b[7]==1'b1)
                             regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
