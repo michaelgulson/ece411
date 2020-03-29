@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 30
+`define CONTROL_WORD_SIZE 31
 
 import rv32i_types::*;
 //import control_word_types::*;
@@ -389,8 +389,8 @@ always_comb begin : MUXES
     endcase
 
     unique case (control_word_MEM.data_addrmux_sel)
-        marmux::pc_out:    data_addrmux_out = pc_out;
-        marmux::alu_out:  data_addrmux_out = alu_out;
+        datamux::pc_out:    data_addrmux_out = pc_out;
+        datamux::alu_out:  data_addrmux_out = alu_out;
         // etc.
         default: data_addrmux_out = pc_out;
     endcase

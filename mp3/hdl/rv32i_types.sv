@@ -3,7 +3,7 @@ package rv32i_types;
 // e.g. pcmux::pc_plus4 and regfilemux::pc_plus4 are seperate identifiers
 // for seperate enumerated types
 import pcmux::*;
-import marmux::*;
+import datamux::*;
 import cmpmux::*;
 import alumux::*;
 import regfilemux::*;
@@ -85,6 +85,7 @@ typedef struct packed {
     pcmux::pcmux_sel_t              pc_mux_sel;
     alumux::alumux1_sel_t           alu_muxsel1;
     alumux::alumux2_sel_t           alu_muxsel2;
+    datamux::addrmux_sel_t          data_addrmux_sel;
 } rv32i_control_word;
 
 
