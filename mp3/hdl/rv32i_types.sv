@@ -79,6 +79,7 @@ typedef struct packed {
     logic [3:0] rmask;
     logic [3:0] wmask;
     logic trap;
+    rv32i_word instr;
 
     //muxes
     regfilemux::regfilemux_sel_t    regfile_mux_sel;

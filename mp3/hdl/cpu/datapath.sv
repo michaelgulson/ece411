@@ -28,11 +28,6 @@ rv32i_word pc_ID;
 logic load_pc;
 rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
-rv32i_word i_imm;
-rv32i_word s_imm;
-rv32i_word b_imm;
-rv32i_word u_imm;
-rv32i_word j_imm;
 
 //ID stage
 rv32i_word regfile_out_srca;
@@ -43,6 +38,8 @@ logic [4:0] rs2;
 logic [2:0] funct3;
 logic [6:0] funct7;
 rv32i_opcode opcode;
+rv32i_word rs1_out;
+rv32i_word rs2_out;
 rv32i_control_word ctrl_word;
 
 //EX stage
@@ -61,6 +58,11 @@ rv32i_word alumux1_out;
 logic [2:0] alumux2_sel;
 rv32i_word alumux2_out;
 rv32i_word pc_offset;
+rv32i_word i_imm_EX;
+rv32i_word s_imm_EX;
+rv32i_word b_imm_EX;
+rv32i_word u_imm_EX;
+rv32i_word j_imm_EX;
 
 //MEM stage
 rv32i_word imm_MEM;
@@ -85,18 +87,26 @@ rv32i_word dm_mask_b;
 rv32i_word dm_mask_h;
 rv32i_word dm_mask_w;
 rv32i_word pc_offset_WB;
-rv32i_word rs1_out;
-rv32i_word rs2_out;
+rv32i_word u_imm_WB;
+
 
 //need this for true values. Gives you a warning if you define it. 
 logic true;
 assign true = 1'b1;
 
-//assigned variables
-assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
+//assigned variables for EX stage  //##############change to instruction from control word
+assign pc_offset = pc_offset_MEM + imm_EX;
+assign i_imm_EX = {{21{imm_EX[31]}}, imm_EX[30:20]};
+assign s_imm_EX = {{21{imm_EX[31]}}, imm_EX[30:25], imm_EX[11:7]};
+assign b_imm_EX = {{20{imm_EX[31]}}, imm_EX[7], imm_EX[30:25], imm_EX[11:8], 1'b0};
+assign u_imm_EX = {imm_EX[31:12], 12'h000};
+assign j_imm_EX = {{12{imm_EX[31]}}, imm_EX[19:12], imm_EX[20], imm_EX[30:21], 1'b0};
+
+//assigned variables for WB stage
+assign u_imm_WB = {imm_WB[31:12], 12'h000};
 
 /********************************Control Unit********************************/
-control_unit Control_Unit(
+control_unit Control_Unit( //incldue instruction
     .opcode(opcode),
     .funct3(funct3),
     .funct7(funct7),
@@ -145,11 +155,11 @@ ir ir_IF_ID(
     .funct3(funct3),
     .funct7(funct7),
     .opcode(opcode),
-    .i_imm(i_imm),
-    .s_imm(s_imm),
-    .b_imm(b_imm),
-    .u_imm(u_imm),
-    .j_imm(j_imm),
+    // .i_imm(i_imm),
+    // .s_imm(s_imm),
+    // .b_imm(b_imm),
+    // .u_imm(u_imm),
+    // .j_imm(j_imm),
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd)
@@ -188,13 +198,13 @@ register read_data2_ID_EX(
     .out(read_data2_EX)
 );
 
-register imm_ID_EX(
-    .clk(clk),
-    .rst(rst),
-    .load(true),
-    .in(i_imm),
-    .out(imm_EX)
-);
+// register imm_ID_EX(
+//     .clk(clk),
+//     .rst(rst),
+//     .load(true),
+//     .in(i_imm),
+//     .out(imm_EX)
+// );
 
 //EX/MEM
 register #(`CONTROL_WORD_SIZE) control_word_EX_MEM(
@@ -237,13 +247,13 @@ register read_data2_EX_MEM(
     .out(read_data2_MEM)
 );
 
-register imm_EX_MEM(
-    .clk(clk),
-    .rst(rst),
-    .load(true),
-    .in(imm_EX),
-    .out(imm_MEM)
-);
+// register imm_EX_MEM(
+//     .clk(clk),
+//     .rst(rst),
+//     .load(true),
+//     .in(imm_EX),
+//     .out(imm_MEM)
+// );
 
 register ALUout_EX_MEM(
     .clk(clk),
@@ -302,13 +312,13 @@ register alu_out_MEM_WB(
     .out(aluout_WB)
 );
 
-register imm_MEM_WB(
-    .clk(clk),
-    .rst(rst),
-    .load(true),
-    .in(imm_MEM),
-    .out(imm_WB)
-);
+// register imm_MEM_WB(
+//     .clk(clk),
+//     .rst(rst),
+//     .load(true),
+//     .in(imm_MEM),
+//     .out(imm_WB)
+// );
 /****************************************************************************/
 
 /*******************************ALU and CMP in one module********************/
@@ -350,22 +360,22 @@ always_comb begin : MUXES
     endcase
 
     unique case (control_word_EX.alu_muxsel2)
-        alumux::i_imm: alumux2_out = i_imm; //fix this 
-        alumux::u_imm: alumux2_out = u_imm; //fix this
-        alumux::b_imm: alumux2_out = b_imm; //fix this
-        alumux::s_imm: alumux2_out = s_imm; //fix this
-        alumux::j_imm: alumux2_out = j_imm; //fix this
-        alumux::rs2_out: alumux2_out = rs2_out; //fix this
-        default: alumux2_out = i_imm; //fix this
+        alumux::i_imm: alumux2_out = i_imm_EX;  
+        alumux::u_imm: alumux2_out = u_imm_EX;
+        alumux::b_imm: alumux2_out = b_imm_EX;
+        alumux::s_imm: alumux2_out = s_imm_EX;
+        alumux::j_imm: alumux2_out = j_imm_EX;
+        alumux::rs2_out: alumux2_out = read_data2_EX;
+        default: alumux2_out = i_imm;
     endcase
 
     //WB stage
     unique case (control_word_WB.regfile_mux_sel)
-        regfilemux::alu_out:    regfilemux_out = alu_out; //fix this
-        regfilemux::br_en:      regfilemux_out = {31'b0, br_en}; //fix this
-        regfilemux::u_imm:      regfilemux_out = u_imm; //fix this
-        regfilemux::lw:         regfilemux_out = data_rdata;
-        regfilemux::pc_plus4:  regfilemux_out = pc_WB +4; //fix this
+        regfilemux::alu_out:    regfilemux_out = aluout_WB;
+        regfilemux::br_en:      regfilemux_out = {31'b0, br_en_WB};
+        regfilemux::u_imm:      regfilemux_out = u_imm_WB;
+        regfilemux::lw:         regfilemux_out = data_out_WB;
+        regfilemux::pc_plus4:  regfilemux_out = pc_WB +4;
         regfilemux::lb:     begin
                             if(dm_mask_b[7]==1'b1)
                             regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
@@ -380,7 +390,7 @@ always_comb begin : MUXES
                                 regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
                             end
         regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
-        default: regfilemux_out = alu_out; //fix this
+        default: regfilemux_out = aluout_WB;
     endcase
 
 end
