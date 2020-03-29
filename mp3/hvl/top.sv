@@ -32,6 +32,10 @@ always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modif
 // Set this to the proper value
 assign itf.registers = '{default: '0};
 
+/****************************** Generate Clock *******************************/
+bit clk;
+assign clk = itf.clk;
+
 /*********************** Instantiate your design here ************************/
 mp3 dut(
     .clk(itf.clk),
