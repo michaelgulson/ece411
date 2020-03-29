@@ -75,6 +75,7 @@ typedef struct packed {
     logic mem_read;
     logic mem_write;
     logic regfile_mux_sel;
+    //regfilemux::regfilemux_sel_t regfile_mux_sel;
     logic [3:0] load_regfile;
     logic pc_mux_sel;
     logic alu_muxsel1;
