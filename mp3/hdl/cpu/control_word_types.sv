@@ -1,3 +1,5 @@
+import rv32i_types::*;
+
 package control_word_types;
 
 
