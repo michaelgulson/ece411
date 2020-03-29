@@ -1,9 +1,9 @@
 //insert top level for mp3 here
-//import rv32i_types::*;
+import rv32i_types::*; 
 
 module mp3
 (
-    input logic clk,
+    input clk,
     input logic rst,
 
     /* I Cache Ports */
@@ -22,6 +22,7 @@ module mp3
     input logic [31:0] data_rdata
 );
 
+logic clk;
 
 datapath pipeline_datapath(
     .clk(clk),
