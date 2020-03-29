@@ -6,11 +6,11 @@ typedef enum bit [1:0] {
 } pcmux_sel_t;
 endpackage
 
-package marmux;
+package datamux;
 typedef enum bit {
     pc_out = 1'b0
     ,alu_out = 1'b1
-} marmux_sel_t;
+} addrmux_sel_t;
 endpackage
 
 package cmpmux;
@@ -49,4 +49,3 @@ typedef enum bit [3:0] {
     ,lhu       = 4'b1000  // unsigned halfword
 } regfilemux_sel_t;
 endpackage
-

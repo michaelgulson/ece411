@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 26
+`define CONTROL_WORD_SIZE 31
 
 import rv32i_types::*;
 //import control_word_types::*;

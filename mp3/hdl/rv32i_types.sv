@@ -85,6 +85,7 @@ typedef struct packed {
     pcmux::pcmux_sel_t              pc_mux_sel;
     alumux::alumux1_sel_t           alu_muxsel1;
     alumux::alumux2_sel_t           alu_muxsel2;
+    datamux::addrmux_sel_t          data_addrmux_sel;
 } rv32i_control_word;
 
 
