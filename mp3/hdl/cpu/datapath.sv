@@ -2,7 +2,7 @@
 `define CONTROL_WORD_SIZE 28
 
 import rv32i_types::*;
-import control_word_types::*;
+//import control_word_types::*;
 
 module datapath(
     input logic clk,
