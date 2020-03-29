@@ -97,8 +97,8 @@ assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
 
 assign data_read = control_word_MEM.mem_read;
 assign data_write = control_word_MEM.mem_write;
-assign instr_read = 1'b1;
-assign instr_addr = pcmux_out;
+assign inst_read = 1'b1;
+assign inst_addr = pcmux_out;
 assign data_addr = data_addrmux_out;
 /********************************Control Unit********************************/
 control_unit Control_Unit(
