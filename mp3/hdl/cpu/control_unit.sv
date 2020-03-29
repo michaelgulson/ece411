@@ -121,6 +121,7 @@ always_comb begin
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::u_imm;
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;    
         end
         op_jal: begin
             ctrl_word.alu_op = alu_add_beq;
@@ -128,6 +129,7 @@ always_comb begin
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::j_imm;
+            ctrl_word.pc_mux_sel = pcmux::alu_out;    
         end
         op_jalr: begin
             ctrl_word.alu_op = alu_add_beq;
@@ -135,11 +137,13 @@ always_comb begin
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::i_imm;
+            ctrl_word.pc_mux_sel = pcmux::alu_mod2;    
         end
         op_br: begin
             ctrl_word.alu_op = alu_add_beq;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::b_imm;
+            ctrl_word.pc_mux_sel = pcmux::alu_out;    
         end
         op_load: begin
             ctrl_word.alu_op = alu_add_beq;
@@ -147,6 +151,7 @@ always_comb begin
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::i_imm;
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;    
             case(load_funct3)
                 lw: ctrl_word.regfile_mux_sel = regfilemux::lb;
                 lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
@@ -161,9 +166,11 @@ always_comb begin
             ctrl_word.mem_write = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::s_imm;   
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;    
         end
         op_imm: begin
             ctrl_word.load_regfile = 1'b1;
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;
             case(arith_funct3)
                 slt: ctrl_word.regfile_mux_sel = regfilemux::br_en;
                 sltu: ctrl_word.regfile_mux_sel = regfilemux::br_en;
@@ -194,6 +201,7 @@ always_comb begin
         op_reg: begin
             ctrl_word.regfile_mux_sel = regfilemux::alu_out;
             ctrl_word.load_regfile = 1'b1;
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;
             case(arith_funct3)
                 add:
                 begin
