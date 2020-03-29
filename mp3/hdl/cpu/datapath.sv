@@ -2,7 +2,7 @@
 `define CONTROL_WORD_SIZE 28
 
 import rv32i_types::*;
-import control_word_types::*;
+//import control_word_types::*;
 
 module datapath(
     input logic clk,
@@ -157,7 +157,7 @@ ir ir_IF_ID(
 );
 
 //ID/EX
-register #(CONTROL_WORD_SIZE) control_word_ID_EX(
+register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
@@ -198,7 +198,7 @@ register imm_ID_EX(
 );
 
 //EX/MEM
-register #(CONTROL_WORD_SIZE) control_word_EX_MEM(
+register #(`CONTROL_WORD_SIZE) control_word_EX_MEM(
     .clk(clk),
     .rst(rst),
     .load(true),
