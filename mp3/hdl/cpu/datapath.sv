@@ -96,7 +96,7 @@ assign true = 1'b1;
 //assigned variables
 assign pcplus4 = pc_out + 4; //IF stage
 assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
-assign 
+//assign 
 
 
 /********************************Control Unit********************************/
