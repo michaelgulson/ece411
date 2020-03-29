@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Settings
-ECE411DIR=$HOME/ece411
-DEFAULT_TARGET=$ECE411DIR/Illini_Senior_Kingfishers/mp3/simulation/modelsim/memory.lst
+ECE411DIR=$HOME/ece411/Illini_Senior_Kingfishers
+DEFAULT_TARGET=$ECE411DIR/mp3/simulation/modelsim/memory.lst
 ASSEMBLER=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-gcc
 OBJCOPY=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-objcopy
 OBJDUMP=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-objdump
-ADDRESSABILITY=32
+ADDRESSABILITY=1
 
 # Command line parameters
 ASM_FILE=$1
