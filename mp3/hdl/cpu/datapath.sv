@@ -23,12 +23,12 @@ module datapath(
 );
 
 //IF stage
-rv32i_word pc_plus4;
+rv32i_word pcplus4;
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
 logic load_pc;
 rv32i_word pc_out;
-logic [1:0] pcmux_sel;
+pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 rv32i_word i_imm;
 rv32i_word s_imm;
 rv32i_word b_imm;
@@ -81,7 +81,6 @@ rv32i_word data_out_WB;
 rv32i_word pc_WB;
 logic br_en_WB;
 rv32i_control_word control_word_WB;
-logic [3:0] regfilemux_sel;
 rv32i_word regfilemux_out;
 rv32i_word dm_mask_b;
 rv32i_word dm_mask_h;
@@ -93,8 +92,10 @@ logic true;
 assign true = 1'b1;
 
 //assigned variables
-assign pc_plus4 = pc_out + 4; //IF stage
+assign pcplus4 = pc_out + 4; //IF stage
 assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
+assign 
+
 
 /********************************Control Unit********************************/
 control_unit Control_Unit(
@@ -335,38 +336,38 @@ load_masking data_mem_masking(
 /*********************************Muxes***************************************/
 //fix this, variables are not correct to their stages.
 always_comb begin : MUXES
+    //IF stage
     unique case (pcmux_sel)
-        pcmux::pc_plus4: pcmux_out = pc_out + 4;  //fix this
-        pcmux::alu_out:  pcmux_out = alu_out; //fix this
-        pcmux::alu_mod2:  pcmux_out = {alu_out[31:1],1'b0}; //alu_mod2 fix later
-        // etc.
-        default: pcmux_out = pc_out + 4; //fix this
+        pcmux::pc_plus4: pcmux_out = pcplus4;
+        pcmux::alu_out:  pcmux_out = aluout_MEM;
+        pcmux::alu_mod2:  pcmux_out = {aluout_MEM[31:1],1'b0};
+        default: pcmux_out = pc_out;
     endcase
 
-    unique case (alumux1_sel)
-        alumux::rs1_out:  alumux1_out = rs1_out; //fix this
-        alumux::pc_out:   alumux1_out = pc_out; //fix this
-    
-        default: alumux1_out = rs1_out; //fix this
+    //EX stage
+    unique case (control_word_EX.alu_muxsel1)
+        alumux::rs1_out:  alumux1_out = read_data1_EX;
+        alumux::pc_out:   alumux1_out = pc_EX;
+        default: alumux1_out = read_data1_EX;
     endcase
 
-    unique case (alumux2_sel)
+    unique case (control_word_EX.alu_muxsel2)
         alumux::i_imm: alumux2_out = i_imm; //fix this 
         alumux::u_imm: alumux2_out = u_imm; //fix this
         alumux::b_imm: alumux2_out = b_imm; //fix this
         alumux::s_imm: alumux2_out = s_imm; //fix this
         alumux::j_imm: alumux2_out = j_imm; //fix this
         alumux::rs2_out: alumux2_out = rs2_out; //fix this
-
         default: alumux2_out = i_imm; //fix this
     endcase
 
-    unique case (regfilemux_sel)
+    //WB stage
+    unique case (control_word_WB.regfilemux_sel)
         regfilemux::alu_out:    regfilemux_out = alu_out; //fix this
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en}; //fix this
         regfilemux::u_imm:      regfilemux_out = u_imm; //fix this
         regfilemux::lw:         regfilemux_out = data_rdata;
-        regfilemux::pc_plus4:  regfilemux_out = pc_out +4; //fix this
+        regfilemux::pc_plus4:  regfilemux_out = pcout_WB +4; //fix this
         regfilemux::lb:     begin
                             if(dm_mask_b[7]==1'b1)
                             regfilemux_out = {24'b111111111111111111111111, dm_mask_b[7:0]};    
