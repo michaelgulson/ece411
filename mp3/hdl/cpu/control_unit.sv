@@ -1,5 +1,6 @@
 import rv32i_types::*;
 //import control_word_types::*;
+`define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
 
 module control_unit
 (
@@ -183,7 +184,7 @@ always_comb begin
                     end
                 end
                 default: begin
-                    ctrl_word.regfile_mux_sel =regfilemux::alu_out;
+                    ctrl_word.regfile_mux_sel = regfilemux::alu_out;
                     ctrl_word.alu_op = alu_ops'(funct3);
                     ctrl_word.alu_muxsel1 = alumux::rs1_out;
                     ctrl_word.alu_muxsel2 = alumux::i_imm;
