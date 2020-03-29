@@ -366,7 +366,7 @@ always_comb begin : MUXES
         alumux::s_imm: alumux2_out = s_imm_EX;
         alumux::j_imm: alumux2_out = j_imm_EX;
         alumux::rs2_out: alumux2_out = read_data2_EX;
-        default: alumux2_out = i_imm;
+        default: alumux2_out = i_imm_EX;
     endcase
 
     //WB stage
