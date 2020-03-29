@@ -25,7 +25,7 @@ module datapath(
 //IF stage
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
-logic load_pc;
+//logic load_pc;
 rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 rv32i_word i_imm;
@@ -87,7 +87,7 @@ rv32i_word dm_mask_w;
 rv32i_word pc_offset_WB;
 rv32i_word rs1_out;
 rv32i_word rs2_out;
-
+rv32i_word data_addrmux_out;
 //need this for true values. Gives you a warning if you define it. 
 logic true;
 assign true = 1'b1;
@@ -95,6 +95,11 @@ assign true = 1'b1;
 //assigned variables
 assign pc_offset = pc_offset_MEM + imm_EX; //EX stage
 
+assign data_read = control_word_MEM.mem_read;
+assign data_write = control_word_MEM.mem_write;
+assign instr_read = 1'b1;
+assign instr_addr = pcmux_out;
+assign data_addr = data_addrmux_out;
 /********************************Control Unit********************************/
 control_unit Control_Unit(
     .opcode(opcode),
@@ -122,7 +127,7 @@ regfile regfile(
 pc_register pc(
     .clk(clk),
     .rst(rst),
-    .load(load_pc),
+    .load(true),
     .in(pcmux_out),
     .out(pc_out)
 );
@@ -381,6 +386,13 @@ always_comb begin : MUXES
                             end
         regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
         default: regfilemux_out = alu_out; //fix this
+    endcase
+
+    unique case (control_word_MEM.data_addrmux_sel)
+        marmux::pc_out:    data_addrmux_out = pc_out;
+        marmux::alu_out:  data_addrmux_out = alu_out;
+        // etc.
+        default: data_addrmux_out = pc_out;
     endcase
 
 end
