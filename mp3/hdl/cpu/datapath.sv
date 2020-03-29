@@ -87,8 +87,6 @@ logic [7:0] dm_mask_b;
 logic [15:0] dm_mask_h;
 rv32i_word dm_mask_w;
 rv32i_word pc_offset_WB;
-rv32i_word rs1_out;
-rv32i_word rs2_out;
 rv32i_word data_addrmux_out;
 rv32i_word u_imm_WB;
 
