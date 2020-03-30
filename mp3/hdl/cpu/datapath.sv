@@ -195,7 +195,7 @@ register read_data1_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(regfile_out_srca),
+    .in(rs1_out),
     .out(read_data1_EX)
 );
 
