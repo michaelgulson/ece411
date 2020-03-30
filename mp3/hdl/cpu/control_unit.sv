@@ -154,7 +154,7 @@ always_comb begin
             ctrl_word.pc_mux_sel = pcmux::pc_plus4;  
             ctrl_word.data_addrmux_sel = datamux::alu_out;  
             case(load_funct3)
-                lw: ctrl_word.regfile_mux_sel = regfilemux::lb;
+                lw: ctrl_word.regfile_mux_sel = regfilemux::lw;
                 lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
                 lhu: ctrl_word.regfile_mux_sel = regfilemux::lhu;
                 lb:ctrl_word.regfile_mux_sel = regfilemux::lb;
