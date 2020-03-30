@@ -4,6 +4,7 @@ import rv32i_types::*;
 
 module control_unit
 (
+    input rv32i_word instr,
     input rv32i_opcode opcode,
     input logic[2:0] funct3,
     input logic[6:0] funct7,
@@ -110,6 +111,7 @@ always_comb begin
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
     ctrl_word.dest = 1'b0; //<-- fix this
     ctrl_word.data_addrmux_sel = datamux::pc_out;
+    ctrl_word.instr = instr;
     case (opcode)
         op_lui: begin
             ctrl_word.load_regfile  = 1'b1;

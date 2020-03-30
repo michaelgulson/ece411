@@ -112,8 +112,10 @@ assign inst_read = 1'b1;
 assign inst_addr = pcmux_out;
 assign data_addr = data_addrmux_out;
 assign data_mbe = control_word_MEM.wmask;
+
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
+    .instr(inst_rdata),
     .opcode(opcode),
     .funct3(funct3),
     .funct7(funct7),
