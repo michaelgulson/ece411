@@ -203,7 +203,7 @@ register read_data2_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(true),
-    .in(regfile_out_srcb),
+    .in(rs2_out),
     .out(read_data2_EX)
 );
 
