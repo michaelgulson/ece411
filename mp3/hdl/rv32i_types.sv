@@ -50,15 +50,6 @@ typedef enum bit [2:0] {
     aand = 3'b111
 } arith_funct3_t;
 
-// typedef enum bit [2:0] { //use alu_ops equivalent instead of branch_funct3_t;
-//     beq  = 3'b000,
-//     bne  = 3'b001,
-//     blt  = 3'b100,
-//     bge  = 3'b101,
-//     bltu = 3'b110,
-//     bgeu = 3'b111
-// } branch_funct3_t;
-
 typedef enum bit [2:0] {
     alu_add_beq = 3'b000,
     alu_sll_bne = 3'b001,
@@ -78,7 +69,7 @@ typedef struct packed {
     logic [4:0] dest;
     logic [3:0] rmask;
     logic [3:0] wmask;
-    logic trap;
+    logic trap; //for branching
     rv32i_word instr;
 
     //muxes

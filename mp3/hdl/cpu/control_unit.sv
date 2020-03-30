@@ -12,8 +12,6 @@ module control_unit
     output rv32i_control_word ctrl_word
 );
 
-
-//branch_funct3_t branch_funct3;
 alu_ops branch_funct3;
 store_funct3_t store_funct3;
 load_funct3_t load_funct3;
@@ -106,7 +104,7 @@ always_comb begin
     ctrl_word.mem_write = 1'b0;
     ctrl_word.regfile_mux_sel = regfilemux::alu_out; 
     ctrl_word.load_regfile = 1'b0;
-    //ctrl_word.pc_mux_sel = 2'b00; //<-- fix this
+    ctrl_word.pc_mux_sel = pcmux::pc_plus4;
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
     ctrl_word.dest = 1'b0; //<-- fix this

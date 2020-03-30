@@ -49,9 +49,6 @@ rv32i_word read_data2_EX;
 rv32i_word pc_EX;
 logic br_en;
 rv32i_control_word control_word_EX;
-rv32i_word imm_EX;
-rv32i_word alu_mux1_out; //ALU
-rv32i_word alu_mux2_out; //ALU
 alu_ops aluop; //ALU
 logic [1:0] alumux1_sel;
 rv32i_word alumux1_out;
@@ -65,7 +62,6 @@ rv32i_word u_imm_EX;
 rv32i_word j_imm_EX;
 
 //MEM stage
-rv32i_word imm_MEM;
 rv32i_word alu_out_MEM;
 rv32i_word data_out;
 rv32i_word pc_MEM;
@@ -76,7 +72,6 @@ rv32i_word read_data2_MEM;
 logic br_en_MEM;
 
 //WB stage
-rv32i_word imm_WB;
 rv32i_word aluout_WB;
 rv32i_word data_out_WB;
 rv32i_word pc_WB;
@@ -95,17 +90,18 @@ rv32i_word u_imm_WB;
 logic true;
 assign true = 1'b1;
 
-//assigned variables for EX stage  //##############change to instruction from control word
-assign pc_offset = pc_offset_MEM + imm_EX;
-assign i_imm_EX = {{21{imm_EX[31]}}, imm_EX[30:20]};
-assign s_imm_EX = {{21{imm_EX[31]}}, imm_EX[30:25], imm_EX[11:7]};
-assign b_imm_EX = {{20{imm_EX[31]}}, imm_EX[7], imm_EX[30:25], imm_EX[11:8], 1'b0};
-assign u_imm_EX = {imm_EX[31:12], 12'h000};
-assign j_imm_EX = {{12{imm_EX[31]}}, imm_EX[19:12], imm_EX[20], imm_EX[30:21], 1'b0};
+//assigned variables for EX stage 
+assign i_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:20]};
+assign s_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:25], control_word_EX.instr[11:7]};
+assign b_imm_EX = {{20{control_word_EX.instr[31]}}, control_word_EX.instr[7], control_word_EX.instr[30:25], control_word_EX.instr[11:8], 1'b0};
+assign u_imm_EX = {control_word_EX.instr[31:12], 12'h000};
+assign j_imm_EX = {{12{control_word_EX.instr[31]}}, control_word_EX.instr[19:12], control_word_EX.instr[20], control_word_EX.instr[30:21], 1'b0};
+assign pc_offset = pc_offset_MEM + i_imm_EX;
 
 //assigned variables for WB stage
-assign u_imm_WB = {imm_WB[31:12], 12'h000};
+assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};
 
+//input/output assignments
 assign data_read = control_word_MEM.mem_read;
 assign data_write = control_word_MEM.mem_write;
 assign inst_read = 1'b1;
@@ -164,11 +160,6 @@ ir ir_IF_ID(
     .funct3(funct3),
     .funct7(funct7),
     .opcode(opcode),
-    // .i_imm(i_imm),
-    // .s_imm(s_imm),
-    // .b_imm(b_imm),
-    // .u_imm(u_imm),
-    // .j_imm(j_imm),
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd)
@@ -206,14 +197,6 @@ register read_data2_ID_EX(
     .in(rs2_out),
     .out(read_data2_EX)
 );
-
-// register imm_ID_EX(
-//     .clk(clk),
-//     .rst(rst),
-//     .load(true),
-//     .in(i_imm),
-//     .out(imm_EX)
-// );
 
 //EX/MEM
 register #(`CONTROL_WORD_SIZE) control_word_EX_MEM(
@@ -255,14 +238,6 @@ register read_data2_EX_MEM(
     .in(read_data2_EX),
     .out(read_data2_MEM)
 );
-
-// register imm_EX_MEM(
-//     .clk(clk),
-//     .rst(rst),
-//     .load(true),
-//     .in(imm_EX),
-//     .out(imm_MEM)
-// );
 
 register ALUout_EX_MEM(
     .clk(clk),
@@ -321,26 +296,20 @@ register alu_out_MEM_WB(
     .out(aluout_WB)
 );
 
-// register imm_MEM_WB(
-//     .clk(clk),
-//     .rst(rst),
-//     .load(true),
-//     .in(imm_MEM),
-//     .out(imm_WB)
-// );
 /****************************************************************************/
 
 /*******************************ALU and CMP in one module********************/
 alu ALU(
-    .aluop(aluop), //controls the operation of the ALU
-    .a(alu_mux1_out), //this is the output of the mux for input 1 of ALU
-    .b(alu_mux2_out), //this is the output of the mux for input 2 of ALU
+    .aluop(control_word_EX.alu_op), //controls the operation of the ALU
+    .a(alumux1_out), //this is the output of the mux for input 1 of ALU
+    .b(alumux2_out), //this is the output of the mux for input 2 of ALU
     .f(alu_out), //output of the ALU
     .z(br_en) //br_en output 
 );
 /*****************************************************************************/
 
 /*******************************Other modules*********************************/
+//masking for the WB stage for regfile mux
 load_masking data_mem_masking(
     .rmask(control_word_WB.rmask),
     .mdrreg_out(data_out_WB),
@@ -349,15 +318,25 @@ load_masking data_mem_masking(
     .mdr_mask_w(dm_mask_w)
 );
 
+//masking for store
 sshifter storeshifter(
-    .wmask(wmask),
+    .wmask(control_word_MEM.wmask),
     .rs2_out(read_data2_MEM),
     .mem_data_out_in(data_wdata)
 );
+
+//pcmux_sel
+always_comb begin : PC_MUX
+    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM & control_word_MEM.trap)
+        pcmux_sel = pcmux::alu_out;
+    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM & control_word_MEM.trap)
+        pcmux_sel = pcmux::alu_mod2;
+    else
+        pcmux_sel = pcmux::pc_plus4;
+end
 /*****************************************************************************/
 
 /*********************************Muxes***************************************/
-//fix this, variables are not correct to their stages.
 always_comb begin : MUXES
     //IF stage
     unique case (pcmux_sel)
