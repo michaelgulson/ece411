@@ -30,8 +30,6 @@ rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 
 //ID stage
-rv32i_word regfile_out_srca;
-rv32i_word regfile_out_srcb;
 logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
