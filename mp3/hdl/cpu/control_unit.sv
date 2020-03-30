@@ -107,7 +107,7 @@ always_comb begin
     ctrl_word.pc_mux_sel = pcmux::pc_plus4;
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
-    ctrl_word.dest = 1'b0; //<-- fix this
+    ctrl_word.dest = instr[11:7];
     ctrl_word.data_addrmux_sel = datamux::pc_out;
     ctrl_word.instr = instr;
     case (opcode)
