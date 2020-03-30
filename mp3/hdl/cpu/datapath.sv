@@ -30,7 +30,6 @@ rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 
 //ID stage
-logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
 logic [2:0] funct3;
@@ -108,7 +107,6 @@ assign funct7 = inst_rdata[31:25];
 assign opcode = rv32i_opcode'(inst_rdata[6:0]);
 assign rs1 = inst_rdata[19:15];
 assign rs2 = inst_rdata[24:20];
-assign rd = inst_rdata[11:7];
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction

@@ -18,11 +18,23 @@ source_tb tb(
 
 /************************ Signals necessary for monitor **********************/
 // This section not required until CP3
+// int timeout = 100000000;   // Feel Free to adjust the timeout value
 
 assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
-assign rvfi.halt = 0;   // Set high when you detect an infinite loop
+assign rvfi.halt = (dut.pipeline_datapath.pc_out == dut.pipeline_datapath.pcmux_out);   // Set high when you detect an infinite loop
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
+
+// Stop simulation on timeout (stall detection), halt
+always @(posedge itf.clk) begin
+    if (rvfi.halt)
+        $finish;
+    // if (timeout == 0) begin
+    //     $display("TOP: Timed out");
+    //     $finish;
+    // end
+    // timeout <= timeout - 1;
+end
 /**************************** End RVFIMON signals ****************************/
 
 /********************* Assign Shadow Memory Signals Here *********************/
