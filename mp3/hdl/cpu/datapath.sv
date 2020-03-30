@@ -311,11 +311,11 @@ sshifter storeshifter(
     .mem_data_out_in(data_wdata)
 );
 
-//pcmux_sel
+//pcmux_sel  jalr jal ???
 always_comb begin : PC_MUX
-    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM & control_word_MEM.trap)
+    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM)
         pcmux_sel = pcmux::alu_out;
-    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM & control_word_MEM.trap)
+    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM)
         pcmux_sel = pcmux::alu_mod2;
     else
         pcmux_sel = pcmux::pc_plus4;
