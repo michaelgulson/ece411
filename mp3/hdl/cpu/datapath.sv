@@ -244,7 +244,7 @@ register ALUout_EX_MEM(
     .rst(rst),
     .load(true),
     .in(alu_out),
-    .out(aluout_MEM)
+    .out(alu_out_MEM)
 );
 
 //MEM/WB
