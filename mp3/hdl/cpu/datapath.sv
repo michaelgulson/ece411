@@ -30,8 +30,6 @@ rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 
 //ID stage
-rv32i_word regfile_out_srca;
-rv32i_word regfile_out_srcb;
 logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
@@ -49,10 +47,7 @@ rv32i_word read_data2_EX;
 rv32i_word pc_EX;
 logic br_en;
 rv32i_control_word control_word_EX;
-alu_ops aluop; //ALU
-logic [1:0] alumux1_sel;
 rv32i_word alumux1_out;
-logic [2:0] alumux2_sel;
 rv32i_word alumux2_out;
 rv32i_word pc_offset;
 rv32i_word i_imm_EX;
@@ -67,7 +62,6 @@ rv32i_word data_out;
 rv32i_word pc_MEM;
 rv32i_word pc_offset_MEM;
 rv32i_control_word control_word_MEM;
-rv32i_word aluout_MEM;
 rv32i_word read_data2_MEM;
 logic br_en_MEM;
 
@@ -105,7 +99,7 @@ assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};
 assign data_read = control_word_MEM.mem_read;
 assign data_write = control_word_MEM.mem_write;
 assign inst_read = 1'b1;
-assign inst_addr = pcmux_out;
+assign inst_addr = pc_out;
 assign data_addr = data_addrmux_out;
 assign data_mbe = control_word_MEM.wmask;
 
@@ -341,8 +335,8 @@ always_comb begin : MUXES
     //IF stage
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
-        pcmux::alu_out:  pcmux_out = aluout_MEM;
-        pcmux::alu_mod2:  pcmux_out = {aluout_MEM[31:1],1'b0};
+        pcmux::alu_out:  pcmux_out = alu_out_MEM;
+        pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
         default: pcmux_out = pc_out;
     endcase
 
