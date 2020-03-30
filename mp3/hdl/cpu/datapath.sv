@@ -409,10 +409,10 @@ always_comb begin : MUXES
     endcase
 
     unique case (control_word_MEM.data_addrmux_sel)
-        datamux::pc_out:    data_addrmux_out = pc_out;
-        datamux::alu_out:  data_addrmux_out = alu_out;
+        datamux::pc_out:    data_addrmux_out = pc_MEM;
+        datamux::alu_out:  data_addrmux_out = alu_out_MEM;
         // etc.
-        default: data_addrmux_out = pc_out;
+        default: data_addrmux_out = pc_MEM;
     endcase
 
 end
