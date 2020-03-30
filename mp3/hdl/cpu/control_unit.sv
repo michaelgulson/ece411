@@ -151,7 +151,8 @@ always_comb begin
             ctrl_word.load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::i_imm;
-            ctrl_word.pc_mux_sel = pcmux::pc_plus4;    
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;  
+            ctrl_word.data_addrmux_sel = datamux::alu_out;  
             case(load_funct3)
                 lw: ctrl_word.regfile_mux_sel = regfilemux::lb;
                 lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
@@ -166,7 +167,8 @@ always_comb begin
             ctrl_word.mem_write = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::s_imm;   
-            ctrl_word.pc_mux_sel = pcmux::pc_plus4;    
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;   
+            ctrl_word.data_addrmux_sel = datamux::alu_out;
         end
         op_imm: begin
             ctrl_word.load_regfile = 1'b1;
