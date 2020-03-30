@@ -67,12 +67,11 @@ rv32i_word data_out;
 rv32i_word pc_MEM;
 rv32i_word pc_offset_MEM;
 rv32i_control_word control_word_MEM;
-rv32i_word aluout_MEM;
 rv32i_word read_data2_MEM;
 logic br_en_MEM;
 
 //WB stage
-rv32i_word aluout_WB;
+rv32i_word alu_out_WB;
 rv32i_word data_out_WB;
 rv32i_word pc_WB;
 logic br_en_WB;
@@ -293,7 +292,7 @@ register alu_out_MEM_WB(
     .rst(rst),
     .load(true),
     .in(alu_out_MEM),
-    .out(aluout_WB)
+    .out(alu_out_WB)
 );
 
 /****************************************************************************/
@@ -341,8 +340,8 @@ always_comb begin : MUXES
     //IF stage
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
-        pcmux::alu_out:  pcmux_out = aluout_MEM;
-        pcmux::alu_mod2:  pcmux_out = {aluout_MEM[31:1],1'b0};
+        pcmux::alu_out:  pcmux_out = alu_out_MEM;
+        pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
         default: pcmux_out = pc_out;
     endcase
 
@@ -365,7 +364,7 @@ always_comb begin : MUXES
 
     //WB stage
     unique case (control_word_WB.regfile_mux_sel)
-        regfilemux::alu_out:    regfilemux_out = aluout_WB;
+        regfilemux::alu_out:    regfilemux_out = alu_out_WB;
         regfilemux::br_en:      regfilemux_out = {31'b0, br_en_WB};
         regfilemux::u_imm:      regfilemux_out = u_imm_WB;
         regfilemux::lw:         regfilemux_out = data_out_WB;
@@ -384,7 +383,7 @@ always_comb begin : MUXES
                                 regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
                             end
         regfilemux::lhu:    regfilemux_out = {16'b0000000000000000, dm_mask_h[15:0]};
-        default: regfilemux_out = aluout_WB;
+        default: regfilemux_out = alu_out_WB;
     endcase
 
     unique case (control_word_MEM.data_addrmux_sel)
