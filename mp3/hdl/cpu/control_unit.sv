@@ -109,7 +109,7 @@ always_comb begin
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
     ctrl_word.dest = 1'b0; //<-- fix this
-
+    ctrl_word.data_addrmux_sel = datamux::pc_out;
     case (opcode)
         op_lui: begin
             ctrl_word.load_regfile  = 1'b1;

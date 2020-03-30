@@ -111,6 +111,7 @@ assign data_write = control_word_MEM.mem_write;
 assign inst_read = 1'b1;
 assign inst_addr = pcmux_out;
 assign data_addr = data_addrmux_out;
+assign data_mbe = control_word_MEM.wmask;
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
     .opcode(opcode),
@@ -344,6 +345,12 @@ load_masking data_mem_masking(
     .mdr_mask_h(dm_mask_h),
     .mdr_mask_b(dm_mask_b),
     .mdr_mask_w(dm_mask_w)
+);
+
+sshifter storeshifter(
+    .wmask(wmask),
+    .rs2_out(read_data2_MEM),
+    .mem_data_out_in(data_wdata)
 );
 /*****************************************************************************/
 
