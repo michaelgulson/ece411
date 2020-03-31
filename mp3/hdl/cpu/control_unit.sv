@@ -107,7 +107,7 @@ always_comb begin
     ctrl_word.pc_mux_sel = pcmux::pc_plus4;
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
-    ctrl_word.dest = 1'b0; //<-- fix this
+    ctrl_word.dest = instr[11:7];
     ctrl_word.data_addrmux_sel = datamux::pc_out;
     ctrl_word.instr = instr;
     case (opcode)
@@ -141,8 +141,8 @@ always_comb begin
         end
         op_br: begin
             ctrl_word.alu_op = alu_add_beq;
-            ctrl_word.alu_muxsel1 = alumux::pc_out;
-            ctrl_word.alu_muxsel2 = alumux::b_imm;
+            ctrl_word.alu_muxsel1 = alumux::rs1_out;
+            ctrl_word.alu_muxsel2 = alumux::rs2_out;
             ctrl_word.pc_mux_sel = pcmux::alu_out;    
         end
         op_load: begin
@@ -154,7 +154,7 @@ always_comb begin
             ctrl_word.pc_mux_sel = pcmux::pc_plus4;  
             ctrl_word.data_addrmux_sel = datamux::alu_out;  
             case(load_funct3)
-                lw: ctrl_word.regfile_mux_sel = regfilemux::lb;
+                lw: ctrl_word.regfile_mux_sel = regfilemux::lw;
                 lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
                 lhu: ctrl_word.regfile_mux_sel = regfilemux::lhu;
                 lb:ctrl_word.regfile_mux_sel = regfilemux::lb;

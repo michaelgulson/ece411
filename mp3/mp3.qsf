@@ -72,7 +72,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/regfile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/pc_reg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/load_masking.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/ir.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/datapath.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/control_unit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cpu/alu.sv

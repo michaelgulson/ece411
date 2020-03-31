@@ -30,7 +30,6 @@ rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 
 //ID stage
-logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
 logic [2:0] funct3;
@@ -47,10 +46,7 @@ rv32i_word read_data2_EX;
 rv32i_word pc_EX;
 logic br_en;
 rv32i_control_word control_word_EX;
-alu_ops aluop; //ALU
-logic [1:0] alumux1_sel;
 rv32i_word alumux1_out;
-logic [2:0] alumux2_sel;
 rv32i_word alumux2_out;
 rv32i_word pc_offset;
 rv32i_word i_imm_EX;
@@ -61,7 +57,6 @@ rv32i_word j_imm_EX;
 
 //MEM stage
 rv32i_word alu_out_MEM;
-rv32i_word data_out;
 rv32i_word pc_MEM;
 rv32i_word pc_offset_MEM;
 rv32i_control_word control_word_MEM;
@@ -93,7 +88,7 @@ assign s_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:25]
 assign b_imm_EX = {{20{control_word_EX.instr[31]}}, control_word_EX.instr[7], control_word_EX.instr[30:25], control_word_EX.instr[11:8], 1'b0};
 assign u_imm_EX = {control_word_EX.instr[31:12], 12'h000};
 assign j_imm_EX = {{12{control_word_EX.instr[31]}}, control_word_EX.instr[19:12], control_word_EX.instr[20], control_word_EX.instr[30:21], 1'b0};
-assign pc_offset = pc_offset_MEM + i_imm_EX;
+assign pc_offset = pc_EX + b_imm_EX;
 
 //assigned variables for WB stage
 assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};
@@ -102,9 +97,16 @@ assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};
 assign data_read = control_word_MEM.mem_read;
 assign data_write = control_word_MEM.mem_write;
 assign inst_read = 1'b1;
-assign inst_addr = pcmux_out;
+assign inst_addr = pc_out;
 assign data_addr = data_addrmux_out;
 assign data_mbe = control_word_MEM.wmask;
+
+//assigned variables for IF stage
+assign funct3 = inst_rdata[14:12];
+assign funct7 = inst_rdata[31:25];
+assign opcode = rv32i_opcode'(inst_rdata[6:0]);
+assign rs1 = inst_rdata[19:15];
+assign rs2 = inst_rdata[24:20];
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
@@ -147,19 +149,6 @@ register pc_IF_ID(
     .load(true),
     .in(pc_out),
     .out(pc_ID)
-);
-
-ir ir_IF_ID(
-    .clk(clk),
-    .rst(rst),
-    .load(true),
-    .in(inst_rdata),
-    .funct3(funct3),
-    .funct7(funct7),
-    .opcode(opcode),
-    .rs1(rs1),
-    .rs2(rs2),
-    .rd(rd)
 );
 
 //ID/EX
@@ -322,11 +311,11 @@ sshifter storeshifter(
     .mem_data_out_in(data_wdata)
 );
 
-//pcmux_sel
+//pcmux_sel  jalr jal ???
 always_comb begin : PC_MUX
-    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM & control_word_MEM.trap)
+    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM)
         pcmux_sel = pcmux::alu_out;
-    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM & control_word_MEM.trap)
+    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM)
         pcmux_sel = pcmux::alu_mod2;
     else
         pcmux_sel = pcmux::pc_plus4;
@@ -338,8 +327,8 @@ always_comb begin : MUXES
     //IF stage
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
-        pcmux::alu_out:  pcmux_out = alu_out_MEM;
-        pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
+        pcmux::alu_out:  pcmux_out = pc_offset_MEM;
+        pcmux::alu_mod2:  pcmux_out = {pc_offset_MEM[31:1],1'b0};
         default: pcmux_out = pc_out;
     endcase
 
