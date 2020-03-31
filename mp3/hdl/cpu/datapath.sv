@@ -88,7 +88,7 @@ assign s_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:25]
 assign b_imm_EX = {{20{control_word_EX.instr[31]}}, control_word_EX.instr[7], control_word_EX.instr[30:25], control_word_EX.instr[11:8], 1'b0};
 assign u_imm_EX = {control_word_EX.instr[31:12], 12'h000};
 assign j_imm_EX = {{12{control_word_EX.instr[31]}}, control_word_EX.instr[19:12], control_word_EX.instr[20], control_word_EX.instr[30:21], 1'b0};
-assign pc_offset = pc_offset_MEM + i_imm_EX;
+assign pc_offset = pc_EX + b_imm_EX;
 
 //assigned variables for WB stage
 assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};

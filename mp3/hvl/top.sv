@@ -21,7 +21,8 @@ source_tb tb(
 // int timeout = 100000000;   // Feel Free to adjust the timeout value
 
 assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
-assign rvfi.halt = (dut.pipeline_datapath.pc_out == dut.pipeline_datapath.pcmux_out);   // Set high when you detect an infinite loop
+assign rvfi.halt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
+                    (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
