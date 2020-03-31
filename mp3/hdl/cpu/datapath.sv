@@ -327,8 +327,8 @@ always_comb begin : MUXES
     //IF stage
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
-        pcmux::alu_out:  pcmux_out = alu_out_MEM;
-        pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
+        pcmux::alu_out:  pcmux_out = pc_offset_MEM;
+        pcmux::alu_mod2:  pcmux_out = {pc_offset_MEM[31:1],1'b0};
         default: pcmux_out = pc_out;
     endcase
 
