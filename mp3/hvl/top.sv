@@ -19,17 +19,32 @@ source_tb tb(
 /************************ Signals necessary for monitor **********************/
 // This section not required until CP3
 // int timeout = 100000000;   // Feel Free to adjust the timeout value
+int halting = 0;
+int count = 0;
+logic prehalt;
+int delay = 5;
 
 assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
-assign rvfi.halt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
+assign prehalt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
                     (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
 // Stop simulation on timeout (stall detection), halt
 always @(posedge itf.clk) begin
-    if (rvfi.halt)
+    if (prehalt) begin
+        halting <= 1;
+        // $display("1");
+    end
+    if (halting == 1) begin
+        count <= count + 1;
+        // $display("2");
+    end
+    if (count == delay) begin
+        // $display("3");
+        rvfi.halt <= 1;
         $finish;
+    end
     // if (timeout == 0) begin
     //     $display("TOP: Timed out");
     //     $finish;
