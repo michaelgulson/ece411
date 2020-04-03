@@ -1,7 +1,7 @@
 module arbiter_control
 (
-    intput clk, 
-    input rst, 
+    input logic clk, 
+    input logic rst, 
     input logic mem_read_i, 
     input logic mem_read_d,
     input logic mem_resp, 
