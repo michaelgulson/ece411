@@ -134,8 +134,14 @@ begin: next_state_logic
     endcase
 end
 
-always_ff @(posedge clk)
+always_ff@(posedge clk)
 begin: next_state_assignment
-	state <= next_state;	 
+    if(rst) 
+    begin
+        state <= HIT;
+    end
+    else
+        state <= next_state;
 end
+
 endmodule : cache_control
