@@ -6,6 +6,7 @@ module arbiter(
     input logic mem_read_d,
     input logic mem_write_d,
     input logic pmem_resp, 
+    input logic [255:0] pmem_rdata,
     input logic [255:0] wdata_i,
     input logic [255:0] wdata_d,
     input logic [31:0] mem_addr_i,

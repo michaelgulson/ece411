@@ -1,5 +1,5 @@
 //insert top level for mp3 here
-// import rv32i_types::*;
+import rv32i_types::*;
 
 module mp3
 (
@@ -13,6 +13,43 @@ module mp3
     output [63:0] pmem_wdata
 );
 
+logic [255:0] pmem_rdata256;
+logic [255:0] pmem_wdata256;
+logic pmem_readin;
+logic pmem_writein;
+logic pmem_wdatain;
+rv32i_word pmem_addressin;
+logic pmem_resp_in;
+logic cacheline_adaptor_resp;
+logic mem_resp;
+rv32i_word mem_rdata;
+logic mem_read;
+logic mem_write;
+rv32i_word mem_address;
+rv32i_word mem_wdata;
+logic [31:0] mem_byte_enable256;
+logic inst_read;
+rv32i_word inst_addr;
+logic inst_resp;
+rv32i_word inst_rdata;
+logic data_read;
+logic data_write;
+rv32i_word data_wdata;
+logic [3:0] data_mbe;
+logic data_resp;
+rv32i_word data_addr;
+rv32i_word data_rdata;
+logic [255:0] inst_rdata_arb;
+logic mem_resp_i;
+logic [255:0] wdata_i;
+logic mem_read_i;
+logic mem_write_i;
+rv32i_word mem_addr_i;
+logic [255:0] data_rdata_arb;
+logic [255:0] wdata_d;
+logic mem_read_d;
+logic mem_write_d;
+rv32i_word mem_addr_d;
 
 datapath pipeline_datapath(
     .clk(clk),
@@ -42,8 +79,8 @@ cache i_cache(
     .mem_read(inst_read),
     .mem_write(1'b0),
     .pmem_resp(mem_resp_i),
-    .mem_wdata(32'bxxxx), //data to the memory
-    .mem_byte_enable(xxxx), //masking, which byte in mem written(@mem write)
+    .mem_wdata(32'd0), //data to the memory
+    .mem_byte_enable(4'b000), //masking, which byte in mem written(@mem write)
     .pmem_wdata(wdata_i),
     .mem_rdata(inst_rdata), 
     .pmem_read(mem_read_i), 
@@ -58,7 +95,7 @@ cache d_cache(
     .mem_address(data_addr),
     .pmem_rdata(data_rdata_arb),
     .mem_read(data_read),
-    .mem_write(1'b0),
+    .mem_write(data_write),
     .pmem_resp(mem_resp_d),
     .mem_wdata(data_wdata), //data to the memory
     .mem_byte_enable(data_mbe), //masking, which byte in mem written(@mem write)
@@ -67,7 +104,7 @@ cache d_cache(
     .pmem_read(mem_read_d), 
     .pmem_write(mem_write_d),
     .mem_resp(data_resp),
-    .pmem_address(mem_addr_i)
+    .pmem_address(mem_addr_d)
 );
 
 
@@ -75,9 +112,11 @@ arbiter arbiter(
     .clk(clk),
     .rst(rst),
     .mem_read_i(mem_read_i), 
+    .mem_write_i(mem_write_i),
     .mem_read_d(mem_read_d),
     .mem_write_d(mem_write_d),
     .pmem_resp(cacheline_adapter_resp), 
+    .pmem_rdata(pmem_rdata256),
     .wdata_i(wdata_i),
     .wdata_d(wdata_d),
     .mem_addr_i(mem_addr_i),
@@ -87,7 +126,7 @@ arbiter arbiter(
     .pmem_write(pmem_writein),
     .mem_resp_i(mem_resp_i),
     .mem_resp_d(mem_resp_d),
-    .pmem_wdata(pmem_writein),
+    .pmem_wdata(pmem_wdata256),
     .inst_rdata(inst_rdata_arb),
     .data_rdata(data_rdata_arb),
     .pmem_addr(pmem_addressin)
