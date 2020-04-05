@@ -40,7 +40,8 @@ module cache #(
     logic data_read;
     logic load_data;
 
-cache_control control
+//TODO: check the control
+l2_control control
 (
     .*
 );

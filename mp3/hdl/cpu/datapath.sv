@@ -315,9 +315,9 @@ sshifter storeshifter(
 
 //pcmux_sel  jalr jal ???
 always_comb begin : PC_MUX
-    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM||(control_word_MEM.instr==op_jal))
+    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h6f))
         pcmux_sel = pcmux::alu_out;
-    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM||(control_word_MEM.instr==op_jalr))
+    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h67))
         pcmux_sel = pcmux::alu_mod2;
     else
         pcmux_sel = pcmux::pc_plus4;
@@ -330,7 +330,7 @@ always_comb begin : MUXES
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out:  pcmux_out = pc_offset_MEM;
-        pcmux::alu_mod2:  pcmux_out = {alu_out_WB[31:1],1'b0};
+        pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
         default: pcmux_out = pc_out;
     endcase
 

@@ -73,6 +73,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE hdl/arbiter/arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/l2_control.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/data_array.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/cacheline_adaptor.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/cache_datapath.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/cache_control.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/cache.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/caches/bus_adapter.sv
