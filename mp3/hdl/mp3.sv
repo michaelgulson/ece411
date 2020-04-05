@@ -3,23 +3,14 @@
 
 module mp3
 (
-    input logic clk,
-    input logic rst,
-
-    /* I Cache Ports */
-    output logic inst_read,
-    output logic [31:0] inst_addr,
-    input logic inst_resp,
-    input logic [31:0] inst_rdata,
-
-    /* D Cache Ports */
-    output logic data_read,
-    output logic data_write,
-    output logic [3:0] data_mbe,
-    output logic [31:0] data_addr,
-    output logic [31:0] data_wdata,
-    input logic data_resp,
-    input logic [31:0] data_rdata
+    input clk,
+    input rst,
+    input pmem_resp,
+    input [63:0] pmem_rdata,
+    output logic pmem_read,
+    output logic pmem_write,
+    output rv32i_word pmem_address,
+    output [63:0] pmem_wdata
 );
 
 
@@ -47,23 +38,79 @@ cache i_cache(
     .clk(clk), 
     .rst(rst), 
     .mem_address(inst_addr),
-    .pmem_rdata,
+    .pmem_rdata(inst_rdata_arb),
     .mem_read(inst_read),
     .mem_write(1'b0),
     .pmem_resp(mem_resp_i),
     .mem_wdata(32'bxxxx), //data to the memory
     .mem_byte_enable(xxxx), //masking, which byte in mem written(@mem write)
-    .pmem_wdata(),
-    .mem_rdata(data_), 
-    .pmem_read, 
-    .pmem_write,
-    .mem_resp,
-    .pmem_address
+    .pmem_wdata(wdata_i),
+    .mem_rdata(inst_rdata), 
+    .pmem_read(mem_read_i), 
+    .pmem_write(mem_write_i),
+    .mem_resp(inst_resp),
+    .pmem_address(mem_addr_i)
 );
 
-cache d_cache(.*);
+cache d_cache(    
+    .clk(clk), 
+    .rst(rst), 
+    .mem_address(data_addr),
+    .pmem_rdata(data_rdata_arb),
+    .mem_read(data_read),
+    .mem_write(1'b0),
+    .pmem_resp(mem_resp_d),
+    .mem_wdata(data_wdata), //data to the memory
+    .mem_byte_enable(data_mbe), //masking, which byte in mem written(@mem write)
+    .pmem_wdata(wdata_d),
+    .mem_rdata(data_rdata), 
+    .pmem_read(mem_read_d), 
+    .pmem_write(mem_write_d),
+    .mem_resp(data_resp),
+    .pmem_address(mem_addr_i)
+);
 
-arbiter arbiter(.*);
 
-cacheline_adapter cacheline_adapter(.*);
+arbiter arbiter(   
+    .clk(clk),
+    .rst(rst),
+    .mem_read_i(mem_read_i), 
+    .mem_read_d(mem_read_d),
+    .mem_write_d(mem_write_d),
+    .pmem_resp(cacheline_adapter_resp), 
+    .wdata_i(wdata_i),
+    .wdata_d(wdata_d),
+    .mem_addr_i(mem_addr_i),
+    .mem_addr_d(mem_addr_d),
+
+    .pmem_read(pmem_readin),
+    .pmem_write(pmem_writein),
+    .mem_resp_i(mem_resp_i),
+    .mem_resp_d(mem_resp_d),
+    .pmem_wdata(pmem_writein),
+    .inst_rdata(inst_rdata_arb),
+    .data_rdata(data_rdata_arb),
+    .pmem_addr(pmem_addressin)
+);
+
+cacheline_adapter cacheline_adapter(
+  .clk(clk),
+   .reset_n(rst),
+
+    // Port to LLC (Lowest Level Cache)
+    .line_i(pmem_wdata256),
+   .line_o(pmem_rdata256),
+    .address_i(pmem_addressin),
+    .read_i(pmem_readin),
+    .write_i(pmem_writein),
+    .resp_o(cacheline_adaptor_resp),
+
+    // Port to memory
+    .burst_i(pmem_rdata),
+    .burst_o(pmem_wdata),
+    .address_o(pmem_address),
+    .read_o(pmem_read),
+    .write_o(pmem_write),
+    .resp_i(pmem_resp)
+);
 endmodule: mp3
