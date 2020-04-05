@@ -4,6 +4,7 @@ module arbiter_control
     input logic rst, 
     input logic mem_read_i, 
     input logic mem_read_d,
+    input logic mem_write_d,
     input logic mem_resp, 
 
     output logic mem_read, 

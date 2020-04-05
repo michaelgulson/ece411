@@ -160,8 +160,7 @@ begin
 end 
 
  
-data_array line[1:0]
-(
+data_array line(
     .read(data_read),
     .write_en({line_1, line_0}),
     .rindex(set_idx),
@@ -171,7 +170,7 @@ data_array line[1:0]
     .*
 );
 
-array #(.width(s_tag)) tag[1:0](
+array #(.width(s_tag)) tag (
     .read(data_read),
     .load({tl_1, tl_0}),
     .rindex(set_idx),
@@ -181,7 +180,7 @@ array #(.width(s_tag)) tag[1:0](
     .*
 );
 
-array valid_array [1:0](
+array valid_array(
     .read(data_read),
     .load({vl_1, vl_0}),
     .rindex(set_idx),
@@ -191,7 +190,7 @@ array valid_array [1:0](
     .*
 );
 
-array dirty_array[1:0](
+array dirty_array(
     .read(data_read),
     .load({dl_1, dl_0}),
     .rindex(set_idx),
@@ -222,22 +221,24 @@ mux2toParamOut #(.width(s_line)) data_mux_in(
 
 endmodule : l1cache
 
-module mux2toParamOut #(parameter width = 32)(
-	input logic select, 
-	input logic [width-1:0] in1, in2,
-	output logic [width-1:0] out
-);
+//already delcared in cache_datapath
 
-	always_comb
-	begin
-		case(select)
-			1'd0:
-				out = in1;
-			1'd1:
-				out = in2; 
-			default:
-				out = in1;		
-		endcase
-	end
+// module mux2toParamOut #(parameter width = 32)(
+// 	input logic select, 
+// 	input logic [width-1:0] in1, in2,
+// 	output logic [width-1:0] out
+// );
 
-endmodule : mux2toParamOut
+// 	always_comb
+// 	begin
+// 		case(select)
+// 			1'd0:
+// 				out = in1;
+// 			1'd1:
+// 				out = in2; 
+// 			default:
+// 				out = in1;		
+// 		endcase
+// 	end
+
+// endmodule : mux2toParamOut

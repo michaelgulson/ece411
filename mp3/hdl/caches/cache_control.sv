@@ -48,32 +48,32 @@ endfunction
 
 always_comb
 begin: state_actions
-    set_defaults()
+    set_defaults();
     unique case(state)
-            LOAD:
-			begin
-                set_valid = pmem_resp;
-				load_tag = pmem_resp;
-                data_read = (mem_read || mem_write);
-                load_data = pmem_resp;
-                pmem_read = !(pmem_resp);
-			end
-            STORE:
-			begin
-                data_read = (mem_read || mem_write);
-				reset_dirty = pmem_resp;
-                pmem_read = pmem_resp;                
-                pmem_write= !(pmem_resp);
-			end
-            HIT:
-			begin
-                data_read = (mem_read || mem_write);
-				mem_resp = (mem_read || mem_write) && hit;
-				set_lru = (mem_read || mem_write) && hit;
-				set_dirty = mem_write && hit;
-				load_data = mem_write && hit;
-			end
-            default:;
+        LOAD:
+        begin
+            set_valid = pmem_resp;
+            load_tag = pmem_resp;
+            data_read = (mem_read || mem_write);
+            load_data = pmem_resp;
+            pmem_read = !(pmem_resp);
+        end
+        STORE:
+        begin
+            data_read = (mem_read || mem_write);
+            reset_dirty = pmem_resp;
+            pmem_read = pmem_resp;                
+            pmem_write= !(pmem_resp);
+        end
+        HIT:
+        begin
+            data_read = (mem_read || mem_write);
+            mem_resp = (mem_read || mem_write) && hit;
+            set_lru = (mem_read || mem_write) && hit;
+            set_dirty = mem_write && hit;
+            load_data = mem_write && hit;
+        end
+        default:;
     endcase
 end
 
@@ -144,4 +144,4 @@ begin: next_state_assignment
         state <= next_state;
 end
 
-endmodule : cache_control
+endmodule
