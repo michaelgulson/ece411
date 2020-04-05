@@ -54,6 +54,7 @@ rv32i_word s_imm_EX;
 rv32i_word b_imm_EX;
 rv32i_word u_imm_EX;
 rv32i_word j_imm_EX;
+rv32i_opcode opcode_EX;
 
 //MEM stage
 rv32i_word alu_out_MEM;
@@ -88,7 +89,7 @@ assign s_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:25]
 assign b_imm_EX = {{20{control_word_EX.instr[31]}}, control_word_EX.instr[7], control_word_EX.instr[30:25], control_word_EX.instr[11:8], 1'b0};
 assign u_imm_EX = {control_word_EX.instr[31:12], 12'h000};
 assign j_imm_EX = {{12{control_word_EX.instr[31]}}, control_word_EX.instr[19:12], control_word_EX.instr[20], control_word_EX.instr[30:21], 1'b0};
-assign pc_offset = pc_EX + b_imm_EX;
+//assign pc_offset = pc_EX + b_imm_EX;
 
 //assigned variables for WB stage
 assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};
@@ -107,6 +108,7 @@ assign funct7 = inst_rdata[31:25];
 assign opcode = rv32i_opcode'(inst_rdata[6:0]);
 assign rs1 = inst_rdata[19:15];
 assign rs2 = inst_rdata[24:20];
+assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
@@ -313,9 +315,9 @@ sshifter storeshifter(
 
 //pcmux_sel  jalr jal ???
 always_comb begin : PC_MUX
-    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM)
+    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & br_en_MEM||(control_word_MEM.instr==op_jal))
         pcmux_sel = pcmux::alu_out;
-    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM)
+    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & br_en_MEM||(control_word_MEM.instr==op_jalr))
         pcmux_sel = pcmux::alu_mod2;
     else
         pcmux_sel = pcmux::pc_plus4;
@@ -328,7 +330,7 @@ always_comb begin : MUXES
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out:  pcmux_out = pc_offset_MEM;
-        pcmux::alu_mod2:  pcmux_out = {pc_offset_MEM[31:1],1'b0};
+        pcmux::alu_mod2:  pcmux_out = {alu_out_WB[31:1],1'b0};
         default: pcmux_out = pc_out;
     endcase
 
@@ -379,6 +381,15 @@ always_comb begin : MUXES
         // etc.
         default: data_addrmux_out = pc_MEM;
     endcase
+
+    unique case (opcode_EX)
+        op_br:     pc_offset = pc_EX + b_imm_EX; 
+        op_jal:    pc_offset = pc_EX + j_imm_EX;
+        op_jalr:   pc_offset = pc_EX + j_imm_EX; 
+
+        default:   pc_offset = pc_EX + b_imm_EX;
+    endcase
+
 
 end
 /*****************************************************************************/

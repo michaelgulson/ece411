@@ -1,11 +1,14 @@
+import rv32i_types::*;
+
 module arbiter_control
 (
     input logic clk, 
     input logic rst, 
     input logic mem_read_i, 
+    input logic mem_write_i,   
     input logic mem_read_d,
-    input logic mem_resp, 
-
+    input logic mem_write_d,
+    input logic mem_resp,
     output logic mem_read, 
     output logic mem_write,
     output logic mem_resp_i, 
@@ -38,6 +41,7 @@ begin: state_actions
         begin
             mem_resp_i = mem_resp;
             mem_read = mem_read_i;
+            mem_write = mem_write_i;
         end
         D_CACHE:
         begin
@@ -55,7 +59,7 @@ begin : next_state_logic
     unique case (state)
         IDLE: 
         begin
-            if(mem_read_i)
+            if(mem_read_i||mem_write_i)
             begin
                 next_state = I_CACHE;
             end
@@ -70,19 +74,22 @@ begin : next_state_logic
         end
         I_CACHE:
         begin
-            if(mem_resp)
+            if(mem_resp&&(!(mem_read_d||mem_write_d)))
             begin
                 next_state = IDLE;
             end
+            else if(mem_resp&&(mem_read_d||mem_write_d))
+            begin
+                next_state = D_CACHE; //wait for resp
+            end
             else
             begin
-                next_state = I_CACHE; //wait for resp
+                next_state = I_CACHE;
             end
-             
         end
         D_CACHE:
         begin
-            if(mem_resp && !(mem_read_d) && !(mem_write_d))
+            if(mem_resp)
             begin
                 next_state = IDLE;
             end

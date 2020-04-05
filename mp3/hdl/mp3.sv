@@ -3,7 +3,7 @@
 
 module mp3
 (
-    input clk,
+    input logic clk,
     input logic rst,
 
     /* I Cache Ports */
@@ -21,6 +21,7 @@ module mp3
     input logic data_resp,
     input logic [31:0] data_rdata
 );
+
 
 datapath pipeline_datapath(
     .clk(clk),
@@ -42,4 +43,27 @@ datapath pipeline_datapath(
     .data_rdata(data_rdata)
 );
 
+cache i_cache(
+    .clk(clk), 
+    .rst(rst), 
+    .mem_address(inst_addr),
+    .pmem_rdata,
+    .mem_read(inst_read),
+    .mem_write(1'b0),
+    .pmem_resp(mem_resp_i),
+    .mem_wdata(32'bxxxx), //data to the memory
+    .mem_byte_enable(xxxx), //masking, which byte in mem written(@mem write)
+    .pmem_wdata(),
+    .mem_rdata(data_), 
+    .pmem_read, 
+    .pmem_write,
+    .mem_resp,
+    .pmem_address
+);
+
+cache d_cache(.*);
+
+arbiter arbiter(.*);
+
+cacheline_adapter cacheline_adapter(.*);
 endmodule: mp3
