@@ -1,6 +1,6 @@
 //cache_datapath
 import rv32i_types::*;
-module l1cache #(
+module cache_datapath #(
     parameter s_offset = 5,
     parameter s_index  = 3,
     parameter s_tag    = 32 - s_offset - s_index,
