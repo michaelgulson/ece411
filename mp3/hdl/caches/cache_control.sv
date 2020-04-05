@@ -1,4 +1,4 @@
-module l2_control #(
+module cache_control #(
     parameter s_offset = 5,
     parameter s_index  = 3,
     parameter s_tag    = 32 - s_offset - s_index,
@@ -48,7 +48,7 @@ endfunction
 
 always_comb
 begin: state_actions
-    set_defaults()
+    set_defaults();
     unique case(state)
             LOAD:
 			begin
@@ -59,12 +59,12 @@ begin: state_actions
                 pmem_read = !(pmem_resp);
 			end
             STORE:
-			begin
+				begin
                 data_read = (mem_read || mem_write);
-				reset_dirty = pmem_resp;
+					 reset_dirty = pmem_resp;
                 pmem_read = pmem_resp;                
                 pmem_write= !(pmem_resp);
-			end
+				end
             HIT:
 			begin
                 data_read = (mem_read || mem_write);
