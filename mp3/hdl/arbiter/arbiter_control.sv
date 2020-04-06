@@ -4,8 +4,7 @@ module arbiter_control
 (
     input logic clk, 
     input logic rst, 
-    input logic mem_read_i, 
-    input logic mem_write_i,   
+    input logic mem_read_i,  
     input logic mem_read_d,
     input logic mem_write_d,
     input logic pmem_resp,
@@ -41,7 +40,6 @@ begin: state_actions
         begin
             mem_resp_i = pmem_resp;
             pmem_read = mem_read_i;
-            pmem_write = mem_write_i;
         end
         D_CACHE:
         begin
@@ -59,7 +57,7 @@ begin : next_state_logic
     unique case (state)
         IDLE: 
         begin
-            if(mem_read_i||mem_write_i)
+            if(mem_read_i)
             begin
                 next_state = I_CACHE;
             end

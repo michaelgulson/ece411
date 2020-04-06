@@ -2,14 +2,12 @@ module arbiter_datapath(
     input logic mux_sel,
     input logic [31:0] mem_addr_i,
     input logic [31:0] mem_addr_d,
-    input logic [255:0] wdata_i,
-    input logic [255:0] wdata_d,
     input logic [255:0] pmem_rdata,
     output logic [31:0] pmem_addr,
     output logic [255:0] inst_rdata,
-    output logic [255:0] data_rdata,
-    output logic [255:0] pmem_wdata
+    output logic [255:0] data_rdata
 );
+
 
 always_comb
 begin
@@ -18,15 +16,14 @@ begin
         begin
             pmem_addr = mem_addr_i;
             inst_rdata = pmem_rdata;
-				data_rdata = 256'b0; // or pmem_rdata?
-            pmem_wdata = wdata_i;
+            data_rdata = 256'd0;
         end
         1'd1:
         begin
             pmem_addr = mem_addr_d;
 				inst_rdata = 256b'0; // or pmem_rdata?
             data_rdata = pmem_rdata;
-            pmem_wdata = wdata_d;
+            inst_rdata = 256'd0;
         end
         default: 
 		  begin
