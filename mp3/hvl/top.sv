@@ -55,6 +55,18 @@ end
 
 /********************* Assign Shadow Memory Signals Here *********************/
 // This section not required until CP2
+//signals already hooked up in dut using interface
+// assign itf.inst_read = NA;
+// assign itf.inst_addr = NA;
+// assign itf.inst_data = NA;
+// assign itf.inst_resp = NA;
+// assign itf.data_read = NA;
+// assign itf.data_write = NA;
+// assign itf.data_addr = NA;
+// assign itf.data_rdata = NA;
+// assign itf.data_wdata = NA;
+// assign itf.data_resp = NA;
+// assign itf.data_mbe = NA;
 /*********************** End Shadow Memory Assignments ***********************/
 
 // Set this to the proper value

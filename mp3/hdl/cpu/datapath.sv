@@ -313,7 +313,7 @@ sshifter storeshifter(
     .mem_data_out_in(data_wdata)
 );
 
-//pcmux_sel  jalr jal ???
+//pcmux_sel
 always_comb begin : PC_MUX
     if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h6f))
         pcmux_sel = pcmux::alu_out;
