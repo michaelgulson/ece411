@@ -128,7 +128,7 @@ arbiter arbiter(
     .pmem_addr(pmem_addressin)
 );
 
-cacheline_adapter cacheline_adapter(
+cacheline_adaptor cacheline_adaptor(
   .clk(clk),
    .reset_n(rst),
 

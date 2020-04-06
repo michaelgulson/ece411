@@ -28,9 +28,8 @@ begin
         default: 
 		  begin
             pmem_addr = mem_addr_i; 
-			inst_rdata = pmem_rdata; // or 256'b0?
-			data_rdata = pmem_rdata; // or 0?
-			pmem_wdata = wdata_d; // or 0?
+				inst_rdata = pmem_rdata; // or 256'b0?
+				data_rdata = pmem_rdata; // or 0?
 		  end
     endcase
 end
