@@ -1,10 +1,10 @@
-import rv32i_types::*;
+//import rv32i_types::*;
 
 module arbiter_control
 (
     input logic clk, 
     input logic rst, 
-    input logic mem_read_i,  
+    input logic mem_read_i, 
     input logic mem_read_d,
     input logic mem_write_d,
     input logic pmem_resp,

@@ -51,6 +51,7 @@ logic [255:0] wdata_d;
 logic mem_read_d;
 logic mem_write_d;
 rv32i_word mem_addr_d;
+logic mem_resp_d;
 
 datapath pipeline_datapath(
     .clk(clk),
@@ -115,7 +116,7 @@ arbiter arbiter(
     .mem_read_i(mem_read_i), 
     .mem_read_d(mem_read_d),
     .mem_write_d(mem_write_d),
-    .pmem_resp(cacheline_adapter_resp), 
+    .pmem_resp(cacheline_adaptor_resp), 
     .pmem_rdata(pmem_rdata256),
     .mem_addr_i(mem_addr_i),
     .mem_addr_d(mem_addr_d),
