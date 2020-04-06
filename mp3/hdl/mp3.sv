@@ -99,7 +99,7 @@ cache d_cache(
     .pmem_resp(mem_resp_d),
     .mem_wdata(data_wdata), //data to the memory
     .mem_byte_enable(data_mbe), //masking, which byte in mem written(@mem write)
-    .pmem_wdata(wdata_d),
+    .pmem_wdata(pmem_wdata256),
     .mem_rdata(data_rdata), 
     .pmem_read(mem_read_d), 
     .pmem_write(mem_write_d),
@@ -112,13 +112,10 @@ arbiter arbiter(
     .clk(clk),
     .rst(rst),
     .mem_read_i(mem_read_i), 
-    .mem_write_i(mem_write_i),
     .mem_read_d(mem_read_d),
     .mem_write_d(mem_write_d),
     .pmem_resp(cacheline_adapter_resp), 
     .pmem_rdata(pmem_rdata256),
-    .wdata_i(wdata_i),
-    .wdata_d(wdata_d),
     .mem_addr_i(mem_addr_i),
     .mem_addr_d(mem_addr_d),
 
@@ -126,7 +123,6 @@ arbiter arbiter(
     .pmem_write(pmem_writein),
     .mem_resp_i(mem_resp_i),
     .mem_resp_d(mem_resp_d),
-    .pmem_wdata(pmem_wdata256),
     .inst_rdata(inst_rdata_arb),
     .data_rdata(data_rdata_arb),
     .pmem_addr(pmem_addressin)
