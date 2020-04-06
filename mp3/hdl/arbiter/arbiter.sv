@@ -20,6 +20,9 @@ module arbiter(
     output logic [31:0] mem_addr
 );
     logic mux_sel;
+	 logic wdata_i;//check
+	 logic wdata; //check
+	 logic mem_write_i; //check
 
 arbiter_datapath arbiter_datapath(
     .*
