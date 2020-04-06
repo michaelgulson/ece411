@@ -78,7 +78,6 @@ assign tl_1 = (load_tag && lru_out);
 assign vl_0 = (set_valid && !lru_out);
 assign vl_1  = (set_valid && lru_out);
 
-
 assign pmem_wdata = (miss)? ((lru_out)? data_array_out1 : data_array_out0) : ((h0)? data_array_out0: data_array_out1);
 
 assign mem_rdata256 = pmem_wdata;
@@ -160,44 +159,85 @@ begin
 end 
 
  
-data_array line
+data_array line_array_1
 (
     .read(data_read),
-    .write_en({line_1, line_0}),
+    .write_en(line_1),
     .rindex(set_idx),
     .windex(set_idx),
-    .datain({data_mux_out, data_mux_out}),
-    .dataout({data_array_out1, data_array_out0}),
+    .datain(data_mux_out),
+    .dataout(data_array_out1),
     .*
 );
 
-array #(.width(s_tag)) tag(
+data_array line_array_0
+(
     .read(data_read),
-    .load({tl_1, tl_0}),
+    .write_en(line_0),
+    .rindex(set_idx),
+    .windex(set_idx),
+    .datain(data_mux_out),
+    .dataout(data_array_out0),
+    .*
+);
+
+array #(.width(s_tag)) tag_array_0(
+    .read(data_read),
+    .load(tl_0),
     .rindex(set_idx),
     .windex(set_idx),
     .datain(set_tag),
-    .dataout({t1,t0}),
+    .dataout(t0),
     .*
 );
 
-array valid_array (
+array #(.width(s_tag)) tag_array_1(
     .read(data_read),
-    .load({vl_1, vl_0}),
+    .load(tl_1),
+    .rindex(set_idx),
+    .windex(set_idx),
+    .datain(set_tag),
+    .dataout(t1),
+    .*
+);
+
+array valid_array_0 (
+    .read(data_read),
+    .load(vl_0),
     .rindex(set_idx),
     .windex(set_idx),
     .datain(1'b1),
-    .dataout({v1, v0}),
+    .dataout(v0),
     .*
 );
 
-array dirty_array(
+array valid_array_1 (
     .read(data_read),
-    .load({dl_1, dl_0}),
+    .load(vl_1),
+    .rindex(set_idx),
+    .windex(set_idx),
+    .datain(1'b1),
+    .dataout(v1),
+    .*
+);
+
+array dirty_array_0(
+    .read(data_read),
+    .load(dl_0),
     .rindex(set_idx),
     .windex(set_idx),
     .datain(set_dirty),
-    .dataout({d1,d0}),
+    .dataout(d0),
+    .*
+);
+
+array dirty_array_1(
+    .read(data_read),
+    .load(dl_1),
+    .rindex(set_idx),
+    .windex(set_idx),
+    .datain(set_dirty),
+    .dataout(d1),
     .*
 );
 
