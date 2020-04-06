@@ -13,21 +13,28 @@ module arbiter_datapath(
 
 always_comb
 begin
-    case(mux_sel)
+    unique case(mux_sel)
         1'd0:
         begin
             pmem_addr = mem_addr_i;
             inst_rdata = pmem_rdata;
+				data_rdata = 256'b0; // or pmem_rdata?
             pmem_wdata = wdata_i;
         end
         1'd1:
         begin
             pmem_addr = mem_addr_d;
+				inst_rdata = 256b'0; // or pmem_rdata?
             data_rdata = pmem_rdata;
             pmem_wdata = wdata_d;
         end
         default: 
+		  begin
             pmem_addr = mem_addr_i; 
+				inst_rdata = pmem_rdata; // or 256'b0?
+				data_rdata = pmem_rdata; // or 0?
+				pmem_wdata = wdata_d; // or 0?
+		  end
     endcase
 end
 endmodule: arbiter_datapath
