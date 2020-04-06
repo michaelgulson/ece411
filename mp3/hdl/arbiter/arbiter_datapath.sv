@@ -21,16 +21,16 @@ begin
         1'd1:
         begin
             pmem_addr = mem_addr_d;
-				inst_rdata = 256b'0; // or pmem_rdata?
+			inst_rdata = 256'b0; // or pmem_rdata?
             data_rdata = pmem_rdata;
             inst_rdata = 256'd0;
         end
         default: 
 		  begin
             pmem_addr = mem_addr_i; 
-				inst_rdata = pmem_rdata; // or 256'b0?
-				data_rdata = pmem_rdata; // or 0?
-				pmem_wdata = wdata_d; // or 0?
+			inst_rdata = pmem_rdata; // or 256'b0?
+			data_rdata = pmem_rdata; // or 0?
+			pmem_wdata = wdata_d; // or 0?
 		  end
     endcase
 end
