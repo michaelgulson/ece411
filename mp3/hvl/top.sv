@@ -91,7 +91,14 @@ mp3 dut(
     .data_addr(itf.data_addr),
     .data_wdata(itf.data_wdata),
     .data_resp(itf.data_resp),
-    .data_rdata(itf.data_rdata)
+    .data_rdata(itf.data_rdata),
+
+    .pmem_resp(itf.mem_resp),
+    .pmem_rdata(itf.mem_rdata),
+    .pmem_read(itf.mem_read),
+    .pmem_write(itf.mem_write),
+    .pmem_address(itf.mem_addr),
+    .pmem_wdata(itf.mem_wdata)
 );
 /***************************** End Instantiation *****************************/
 
