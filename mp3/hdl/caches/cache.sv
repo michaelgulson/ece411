@@ -40,12 +40,7 @@ module cache #(
     logic data_read;
     logic load_data;
 
-<<<<<<< HEAD
-//TODO: check the control
-l2_control control
-=======
 cache_control cache_control
->>>>>>> nikki
 (
     .*
 );
