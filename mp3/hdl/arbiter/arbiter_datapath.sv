@@ -4,11 +4,19 @@ module arbiter_datapath(
     input logic [31:0] mem_addr_d,
     input logic [255:0] wdata_i,
     input logic [255:0] wdata_d,
+<<<<<<< HEAD
     input logic [255:0] pmem_rdata,
     output logic [31:0] pmem_addr,
     output logic [255:0] inst_rdata,
     output logic [255:0] data_rdata,
     output logic [255:0] pmem_wdata
+=======
+    input logic [255:0] rdata,
+    output logic [31:0] mem_addr,
+    output logic [255:0] inst_rdata,
+    output logic [255:0] data_rdata,
+    output logic [255:0] wdata
+>>>>>>> nikki
 );
 
 always_comb

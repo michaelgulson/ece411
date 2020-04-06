@@ -220,7 +220,11 @@ mux2toParamOut #(.width(s_line)) data_mux_in(
             .*
 );
 
+<<<<<<< HEAD
 endmodule
+=======
+endmodule : cache_datapath
+>>>>>>> nikki
 
 module mux2toParamOut #(parameter width = 32)(
 	input logic select, 

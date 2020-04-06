@@ -21,7 +21,14 @@ module arbiter(
     output logic [255:0] data_rdata,
     output logic [31:0] pmem_addr
 );
+<<<<<<< HEAD
 logic mux_sel;
+=======
+    logic mux_sel;
+	 logic wdata_i;//check
+	 logic wdata; //check
+	 logic mem_write_i; //check
+>>>>>>> nikki
 
 arbiter_datapath arbiter_datapath(
     .*
