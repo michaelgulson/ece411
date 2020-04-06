@@ -1,14 +1,15 @@
+import rv32i_types::*;
+
 module arbiter_control
 (
     input logic clk, 
     input logic rst, 
-    input logic mem_read_i, 
+    input logic mem_read_i,  
     input logic mem_read_d,
     input logic mem_write_d,
-    input logic mem_resp, 
-
-    output logic mem_read, 
-    output logic mem_write,
+    input logic pmem_resp,
+    output logic pmem_read, 
+    output logic pmem_write,
     output logic mem_resp_i, 
     output logic mem_resp_d, 
     output logic mux_sel
@@ -21,8 +22,8 @@ enum int unsigned{
 } state, next_state;
 
 function void set_defaults();
-    mem_read = 1'b0;
-    mem_write = 1'b0;
+    pmem_read = 1'b0;
+    pmem_write = 1'b0;
     mem_resp_i = 1'b0;
     mem_resp_d = 1'b0;
     mux_sel = 1'b0;
@@ -37,14 +38,14 @@ begin: state_actions
 
         I_CACHE:
         begin
-            mem_resp_i = mem_resp;
-            mem_read = mem_read_i;
+            mem_resp_i = pmem_resp;
+            pmem_read = mem_read_i;
         end
         D_CACHE:
         begin
-            mem_resp_d = mem_resp;
-            mem_read = mem_read_d;
-            mem_write = mem_write_d;
+            mem_resp_d = pmem_resp;
+            pmem_read = mem_read_d;
+            pmem_write = mem_write_d;
             mux_sel = 1'b1;
         end
         default: ;
@@ -71,19 +72,22 @@ begin : next_state_logic
         end
         I_CACHE:
         begin
-            if(mem_resp)
+            if(pmem_resp&&(!(mem_read_d||mem_write_d)))
             begin
                 next_state = IDLE;
             end
+            else if(pmem_resp&&(mem_read_d||mem_write_d))
+            begin
+                next_state = D_CACHE; //wait for resp
+            end
             else
             begin
-                next_state = I_CACHE; //wait for resp
+                next_state = I_CACHE;
             end
-             
         end
         D_CACHE:
         begin
-            if(mem_resp && !(mem_read_d) && !(mem_write_d))
+            if(pmem_resp)
             begin
                 next_state = IDLE;
             end

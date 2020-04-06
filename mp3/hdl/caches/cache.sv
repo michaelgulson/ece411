@@ -40,13 +40,12 @@ module cache #(
     logic data_read;
     logic load_data;
 
-//TODO: check the control
-l2_control control
+cache_control cache_control
 (
     .*
 );
 
-l1cache l1cache
+cache_datapath cache_datapath
 (
     .*
 );

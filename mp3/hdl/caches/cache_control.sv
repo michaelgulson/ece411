@@ -1,4 +1,4 @@
-module l2_control #(
+module cache_control #(
     parameter s_offset = 5,
     parameter s_index  = 3,
     parameter s_tag    = 32 - s_offset - s_index,

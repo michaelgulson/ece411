@@ -220,7 +220,7 @@ mux2toParamOut #(.width(s_line)) data_mux_in(
             .*
 );
 
-endmodule
+endmodule : cache_datapath
 
 module mux2toParamOut #(parameter width = 32)(
 	input logic select, 
