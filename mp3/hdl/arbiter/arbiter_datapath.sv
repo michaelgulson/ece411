@@ -18,16 +18,22 @@ begin
         begin
             pmem_addr = mem_addr_i;
             inst_rdata = pmem_rdata;
+            data_rdata = 256'd0;
             pmem_wdata = wdata_i;
         end
         1'd1:
         begin
             pmem_addr = mem_addr_d;
             data_rdata = pmem_rdata;
+            inst_rdata = 256'd0;
             pmem_wdata = wdata_d;
         end
         default: 
-            pmem_addr = mem_addr_i; 
+        begin
+            pmem_addr = mem_addr_i;
+            inst_rdata = 256'd0;
+            data_rdata = 256'd0;
+        end
     endcase
 end
 endmodule: arbiter_datapath
