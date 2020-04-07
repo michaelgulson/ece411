@@ -131,12 +131,12 @@ arbiter arbiter(
 );
 
 cacheline_adaptor cacheline_adaptor(
-  .clk(clk),
+   .clk(clk),
    .reset_n(rst),
 
     // Port to LLC (Lowest Level Cache)
     .line_i(pmem_wdata256),
-   .line_o(pmem_rdata256),
+	.line_o(pmem_rdata256),
     .address_i(pmem_addressin),
     .read_i(pmem_readin),
     .write_i(pmem_writein),
