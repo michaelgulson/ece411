@@ -1,3 +1,5 @@
+//nathan's cacheline_adaptor
+
 module cacheline_adaptor
 (
     input clk,
@@ -20,185 +22,113 @@ module cacheline_adaptor
     input resp_i
 );
 
-logic [63:0] buffer_mem [3:0];
-//logic [255:0] buffer_mem;
-logic [255:0] write_buffer;
-logic [1:0] read_cnt;
-logic [1:0] write_cnt;
-logic read_state;
-logic write_state;
-logic delayWrite;
+/* making cacheline adaptor, 32 or 64 bytes of data in
+ * address space. Pins limit it so, have to send over
+ * several cycles.
+ * 
+ * Does two things:
+ *   1. On loads, buffers data from memory until the
+ *      burst is complete, then repsonds to lowest
+ *      level cacche (LLC) with the complete cache 
+ *      line.
+ *   2. On stores, buffers a cacheline from the LLC,
+ *      segments the data into appropriate sized blocks
+ *      for burst transmission,and transmits the blocks
+ *      into memory.
+ */
 
-
-always_ff @ (posedge clk, posedge reset_n) begin
-    if (reset_n==1'b1) begin
+always_ff @(posedge clk, negedge reset_n) begin
+    static logic mode;
+    static logic[2:0] counter; 
+    //if reset
+    if(~reset_n) begin
         read_o <= 1'b0;
         write_o <= 1'b0;
-        read_cnt <= 2'b00;
-        write_cnt <= 2'b00;
-        //delayRead <= 2'b00;
-        read_state <= 1'b0;
-        write_state <= 1'b0;
-        delayWrite <= 1'b0;
+        resp_o <= 1'b0;
+        mode = 1'b0;
     end
-    else if (read_state)begin
-        case({read_i, write_i, resp_i})
-            3'b000: begin       
-                                /*if(cnt<4) begin
-                                    line_o[63:0] <= buffer_mem[0];
-                                    line_o[127:64] <= buffer_mem[1];
-                                    line_o[191:128] <= buffer_mem[2];
-                                    line_o[255:192] <= buffer_mem[3];
-                                    //$display(buffer_mem[1]);
-                                    //line_o <= buffer_mem;
-                                    //$display(buffer_mem[0]);
-                                    resp_o <= 1'b1; 
-                                    //$display(buffer_mem[0]);
-                                end*/
-                                //if(cnt==3) begin
-                                //$display(cnt);
-                                if(read_cnt==3) begin
-                                    /*if(delayRead == 3) begin
-                                        read_o <= 1'b1;
-                                    end*/ 
-                                    //else begin
-                                    //else begin
-                                        read_o <= 1'b0;
-                                        resp_o <= 1'b1;
-                                        line_o[63:0] <= buffer_mem[0];
-                                        line_o[127:64] <= buffer_mem[1];
-                                        line_o[191:128] <= buffer_mem[2];
-                                        line_o[255:192] <= buffer_mem[3];
-                                    //read_state <= 1'b0;
-                                    //    delayRead <= delayRead +1;
-                                        read_state <= 1'b0;
-                                        //read_cnt <= 2'b00;
-                                    //end
-                                    //read_o <= 1'b0;
-                                    //$display(buffer_mem[2]);
-                                    //$display(delayRead);
-                                end
-                                else
-                                    read_o <= 1'b1;
-
-                                //end
-                    end
-            3'b001: begin 
-                            if(read_cnt<2) begin
-                                buffer_mem[read_cnt] <= burst_i;   
-                                read_cnt <= read_cnt +1;
-                                read_o <= 1'b1;
-                            end
-                            else if(read_cnt==2)begin
-                                buffer_mem[read_cnt] <= burst_i;   
-                                read_cnt <= read_cnt +1;
-                                read_o <= 1'b0;
-                            end
-                            else if(read_cnt ==3) begin
-                                    buffer_mem[read_cnt] <= burst_i;
-                                    read_o <= 1'b0;
-                                
-                            end
-                            else begin
-                                //do nothing
-                                read_o <= 1'b1;
-                            end
-                            //$display(line_o[64*cnt +: 64]);
-                    end
-            /*3'b010: begin
-                                write_o <= 1'b1;
-                                address_o <= address_i;
-                                write_state <= 1'b1;
-                                write_cnt <= 2'b00;    
-                    end   */        
-            3'b100: begin  
-                                read_cnt <= 2'b00;
-                                read_o <= 1'b1;
-                                //address_o <= address_i;
-                                //read_state <= 1'b1;
-                                resp_o <= 1'b0;
-                    end
-            3'b101: begin
-                            read_cnt <= 2'b00;
-                            read_o <= 1'b1;
-                            //address_o <= address_i;
-                    end
-            default:  begin     end
-        endcase
-    end
-
-    else if(write_state) begin
-        case({read_i, write_i, resp_i})        
-        3'b000: begin
-                    //if(write_cnt==3)begin
+    else begin
+        case({read_i,write_i,resp_i})
+            3'b000: begin
+                if(mode == 1'b0)begin //completed reads
+                    if(counter == 4)begin
                         resp_o <= 1'b1;
-                        write_state <= 1'b0;
-                        
-                    //end
-                end
-        3'b001: begin
-            //if(delayWrite) begin
-            //    $display("reaches ln128");
-                if(write_cnt<3) begin
-                    burst_o <= write_buffer[64*write_cnt +: 64];   
-                    write_cnt <= write_cnt +1;
+                        counter <= 5;
+                    end
+                    read_o <= 1'b0;
                 end
                 else begin
-                    if(write_cnt==3)begin
-                        burst_o <= write_buffer[64*write_cnt +: 64];  
-                        //$display("Write Buffer \t%x", write_buffer);
+                    // $display("counter: %d",counter);
+                    if(counter == 2) begin //completed bursts
+                        counter <= 3; //avoid coming here agin twice
+                        resp_o <= 1'b1;
                     end
-                end
-            //end
-            //else begin
-            //    delayWrite <= 1'b1;
-            //    $display("reaches ln141");
-            //end                   
-
-            end
-        3'b010: begin
-                    address_o <= address_i;
-                    write_buffer <= line_i;
-                    resp_o <= 1'b0;
-                    write_cnt <= 2'b00;
-                    write_o <= 1'b1;
-                    delayWrite <= 1'b0;
-                    burst_o <= write_buffer[63:0];
-                    write_cnt <= 2'b01;
-                end
-        3'b011: begin
-                    burst_o <= write_buffer[64*write_cnt +: 64];
-                    write_cnt <= 2'b10;
-                end        
-        default: begin
-                 end
-        endcase
-    end
-
-    else begin
-        case({read_i, write_i})
-            2'b00: begin
-                    read_cnt <= 2'b00;
-                    read_o <= 1'b0;
                     write_o <= 1'b0;
-                    resp_o <= 1'b0;
-                   end
-            
-            2'b01: begin
-                    write_state <= 1'b1;
-                    end
-            2'b10: begin
-                    read_state <= 1'b1;
-                    read_cnt <= 2'b00;
-                    read_o <= 1'b1;
-                    address_o <= address_i;
-                   end
-            default: begin
-                        read_o <= 1'b0;
-                        write_o <= 1'b0;
-                    end
+                end
+            end
+
+            3'b001: begin 
+                if(mode == 1'b0) begin //reciving batches
+                    case(counter)
+                        3'b000: begin //recive first batch
+                            counter <= 1;
+                            line_o[63:0] <= burst_i;
+                        end
+                        3'b001: begin //second batch
+                            counter <= 2;
+                            line_o[127:64] <= burst_i;
+                        end
+                        3'b010: begin //third batch
+                            counter <= 3;
+                            line_o[191:128] <= burst_i;
+                        end
+                        3'b011: begin //forth batch
+                            counter <= 4;
+                            line_o[255:192] <= burst_i;
+                        end
+                        default: ; //done loading batches
+                    endcase
+                end
+                else begin
+                    case(counter)
+                        3'b000: begin //first burst     
+                            counter <= 1;
+                            burst_o <= line_i[191:128];
+                            // $display("sending %x",line_i[191:128]);
+                        end
+                        3'b001: begin //second burst
+                            counter <= 2;
+                            burst_o <= line_i[255:192]; //last burst here
+                            // $display("sending %x",line_i[255:192]);
+                        end
+                        default: ; //nothing here
+                    endcase
+                end
+            end
+            3'b100: begin  //receiving from testbench to memory
+                address_o <= address_i; //send address
+                resp_o <= 1'b0; //response not valid
+                read_o <= 1'b1; //turn read on
+                write_o <= 1'b0; //turn write off
+                counter <= 0;
+                mode <= 1'b0;
+            end
+            3'b010: begin //receiving from memory to testbench
+                address_o <= address_i; //send address
+                resp_o <= 1'b0; //response not valid
+                read_o <= 1'b0; //turn read off
+                write_o <= 1'b1; //turn write on
+                counter <= 0;
+                mode <= 1'b1;
+                burst_o <= line_i[63:0];
+                // $display("sending %x",line_i[63:0]);
+            end
+            3'b011: begin //write and resp is logic 1
+                burst_o <= line_i[127:64];
+                // $display("sending %x",line_i[127:64]);
+            end
         endcase
     end
-
 end
+
 endmodule : cacheline_adaptor
