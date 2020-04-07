@@ -56,17 +56,17 @@ end
 /********************* Assign Shadow Memory Signals Here *********************/
 // This section not required until CP2
 //signals already hooked up in dut using interface
-// assign itf.inst_read = NA;
-// assign itf.inst_addr = NA;
-// assign itf.inst_data = NA;
-// assign itf.inst_resp = NA;
-// assign itf.data_read = NA;
-// assign itf.data_write = NA;
-// assign itf.data_addr = NA;
-// assign itf.data_rdata = NA;
-// assign itf.data_wdata = NA;
-// assign itf.data_resp = NA;
-// assign itf.data_mbe = NA;
+assign itf.inst_read = dut.inst_read;
+assign itf.inst_addr = dut.inst_addr;
+assign itf.inst_rdata = dut.inst_rdata;
+assign itf.inst_resp = dut.inst_resp;
+assign itf.data_read = dut.data_read;
+assign itf.data_write = dut.data_write;
+assign itf.data_addr = dut.data_addr;
+assign itf.data_rdata = dut.data_rdata;
+assign itf.data_wdata = dut.data_wdata;
+assign itf.data_resp = dut.data_resp;
+assign itf.data_mbe = dut.data_mbe;
 /*********************** End Shadow Memory Assignments ***********************/
 
 // Set this to the proper value
@@ -80,19 +80,6 @@ assign clk = itf.clk;
 mp3 dut(
     .clk(itf.clk),
     .rst(itf.rst),
-    .inst_read(itf.inst_read),
-    .inst_addr(itf.inst_addr),
-    .inst_resp(itf.inst_resp),
-    .inst_rdata(itf.inst_rdata),
-
-    .data_read(itf.data_read),
-    .data_write(itf.data_write),
-    .data_mbe(itf.data_mbe),
-    .data_addr(itf.data_addr),
-    .data_wdata(itf.data_wdata),
-    .data_resp(itf.data_resp),
-    .data_rdata(itf.data_rdata),
-
     .pmem_resp(itf.mem_resp),
     .pmem_rdata(itf.mem_rdata),
     .pmem_read(itf.mem_read),
