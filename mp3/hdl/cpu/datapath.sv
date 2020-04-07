@@ -78,12 +78,15 @@ rv32i_word pc_offset_WB;
 rv32i_word data_addrmux_out;
 rv32i_word u_imm_WB;
 
-
-//need this for loadReg values. Gives you a warning if you define it. 
+//LoadReg signals
 logic loadReg;
+logic data_ok;
 logic data_rw;
+
+//need this for loadReg.
 assign data_rw = data_read || data_write;
-assign loadReg = (data_rw) ? ((data_resp) ? 1'b1 : 1'b0) : 1'b1;
+assign data_ok = (data_rw) ? ((data_resp) ? 1'b1 : 1'b0) : 1'b1;
+assign loadReg = inst_resp && data_ok;
 
 //assigned variables for EX stage 
 assign i_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:20]};
