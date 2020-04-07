@@ -132,7 +132,7 @@ arbiter arbiter(
 
 cacheline_adaptor cacheline_adaptor(
    .clk(clk),
-   .reset_n(rst),
+   .reset_n(!rst), //cacheline_adaptor active low
 
     // Port to LLC (Lowest Level Cache)
     .line_i(pmem_wdata256),
