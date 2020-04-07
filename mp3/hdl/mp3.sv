@@ -10,7 +10,7 @@ module mp3
     output logic pmem_read,
     output logic pmem_write,
     output rv32i_word pmem_address,
-    output [63:0] pmem_wdata,
+    output [63:0] pmem_wdata
 );
 
 logic [255:0] pmem_rdata256;
