@@ -40,6 +40,18 @@ logic mem_read_d;
 logic mem_write_d;
 rv32i_word mem_addr_d;
 logic mem_resp_d;
+logic inst_read;
+rv32i_word inst_addr;
+logic inst_resp;
+rv32i_word inst_rdata;
+logic data_read;
+logic data_write;
+rv32i_word data_wdata;
+logic [3:0] data_mbe;
+logic data_resp;
+rv32i_word data_addr;
+rv32i_word data_rdata;
+
 
 datapath pipeline_datapath(
     .clk(clk),
