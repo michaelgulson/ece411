@@ -58,13 +58,13 @@ end
 //signals already hooked up in dut using interface
 assign itf.inst_read = dut.inst_read;
 assign itf.inst_addr = dut.inst_addr;
-assign itf.inst_data = dut.inst_data;
+assign itf.inst_rdata = dut.inst_rdata;
 assign itf.inst_resp = dut.inst_resp;
 assign itf.data_read = dut.data_read;
 assign itf.data_write = dut.data_write;
 assign itf.data_addr = dut.data_addr;
 assign itf.data_rdata = dut.data_rdata;
-assign itf.data_wdata = dut.wdata;
+assign itf.data_wdata = dut.data_wdata;
 assign itf.data_resp = dut.data_resp;
 assign itf.data_mbe = dut.data_mbe;
 /*********************** End Shadow Memory Assignments ***********************/
@@ -78,6 +78,8 @@ assign clk = itf.clk;
 
 /*********************** Instantiate your design here ************************/
 mp3 dut(
+    .clk(itf.clk),
+    .rst(itf.rst),
     .pmem_resp(itf.mem_resp),
     .pmem_rdata(itf.mem_rdata),
     .pmem_read(itf.mem_read),
