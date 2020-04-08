@@ -38,6 +38,7 @@ rv32i_opcode opcode;
 rv32i_word rs1_out;
 rv32i_word rs2_out;
 rv32i_control_word ctrl_word;
+rv32i_word ir_ID;
 
 //EX stage
 rv32i_word alu_out;
@@ -108,16 +109,16 @@ assign data_addr = data_addrmux_out;
 assign data_mbe = control_word_MEM.wmask;
 
 //assigned variables for IF stage
-assign funct3 = inst_rdata[14:12];
-assign funct7 = inst_rdata[31:25];
-assign opcode = rv32i_opcode'(inst_rdata[6:0]);
-assign rs1 = inst_rdata[19:15];
-assign rs2 = inst_rdata[24:20];
+assign funct3 = ir_ID[14:12];
+assign funct7 = ir_ID[31:25];
+assign opcode = rv32i_opcode'(ir_ID[6:0]);
+assign rs1 = ir_ID[19:15];
+assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
-    .instr(inst_rdata),
+    .instr(ir_ID),
     .opcode(opcode),
     .funct3(funct3),
     .funct7(funct7),
@@ -156,6 +157,14 @@ register pc_IF_ID(
     .load(loadReg),
     .in(pc_out),
     .out(pc_ID)
+);
+
+register ir_IF_ID(
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(inst_rdata),
+    .out(ir_ID)
 );
 
 //ID/EX
