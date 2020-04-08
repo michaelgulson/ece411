@@ -1,3 +1,4 @@
+//nikki's cacheline adaptor
 module cacheline_adaptor
 (
     input clk,

@@ -78,10 +78,15 @@ rv32i_word pc_offset_WB;
 rv32i_word data_addrmux_out;
 rv32i_word u_imm_WB;
 
+//LoadReg signals
+logic loadReg;
+logic data_ok;
+logic data_rw;
 
-//need this for true values. Gives you a warning if you define it. 
-logic true;
-assign true = 1'b1;
+//need this for loadReg.
+assign data_rw = data_read || data_write;
+assign data_ok = (data_rw) ? ((data_resp) ? 1'b1 : 1'b0) : 1'b1;
+assign loadReg = inst_resp && data_ok;
 
 //assigned variables for EX stage 
 assign i_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:20]};
@@ -138,7 +143,7 @@ regfile regfile(
 pc_register pc(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pcmux_out),
     .out(pc_out)
 );
@@ -148,7 +153,7 @@ pc_register pc(
 register pc_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pc_out),
     .out(pc_ID)
 );
@@ -157,7 +162,7 @@ register pc_IF_ID(
 register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(ctrl_word),
     .out(control_word_EX)
 ); 
@@ -165,7 +170,7 @@ register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
 register pc_ID_EX(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pc_ID),
     .out(pc_EX)
 );
@@ -173,7 +178,7 @@ register pc_ID_EX(
 register read_data1_ID_EX(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(rs1_out),
     .out(read_data1_EX)
 );
@@ -181,7 +186,7 @@ register read_data1_ID_EX(
 register read_data2_ID_EX(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(rs2_out),
     .out(read_data2_EX)
 );
@@ -190,7 +195,7 @@ register read_data2_ID_EX(
 register #(`CONTROL_WORD_SIZE) control_word_EX_MEM(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(control_word_EX),
     .out(control_word_MEM)
 ); 
@@ -198,7 +203,7 @@ register #(`CONTROL_WORD_SIZE) control_word_EX_MEM(
 register pc_EX_MEM(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pc_EX),
     .out(pc_MEM)
 );
@@ -206,7 +211,7 @@ register pc_EX_MEM(
 register #(1) br_en_EX_MEM(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(br_en),
     .out(br_en_MEM)
 );
@@ -214,7 +219,7 @@ register #(1) br_en_EX_MEM(
 register pc_offset_EX_MEM(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pc_offset),
     .out(pc_offset_MEM)
 );
@@ -222,7 +227,7 @@ register pc_offset_EX_MEM(
 register read_data2_EX_MEM(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(read_data2_EX),
     .out(read_data2_MEM)
 );
@@ -230,7 +235,7 @@ register read_data2_EX_MEM(
 register ALUout_EX_MEM(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(alu_out),
     .out(alu_out_MEM)
 );
@@ -239,7 +244,7 @@ register ALUout_EX_MEM(
 register #(`CONTROL_WORD_SIZE) control_word_MEM_WB(
    .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(control_word_MEM),
     .out(control_word_WB)
 ); 
@@ -247,7 +252,7 @@ register #(`CONTROL_WORD_SIZE) control_word_MEM_WB(
 register #(1) br_en_MEM_WB(
    .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(br_en_MEM),
     .out(br_en_WB)
 ); 
@@ -255,7 +260,7 @@ register #(1) br_en_MEM_WB(
 register pc_MEM_WB(
    .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pc_MEM),
     .out(pc_WB)
 );
@@ -263,7 +268,7 @@ register pc_MEM_WB(
 register pc_offset_MEM_WB(
    .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(pc_offset_MEM),
     .out(pc_offset_WB)
 );
@@ -271,7 +276,7 @@ register pc_offset_MEM_WB(
 register data_out_MEM_WB(
    .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(data_rdata),
     .out(data_out_WB)
 );
@@ -279,7 +284,7 @@ register data_out_MEM_WB(
 register alu_out_MEM_WB(
     .clk(clk),
     .rst(rst),
-    .load(true),
+    .load(loadReg),
     .in(alu_out_MEM),
     .out(alu_out_WB)
 );
