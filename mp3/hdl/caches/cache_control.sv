@@ -49,38 +49,45 @@ endfunction
 always_comb
 begin: state_actions
     set_defaults();
-    unique case(state)
-        LOAD:
-        begin
-            set_valid = pmem_resp;
-            load_tag = pmem_resp;
-            data_read = (mem_read || mem_write);
-            load_data = pmem_resp;
-            pmem_read = !(pmem_resp);
-        end
-        STORE:
-        begin
-            data_read = (mem_read || mem_write);
-            reset_dirty = pmem_resp;
-            pmem_read = pmem_resp;                
-            pmem_write= !(pmem_resp);
-        end
-        HIT:
-        begin
-            data_read = (mem_read || mem_write);
-            mem_resp = (mem_read || mem_write) && hit;
-            set_lru = (mem_read || mem_write) && hit;
-            set_dirty = mem_write && hit;
-            load_data = mem_write && hit;
-        end
-        default:;
-    endcase
+    if(rst) 
+    begin
+        data_read = 1'b1;
+    end
+    else 
+    begin
+        unique case(state)
+            LOAD:
+            begin
+                set_valid = pmem_resp;
+                load_tag = pmem_resp;
+                data_read = (mem_read || mem_write);
+                load_data = pmem_resp;
+                pmem_read = !(pmem_resp);
+            end
+            STORE:
+            begin
+                data_read = (mem_read || mem_write);
+                reset_dirty = pmem_resp;
+                pmem_read = pmem_resp;                
+                pmem_write= !(pmem_resp);
+            end
+            HIT:
+            begin
+                data_read = (mem_read || mem_write);
+                mem_resp = (mem_read || mem_write) && hit;
+                set_lru = (mem_read || mem_write) && hit;
+                set_dirty = mem_write && hit;
+                load_data = mem_write && hit;
+            end
+            default:;
+        endcase
+    end
 end
 
 always_comb
 begin: next_state_logic
     unique case(state)
-        LOAD:
+        LOAD: //getting data from physical memory
         begin
             if(pmem_resp)
             begin
@@ -91,7 +98,7 @@ begin: next_state_logic
                 next_state = LOAD;
             end
         end
-        STORE:
+        STORE: //sending data to physical memory
         begin
             if(pmem_resp)
             begin
@@ -102,7 +109,7 @@ begin: next_state_logic
                 next_state = STORE;
             end
         end
-        HIT:
+        HIT: //
         begin
             if(mem_read || mem_write)
             begin

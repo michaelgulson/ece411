@@ -70,7 +70,7 @@ assign dl_0 = ((set_dirty || reset_dirty) && !lru_out);
 assign dl_1 = ((set_dirty || reset_dirty) && lru_out);
 assign dirty = (lru_out)? d1 : d0;
 
-assign lru_in = (hit) ? h0 : !lru_out;
+assign lru_in = (hit) ? h1 : lru_out;
 
 assign tl_0 = (load_tag && !lru_out);
 assign tl_1 = (load_tag && lru_out);
@@ -87,12 +87,12 @@ assign pmem_address = (!pmem_write) ?  mem_address : {(!lru_out) ? t0 : t1, mem_
 always_comb
 begin 
     unique case (set_dirty)
-    1'b0:
+    1'b0: //not dirty
     begin
         unique case (lru_out)
-        1'b0:
+        1'b0:  //way 0 was lru
         begin 
-            unique case (load_data)
+            unique case (load_data) 
             1'b0:
             begin 
                 line_0 = 32'd0;
@@ -104,7 +104,7 @@ begin
             endcase
             line_1 = 32'd0;
         end 
-        1'b1:
+        1'b1: //way 1 was lru
         begin 
             unique case (load_data)
             1'b0:
@@ -118,15 +118,15 @@ begin
             endcase
             line_0 = 32'd0;
         end
-        default:
+        default: //this should never happen
         begin
             line_0 = 32'd0;
             line_1 = 32'd0; 
         end 
         endcase 
     end 
-    1'b1:
-    begin 
+    1'b1: //dirty
+    begin  
     // Line 0
     unique case (h0)
     1'b0: line_0 = 32'd0;
