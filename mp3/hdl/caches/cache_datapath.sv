@@ -70,7 +70,7 @@ assign dl_0 = ((set_dirty || reset_dirty) && !lru_out);
 assign dl_1 = ((set_dirty || reset_dirty) && lru_out);
 assign dirty = (lru_out)? d1 : d0;
 
-assign lru_in = (hit) ? h1 : lru_out;
+assign lru_in = (hit) ? ((h0) ? 1'b1: 1'b0) : lru_out;
 
 assign tl_0 = (load_tag && !lru_out);
 assign tl_1 = (load_tag && lru_out);

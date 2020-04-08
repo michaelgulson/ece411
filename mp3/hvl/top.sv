@@ -55,7 +55,6 @@ end
 
 /********************* Assign Shadow Memory Signals Here *********************/
 // This section not required until CP2
-//signals already hooked up in dut using interface
 assign itf.inst_read = dut.inst_read;
 assign itf.inst_addr = dut.inst_addr;
 assign itf.inst_rdata = dut.inst_rdata;
