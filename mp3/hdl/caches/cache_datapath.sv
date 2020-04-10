@@ -33,7 +33,7 @@ module cache_datapath #(
 
 logic [s_tag-1:0] set_tag;
 logic [s_index-1:0] set_idx;
-logic [s_index-1:0] set_out;
+logic [s_index-1:0] idx_out;
 logic cache_hit;
 logic h0;
 logic h1;
@@ -61,8 +61,8 @@ logic [255:0]data_array_out1;
 assign set_tag = mem_address[31:8];
 assign set_idx = mem_address[7:5];
 
-assign h0 = ( (set_tag == t0) && (set_idx == set_out) && v0 ); //maybe idx problem?
-assign h1 = ( (set_tag == t1) && (set_idx == set_out) && v1 );
+assign h0 = ( (set_tag == t0) && (set_idx == idx_out) && v0 ); //maybe idx problem?
+assign h1 = ( (set_tag == t1) && (set_idx == idx_out) && v1 );
 assign cache_hit = (h0 || h1);
 assign hit = cache_hit;
 assign miss = (!cache_hit);
@@ -162,14 +162,14 @@ end
 //keeping track of idx number
 always_ff @(posedge clk) begin
     if(rst) begin
-        set_out <= set_idx;
+        idx_out <= set_idx;
     end
     else begin
         if(data_read) begin
-            set_out <= set_idx;
+            idx_out <= set_idx;
         end
         else begin
-            set_out <= set_out;
+            idx_out <= idx_out;
         end
     end
 end
