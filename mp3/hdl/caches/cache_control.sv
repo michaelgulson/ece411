@@ -20,7 +20,6 @@ module cache_control #(
     output logic set_valid,
     output logic load_tag,
     output logic set_lru,
-    output logic data_read,
     output logic load_data,
     output logic mem_resp,
     output logic pmem_read,
@@ -39,7 +38,6 @@ function void set_defaults();
     set_valid = 1'b0;
     load_tag = 1'b0;
     set_lru = 1'b0;
-    data_read = 1'b1;
     load_data = 1'b0;
     mem_resp = 1'b0;
     pmem_read = 1'b0;
@@ -51,9 +49,7 @@ begin: state_actions
     set_defaults();
     if(rst) 
     begin
-        data_read = 1'b1;
         // load_data = 1'b1;
-        
     end
     else 
     begin
@@ -62,20 +58,17 @@ begin: state_actions
             begin
                 set_valid = pmem_resp;
                 load_tag = pmem_resp;
-                //data_read = (mem_read || mem_write);
                 load_data = pmem_resp;
                 pmem_read = !(pmem_resp);
             end
             STORE:
             begin
-                //data_read = (mem_read || mem_write);
                 reset_dirty = pmem_resp;
                 pmem_read = pmem_resp;                
                 pmem_write= !(pmem_resp);
             end
             HIT:
             begin
-                //data_read = (mem_read || mem_write);
                 mem_resp = (mem_read || mem_write) && hit;
                 set_lru = (mem_read || mem_write) && hit;
                 set_dirty = mem_write && hit;

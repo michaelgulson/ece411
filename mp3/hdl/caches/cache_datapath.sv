@@ -17,7 +17,6 @@ module cache_datapath #(
     input logic set_valid,
     input logic load_tag,
     input logic set_lru,
-    input logic data_read,
     input logic load_data, 
     input logic pmem_write,
     input logic [31:0] mem_byte_enable256,
@@ -55,7 +54,9 @@ logic [31:0]line_0;
 logic [31:0]line_1;
 logic [255:0]data_array_out0;
 logic [255:0]data_array_out1;
+logic data_read;
 
+assign data_read = 1'b1;
 
 assign set_tag = mem_address[31:8];
 assign set_idx = mem_address[7:5];
