@@ -30,10 +30,7 @@ assign dataout = _dataout;
 
 always_comb 
 begin
-    if(read)
-        _dataout <= (load  & (rindex == windex)) ? datain : data[rindex];
-    else 
-        _dataout <= '0;
+    _dataout = (load  & (rindex == windex)) ? datain : data[rindex];
 end
 
 always_ff @(posedge clk)
