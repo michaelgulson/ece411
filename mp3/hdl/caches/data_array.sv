@@ -31,11 +31,10 @@ logic [s_line-1:0] data [num_sets-1:0] /* synthesis ramstyle = "logic" */;
 logic [s_line-1:0] _dataout;
 assign dataout = _dataout;
 
-always_comb 
-begin
+always_comb begin
     for (int i = 0; i < s_mask; i++)
         _dataout[8*i +: 8] = (write_en[i] & (rindex == windex)) ?
-                        datain[8*i +: 8] : data[rindex][8*i +: 8];
+                                datain[8*i +: 8] : data[rindex][8*i +: 8];
 end
 
 always_ff @(posedge clk)

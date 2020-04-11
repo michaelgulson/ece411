@@ -17,7 +17,6 @@ module cache_datapath #(
     input logic set_valid,
     input logic load_tag,
     input logic set_lru,
-    input logic data_read,
     input logic load_data, 
     input logic pmem_write,
     input logic [31:0] mem_byte_enable256,
@@ -33,7 +32,6 @@ module cache_datapath #(
 
 logic [s_tag-1:0] set_tag;
 logic [s_index-1:0] set_idx;
-logic [s_index-1:0] set_out;
 logic cache_hit;
 logic h0;
 logic h1;
@@ -56,13 +54,15 @@ logic [31:0]line_0;
 logic [31:0]line_1;
 logic [255:0]data_array_out0;
 logic [255:0]data_array_out1;
+logic data_read;
 
+assign data_read = 1'b1;
 
 assign set_tag = mem_address[31:8];
 assign set_idx = mem_address[7:5];
 
-assign h0 = ( (set_tag == t0) && (set_idx == set_out) && v0 ); //maybe idx problem?
-assign h1 = ( (set_tag == t1) && (set_idx == set_out) && v1 );
+assign h0 = ( (set_tag == t0) && v0 );
+assign h1 = ( (set_tag == t1) && v1 );
 assign cache_hit = (h0 || h1);
 assign hit = cache_hit;
 assign miss = (!cache_hit);
@@ -158,21 +158,6 @@ begin
     end 
     endcase 
 end 
-
-//keeping track of idx number
-always_ff @(posedge clk) begin
-    if(rst) begin
-        set_out <= set_idx;
-    end
-    else begin
-        if(data_read) begin
-            set_out <= set_idx;
-        end
-        else begin
-            set_out <= set_out;
-        end
-    end
-end
  
 data_array line_array_1
 (
