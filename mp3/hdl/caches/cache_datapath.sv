@@ -33,6 +33,7 @@ module cache_datapath #(
 
 logic [s_tag-1:0] set_tag;
 logic [s_index-1:0] set_idx;
+logic [s_index-1:0] set_out;
 logic cache_hit;
 logic h0;
 logic h1;
@@ -60,8 +61,8 @@ logic [255:0]data_array_out1;
 assign set_tag = mem_address[31:8];
 assign set_idx = mem_address[7:5];
 
-assign h0 = ( (set_tag == t0) && v0 );
-assign h1 = ( (set_tag == t1) && v1 );
+assign h0 = ( (set_tag == t0) && (set_idx == set_out) && v0 ); //maybe idx problem?
+assign h1 = ( (set_tag == t1) && (set_idx == set_out) && v1 );
 assign cache_hit = (h0 || h1);
 assign hit = cache_hit;
 assign miss = (!cache_hit);
@@ -70,7 +71,7 @@ assign dl_0 = ((set_dirty || reset_dirty) && !lru_out);
 assign dl_1 = ((set_dirty || reset_dirty) && lru_out);
 assign dirty = (lru_out)? d1 : d0;
 
-assign lru_in = (hit) ? h0 : !lru_out;
+assign lru_in = (hit) ? ((h0) ? 1'b1: 1'b0) : lru_out;
 
 assign tl_0 = (load_tag && !lru_out);
 assign tl_1 = (load_tag && lru_out);
@@ -87,12 +88,12 @@ assign pmem_address = (!pmem_write) ?  mem_address : {(!lru_out) ? t0 : t1, mem_
 always_comb
 begin 
     unique case (set_dirty)
-    1'b0:
+    1'b0: //not dirty
     begin
         unique case (lru_out)
-        1'b0:
+        1'b0:  //way 0 was lru
         begin 
-            unique case (load_data)
+            unique case (load_data) 
             1'b0:
             begin 
                 line_0 = 32'd0;
@@ -104,7 +105,7 @@ begin
             endcase
             line_1 = 32'd0;
         end 
-        1'b1:
+        1'b1: //way 1 was lru
         begin 
             unique case (load_data)
             1'b0:
@@ -118,15 +119,15 @@ begin
             endcase
             line_0 = 32'd0;
         end
-        default:
+        default: //this should never happen
         begin
             line_0 = 32'd0;
             line_1 = 32'd0; 
         end 
         endcase 
     end 
-    1'b1:
-    begin 
+    1'b1: //dirty
+    begin  
     // Line 0
     unique case (h0)
     1'b0: line_0 = 32'd0;
@@ -158,6 +159,20 @@ begin
     endcase 
 end 
 
+//keeping track of idx number
+always_ff @(posedge clk) begin
+    if(rst) begin
+        set_out <= set_idx;
+    end
+    else begin
+        if(data_read) begin
+            set_out <= set_idx;
+        end
+        else begin
+            set_out <= set_out;
+        end
+    end
+end
  
 data_array line_array_1
 (
