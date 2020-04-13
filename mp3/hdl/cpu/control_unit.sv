@@ -140,7 +140,7 @@ always_comb begin
             ctrl_word.pc_mux_sel = pcmux::alu_mod2;    
         end
         op_br: begin
-            ctrl_word.alu_op = alu_add_beq;
+            ctrl_word.alu_op = branch_funct3;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::rs2_out;
             ctrl_word.pc_mux_sel = pcmux::alu_out;    
