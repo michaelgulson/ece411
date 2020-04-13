@@ -149,15 +149,6 @@ pc_register pc(
     .out(pc_out)
 );
 
-register ir_IF_ID(
-    .clk(clk),
-    .rst(rst),
-    .load(true),
-    .in(inst_rdata),
-    .out(ir_ID)
-);
-
-
 //5 stage registers
 //IF/ID
 register pc_IF_ID(
