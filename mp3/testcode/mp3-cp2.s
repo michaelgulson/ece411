@@ -71,9 +71,10 @@ fetch_stall_test:
    # cache line boundary
    nop
    nop
-   nop
+   # nop
    sw x7, %lo(TOTAL)(x8)
    lw x1, %lo(TOTAL)(x8)
+   lw x9, %lo(VICTIM)(x8)
 inf:
    beq x0, x0, inf
    nop
