@@ -37,7 +37,6 @@ module cache #(
     logic set_valid;
     logic load_tag;
     logic set_lru;
-    logic data_read;
     logic load_data;
 
 cache_control cache_control
