@@ -52,3 +52,4 @@ else begin
     forwardB = {1'b0,alumuxsel2_EX};
 end
 end
+endmodule

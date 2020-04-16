@@ -378,7 +378,7 @@ always_comb begin : MUXES
         4'b0100: alumux2_out = j_imm_EX;
         4'b0101: alumux2_out = read_data2_EX;
         4'b1000: alumux2_out = alu_out_MEM;
-        4'b1001: alumux2_out = regfilemux_out
+        4'b1001: alumux2_out = regfilemux_out;
         default: alumux2_out = i_imm_EX;
     endcase
 
