@@ -86,6 +86,26 @@ logic loadReg;
 logic data_ok;
 logic data_rw;
 
+//static branch
+logic flush; //detects a flush, changes
+rv32i_control_word nop;
+
+//nop assignments
+assign nop.alu_op = alu_add_beq;
+assign nop.mem_read = 1'b0;
+assign nop.mem_write = 1'b0;
+assign nop.load_regfile = 1'b0;
+assign nop.dest = 5'b0;
+assign nop.rmask = 4'b0;
+assign nop.wmask = 4'b0;
+assign nop.trap = 1'b0;
+assign nop.instr = 32'b0;
+assign nop.regfile_mux_sel = regfilemux::alu_out;
+assign nop.pc_mux_sel = pcmux::pc_plus4;
+assign nop.alu_muxsel1 = alumux::rs1_out;
+assign nop.alu_muxsel2 = alumux::i_imm;
+assign nop.data_addrmux_sel = datamux::pc_out;
+
 //need this for loadReg.
 assign data_rw = data_read || data_write;
 assign data_ok = (data_rw) ? ((data_resp) ? 1'b1 : 1'b0) : 1'b1;
@@ -97,7 +117,6 @@ assign s_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:25]
 assign b_imm_EX = {{20{control_word_EX.instr[31]}}, control_word_EX.instr[7], control_word_EX.instr[30:25], control_word_EX.instr[11:8], 1'b0};
 assign u_imm_EX = {control_word_EX.instr[31:12], 12'h000};
 assign j_imm_EX = {{12{control_word_EX.instr[31]}}, control_word_EX.instr[19:12], control_word_EX.instr[20], control_word_EX.instr[30:21], 1'b0};
-//assign pc_offset = pc_EX + b_imm_EX;
 
 //assigned variables for WB stage
 assign u_imm_WB = {control_word_WB.instr[31:12], 12'h000};
@@ -124,7 +143,7 @@ control_unit Control_Unit( //incldue instruction
     .opcode(opcode),
     .funct3(funct3),
     .funct7(funct7),
-    .addr_01(pc_offset_MEM[1:0]), // <-----FIX THIS
+    .addr_01(pc_offset_MEM[1:0]),
     .ctrl_word(ctrl_word)
 );
 /****************************************************************************/
@@ -165,7 +184,7 @@ register ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in(inst_rdata),
+    .in((flush ? 32'b0 : inst_rdata)),
     .out(ir_ID)
 );
 
@@ -174,7 +193,7 @@ register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in(ctrl_word),
+    .in((flush ? nop : ctrl_word)),
     .out(control_word_EX)
 ); 
 
@@ -207,7 +226,7 @@ register #(`CONTROL_WORD_SIZE) control_word_EX_MEM(
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in(control_word_EX),
+    .in((flush ? nop : control_word_EX)),
     .out(control_word_MEM)
 ); 
 
@@ -340,14 +359,20 @@ fowarding_unit forwarding_unit(
 
 
 
-//pcmux_sel
+//pcmux_sel branch detection
 always_comb begin : PC_MUX
-    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h6f))
+    if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h6f)) begin
         pcmux_sel = pcmux::alu_out;
-    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h67))
+        flush = 1'b1;
+    end
+    else if((control_word_MEM.pc_mux_sel == pcmux::alu_mod2) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h67)) begin
         pcmux_sel = pcmux::alu_mod2;
-    else
+        flush = 1'b1;
+    end
+    else begin
         pcmux_sel = pcmux::pc_plus4;
+        flush = 1'b0;
+    end
 end
 /*****************************************************************************/
 
