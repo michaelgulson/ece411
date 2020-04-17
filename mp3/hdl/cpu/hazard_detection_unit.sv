@@ -4,7 +4,7 @@ module hazard_detect_unit(
     input rv32i_control_word control_word_EX,
     input rv32i_control_word control_word_ID,
 
-    output control_word_mux_sel
+    output logic control_word_mux_sel
 );
 
 logic [4:0] rs1_ID;

@@ -168,7 +168,7 @@ regfile regfile(
 pc_register pc(
     .clk(clk),
     .rst(rst),
-    .load(loadReg),
+    .load(loadReg && !control_word_mux_sel),
     .in(pcmux_out),
     .out(pc_out)
 );
@@ -178,7 +178,7 @@ pc_register pc(
 register pc_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(loadReg),
+    .load(loadReg && !control_word_mux_sel),
     .in(pc_out),
     .out(pc_ID)
 );
@@ -186,7 +186,7 @@ register pc_IF_ID(
 register ir_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(loadReg),
+    .load(loadReg && !control_word_mux_sel),
     .in((flush ? 32'b0 : inst_rdata)),
     .out(ir_ID)
 );
@@ -360,7 +360,7 @@ fowarding_unit forwarding_unit(
 );
 
 hazard_detect_unit hazard_detect(
-    .control_word_ID(ctrl_word),
+    .control_word_ID((flush ? nop : ctrl_word)),
     .control_word_EX(control_word_EX),
     .control_word_mux_sel(control_word_mux_sel)
 );
