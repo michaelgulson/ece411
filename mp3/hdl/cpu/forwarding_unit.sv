@@ -3,13 +3,13 @@ import rv32i_types::*;
 
 module fowarding_unit
 (
-input rv32i_control_word control_word_EX,
-input rv32i_control_word control_word_MEM,
-input rv32i_control_word control_word_WB,
+    input rv32i_control_word control_word_EX,
+    input rv32i_control_word control_word_MEM,
+    input rv32i_control_word control_word_WB,
 
 
-output [1:0] forwardA,
-output [3:0] forwardB
+    output [1:0] forwardA,
+    output [3:0] forwardB
 );
 
 logic [4:0] dest_MEM;
@@ -32,24 +32,24 @@ assign alumuxsel2_EX = control_word_EX.alu_muxsel2;
 
 
 always_comb begin
-if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs1_EX)begin
-    forwardA = 2'b10;
-end
-else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs1_EX)begin
-    forwardA = 2'b11;
-end
-else begin
-    forwardA = {1'b0,alumuxsel1_EX};
-end
+    if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs1_EX)begin
+        forwardA = 2'b10;
+    end
+    else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs1_EX)begin
+        forwardA = 2'b11;
+    end
+    else begin
+        forwardA = {1'b0,alumuxsel1_EX};
+    end
 
-if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs2_EX)begin
-    forwardB = 4'b1000;
-end
-else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs2_EX)begin
-    forwardB = 4'b1001;
-end
-else begin
-    forwardB = {1'b0,alumuxsel2_EX};
-end
-end
+    if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs2_EX)begin
+        forwardB = 4'b1000;
+    end
+    else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs2_EX)begin
+        forwardB = 4'b1001;
+    end
+    else begin
+        forwardB = {1'b0,alumuxsel2_EX};
+    end
+    end
 endmodule

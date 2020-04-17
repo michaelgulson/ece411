@@ -455,11 +455,11 @@ always_comb begin : MUXES
         default:   pc_offset = pc_EX + b_imm_EX;
     endcase
 
-    unique case (control_word_mux_sel)
-        1'b0:   
-        1'b1:
+    // unique case (control_word_mux_sel)
+    //     1'b0:   
+    //     1'b1:
 
-    endcase
+    // endcase
 
 end
 /*****************************************************************************/
