@@ -140,9 +140,6 @@ assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 assign nop_sel = flush||control_word_mux_sel;
 
-logic pchold = loadReg && !control_word_mux_sel;
-assign 
-
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
     .instr(ir_ID),

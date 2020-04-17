@@ -104,7 +104,7 @@ begin: next_state_logic
                 next_state = STORE;
             end
         end
-        HIT: //
+        HIT: //detecting a hit
         begin
             if(mem_read || mem_write)
             begin
