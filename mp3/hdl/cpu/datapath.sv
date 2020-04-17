@@ -111,7 +111,7 @@ assign nop.data_addrmux_sel = datamux::pc_out;
 //need this for loadReg.
 assign data_rw = data_read || data_write;
 assign data_ok = (data_rw) ? ((data_resp) ? 1'b1 : 1'b0) : 1'b1;
-assign loadReg = inst_resp && data_ok;
+assign loadReg = inst_resp && data_ok; //for stalling (makes sure that cahce is updated)
 
 //assigned variables for EX stage 
 assign i_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:20]};
@@ -139,6 +139,9 @@ assign rs1 = ir_ID[19:15];
 assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 assign nop_sel = flush||control_word_mux_sel;
+
+logic pchold = loadReg && !control_word_mux_sel;
+assign 
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction

@@ -8,8 +8,8 @@ module fowarding_unit
     input rv32i_control_word control_word_WB,
 
 
-    output [1:0] forwardA,
-    output [3:0] forwardB
+    output logic [1:0] forwardA,
+    output logic [3:0] forwardB
 );
 
 logic [4:0] dest_MEM;
@@ -39,7 +39,7 @@ always_comb begin
         forwardA = 2'b11;
     end
     else begin
-        forwardA = {1'b0,alumuxsel1_EX};
+        forwardA = {1'b0,alumuxsel1_EX}; //normal operation
     end
 
     if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs2_EX)begin
@@ -49,7 +49,7 @@ always_comb begin
         forwardB = 4'b1001;
     end
     else begin
-        forwardB = {1'b0,alumuxsel2_EX};
+        forwardB = {1'b0,alumuxsel2_EX}; //normal operation
     end
     end
 endmodule
