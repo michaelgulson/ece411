@@ -9,7 +9,7 @@ module fowarding_unit
 
 
     output logic [1:0] forwardA,
-    output logic [3:0] forwardB
+    output logic [1:0] forwardB
 );
 
 logic [4:0] dest_MEM;
@@ -37,29 +37,29 @@ always_comb begin
             forwardA = 2'b10;
         end
         else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs1_EX)begin
-            forwardA = 2'b11;
+            forwardA = 2'b01;
         end
         else begin
-            forwardA = {1'b0,control_word_EX.alu_muxsel1}; //normal opearation
+            forwardA = 2'b00;
         end
     end
     else begin
-        forwardA = {1'b0,control_word_EX.alu_muxsel1}; //normal operation
+        forwardA = 2'b00;
     end
 
     if((opcode_EX == op_reg)||(opcode_EX == op_store)||(opcode_EX == op_br)) begin
         if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs2_EX)begin
-            forwardB = 4'b1000;
+            forwardB = 2'b10;
         end
         else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs2_EX)begin
-            forwardB = 4'b1001;
+            forwardB = 2'b01;
         end
         else begin
-            forwardB = {1'b0,control_word_EX.alu_muxsel2}; //normal operation
+            forwardB = 2'b00;
         end
     end
     else begin
-        forwardB = {1'b0,control_word_EX.alu_muxsel2}; //normal operation
+        forwardB = 2'b00;
     end
 end
 endmodule
