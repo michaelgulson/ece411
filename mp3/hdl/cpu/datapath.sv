@@ -39,6 +39,8 @@ rv32i_word rs1_out;
 rv32i_word rs2_out;
 rv32i_control_word ctrl_word;
 rv32i_word ir_ID;
+logic control_word_mux_sel;
+logic nop_sel;
 
 //EX stage
 rv32i_word alu_out;
@@ -136,6 +138,7 @@ assign opcode = rv32i_opcode'(ir_ID[6:0]);
 assign rs1 = ir_ID[19:15];
 assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
+assign nop_sel = flush||control_word_mux_sel;
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
@@ -193,7 +196,7 @@ register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in((flush ? nop : ctrl_word)),
+    .in((nop_sel ? nop : ctrl_word)),
     .out(control_word_EX)
 ); 
 
@@ -347,13 +350,19 @@ sshifter storeshifter(
     .rs2_out(read_data2_MEM),
     .mem_data_out_in(data_wdata)
 );
-/***************************forwarding unit**********************************/
+/***************************forwarding unit and hazard detection*******************/
 fowarding_unit forwarding_unit(
     .control_word_EX(control_word_EX),
     .control_word_MEM(control_word_MEM),
     .control_word_WB(control_word_WB),
     .forwardA(forwardA),
     .forwardB(forwardB)
+);
+
+hazard_detect hazard_detect(
+    .control_word_ID(control_word_ID),
+    .control_word_EX(control_word_EX),
+    .control_word_mux_sel(control_word_mux_sel)
 );
 /****************************************************************************/
 
@@ -446,6 +455,11 @@ always_comb begin : MUXES
         default:   pc_offset = pc_EX + b_imm_EX;
     endcase
 
+    unique case (control_word_mux_sel)
+        1'b0:   
+        1'b1:
+
+    endcase
 
 end
 /*****************************************************************************/
