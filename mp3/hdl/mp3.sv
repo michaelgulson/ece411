@@ -44,6 +44,12 @@ logic [3:0] data_mbe;
 logic data_resp;
 rv32i_word data_addr;
 rv32i_word data_rdata;
+logic l2_addr;
+logic l2_read;
+logic l2_write;
+logic l2_wdata;
+logic l2_resp;
+
 
 
 datapath pipeline_datapath(
@@ -100,6 +106,29 @@ cache d_cache(
     .pmem_write(mem_write_d),
     .mem_resp(data_resp),
     .pmem_address(mem_addr_d)
+);
+
+
+
+
+cache #(.write_width(256),
+        .s_index(2),
+        .l2(1)) 
+l2_cache(
+    .clk(clk), 
+    .rst(rst), 
+    .mem_address(l2_addr),
+    .pmem_rdata(pmem_rdata),
+    .mem_read(l2_read),
+    .mem_write(l2_write),
+    .pmem_resp(pmem_resp),
+    .mem_wdata(l2_wdata), 
+    .mem_byte_enable(4'b000), 
+    .mem_rdata(l2_rdata), 
+    .pmem_read(read_o),  //not sure
+    .pmem_write(write_o), //not sure
+    .mem_resp(l2_resp),
+    .pmem_address(addreess_o)
 );
 
 

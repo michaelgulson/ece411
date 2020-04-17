@@ -4,7 +4,9 @@ module cache #(
     parameter s_tag    = 32 - s_offset - s_index,
     parameter s_mask   = 2**s_offset,
     parameter s_line   = 8*s_mask,
-    parameter num_sets = 2**s_index
+    parameter num_sets = 2**s_index,
+    parameter l2 = 0,
+	 parameter write_width = 32
 )
 (
     input logic clk, 
@@ -14,10 +16,11 @@ module cache #(
     input logic mem_read,
     input logic mem_write,
     input logic pmem_resp,
-    input logic [31:0] mem_wdata, //data to the memory
-    input logic [3:0] mem_byte_enable, //masking, which byte in mem written(@mem write)
+    //input logic [31:0] mem_wdata, //data to the memory
+    input logic [write_width-1:0] mem_wdata,
+	 input logic [3:0] mem_byte_enable, //masking, which byte in mem written(@mem write)
     output logic [255:0] pmem_wdata,
-    output logic [31:0] mem_rdata, 
+    output logic [write_width-1:0] mem_rdata, 
     output logic pmem_read, 
     output logic pmem_write,
     output logic mem_resp,
@@ -44,15 +47,30 @@ cache_control cache_control
     .*
 );
 
-cache_datapath cache_datapath
-(
-    .*
-);
+generate
+    if(l2 == 0)
+    begin
+        cache_datapath cache_datapath
+        (
+            .*
+        );
 
-bus_adapter bus_adapter
-(
-    .address(mem_address),
-    .*
-);
+        bus_adapter bus_adapter
+        (
+            .address(mem_address),
+            .*
+        );
+    end
+    if(l2 == 1)
+    begin
+        cache_datapath cache_datapath
+        (
+            .mem_byte_enable256(32'hFFFFFFFF),
+            .mem_wdata256(mem_wdata),
+            .mem_rdata256(mem_rdata),
+            .*
+        );  
+    end
+endgenerate
 
 endmodule : cache
