@@ -51,11 +51,9 @@ generate
         magic_memory_dp mem(magic_mem_itf);
     end
     else if (`MEMORY == `PARAM_MEM) begin : memory
-        // ParamMemory #(50, 25, 4, 256, 512) mem(mem_itf);
+        ParamMemory #(50, 25, 4, 256, 512) mem(mem_itf);
     end
 endgenerate
-
-ParamMemory #(50, 25, 4, 256, 512) mem(mem_itf);
 
 generate
     if (`USE_SHADOW_MEMORY) begin

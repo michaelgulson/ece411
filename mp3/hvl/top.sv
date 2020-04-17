@@ -61,12 +61,12 @@ initial begin
         //check way 0
         if(dut.d_cache.cache_datapath.valid_array_0.data[i] &
            dut.d_cache.cache_datapath.dirty_array_0.data[i]) begin
-            tb.mem._mem[dut.d_cache.cache_datapath.tag_array_0.data[i]] = dut.d_cache.cache_datapath.line_array_0.data[i];
+            tb.memory.mem._mem[dut.d_cache.cache_datapath.tag_array_0.data[i]] = dut.d_cache.cache_datapath.line_array_0.data[i];
         end
         //check way 1
         if(dut.d_cache.cache_datapath.valid_array_1.data[i] &
            dut.d_cache.cache_datapath.dirty_array_1.data[i]) begin
-            tb.mem._mem[dut.d_cache.cache_datapath.tag_array_1.data[i]] = dut.d_cache.cache_datapath.line_array_1.data[i];
+            tb.memory.mem._mem[dut.d_cache.cache_datapath.tag_array_1.data[i]] = dut.d_cache.cache_datapath.line_array_1.data[i];
         end
     end
 end
