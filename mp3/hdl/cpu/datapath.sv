@@ -359,8 +359,8 @@ fowarding_unit forwarding_unit(
     .forwardB(forwardB)
 );
 
-hazard_detect hazard_detect(
-    .control_word_ID(control_word_ID),
+hazard_detect_unit hazard_detect(
+    .control_word_ID(ctrl_word),
     .control_word_EX(control_word_EX),
     .control_word_mux_sel(control_word_mux_sel)
 );
@@ -454,12 +454,6 @@ always_comb begin : MUXES
 
         default:   pc_offset = pc_EX + b_imm_EX;
     endcase
-
-    // unique case (control_word_mux_sel)
-    //     1'b0:   
-    //     1'b1:
-
-    // endcase
 
 end
 /*****************************************************************************/
