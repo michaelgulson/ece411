@@ -3,13 +3,13 @@ import rv32i_types::*;
 
 module fowarding_unit
 (
-input rv32i_control_word control_word_EX,
-input rv32i_control_word control_word_MEM,
-input rv32i_control_word control_word_WB,
+    input rv32i_control_word control_word_EX,
+    input rv32i_control_word control_word_MEM,
+    input rv32i_control_word control_word_WB,
 
 
-output logic [1:0] forwardA,
-output logic [3:0] forwardB
+    output logic [1:0] forwardA,
+    output logic [3:0] forwardB
 );
 
 logic [4:0] dest_MEM;
@@ -40,11 +40,11 @@ always_comb begin
             forwardA = 2'b11;
         end
         else begin
-            forwardA = {1'b0,alumuxsel1_EX};
+            forwardA = {1'b0,alumuxsel1_EX}; //normal opearation
         end
     end
     else begin
-        forwardA = {1'b0,alumuxsel1_EX};
+        forwardA = {1'b0,alumuxsel1_EX}; //normal operation
     end
 
     if((opcode_EX == op_reg)||(opcode_EX == op_store)||(opcode_EX == op_br)) begin
@@ -55,11 +55,11 @@ always_comb begin
             forwardB = 4'b1001;
         end
         else begin
-            forwardB = {1'b0,alumuxsel2_EX};
+            forwardB = {1'b0,alumuxsel2_EX}; //normal operation
         end
     end
     else begin
-        forwardB = {1'b0,alumuxsel2_EX};
+        forwardB = {1'b0,alumuxsel2_EX}; //normal operation
     end
 end
 endmodule
