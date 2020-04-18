@@ -59,7 +59,7 @@ rv32i_word u_imm_EX;
 rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
 alumux::alumux1_sel_t forwardA;
-alumux::alumux1_sel_t forwardB;
+alumux::alumux2_sel_t forwardB;
 
 //MEM stage
 rv32i_word alu_out_MEM;

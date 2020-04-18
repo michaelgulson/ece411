@@ -34,7 +34,7 @@ always_comb begin
             forwardA = alumux::alu_out_MEM1;
         end
         else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs1_EX)begin
-            forwardA = alumux::alu_out_WB1;
+            forwardA = alumux::regfile_WB1;
         end
         else begin
             forwardA = control_word_EX.alu_muxsel1;
@@ -49,7 +49,7 @@ always_comb begin
             forwardB = alumux::alu_out_MEM2;
         end
         else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs2_EX)begin
-            forwardB = alumux::alu_out_WB2;
+            forwardB = alumux::regfile_WB2;
         end
         else begin
             forwardB = control_word_EX.alu_muxsel2;
