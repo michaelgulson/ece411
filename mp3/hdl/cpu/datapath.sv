@@ -39,6 +39,8 @@ rv32i_word rs1_out;
 rv32i_word rs2_out;
 rv32i_control_word ctrl_word;
 rv32i_word ir_ID;
+logic control_word_mux_sel;
+logic nop_sel;
 
 //EX stage
 rv32i_word alu_out;
@@ -57,7 +59,9 @@ rv32i_word u_imm_EX;
 rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
 logic [1:0] forwardA;
-logic [3:0] forwardB;
+logic [1:0] forwardB;
+rv32i_word fmuxA_out;
+rv32i_word fmuxB_out;
 
 //MEM stage
 rv32i_word alu_out_MEM;
@@ -109,7 +113,7 @@ assign nop.data_addrmux_sel = datamux::pc_out;
 //need this for loadReg.
 assign data_rw = data_read || data_write;
 assign data_ok = (data_rw) ? ((data_resp) ? 1'b1 : 1'b0) : 1'b1;
-assign loadReg = inst_resp && data_ok;
+assign loadReg = inst_resp && data_ok; //for stalling (makes sure that cahce is updated)
 
 //assigned variables for EX stage 
 assign i_imm_EX = {{21{control_word_EX.instr[31]}}, control_word_EX.instr[30:20]};
@@ -136,6 +140,7 @@ assign opcode = rv32i_opcode'(ir_ID[6:0]);
 assign rs1 = ir_ID[19:15];
 assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
+assign nop_sel = flush||control_word_mux_sel;
 
 /********************************Control Unit********************************/
 control_unit Control_Unit( //incldue instruction
@@ -165,7 +170,7 @@ regfile regfile(
 pc_register pc(
     .clk(clk),
     .rst(rst),
-    .load(loadReg),
+    .load(loadReg && !control_word_mux_sel),
     .in(pcmux_out),
     .out(pc_out)
 );
@@ -175,7 +180,7 @@ pc_register pc(
 register pc_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(loadReg),
+    .load(loadReg && !control_word_mux_sel),
     .in(pc_out),
     .out(pc_ID)
 );
@@ -183,7 +188,7 @@ register pc_IF_ID(
 register ir_IF_ID(
     .clk(clk),
     .rst(rst),
-    .load(loadReg),
+    .load(loadReg && !control_word_mux_sel),
     .in((flush ? 32'b0 : inst_rdata)),
     .out(ir_ID)
 );
@@ -193,7 +198,7 @@ register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in((flush ? nop : ctrl_word)),
+    .in((nop_sel ? nop : ctrl_word)),
     .out(control_word_EX)
 ); 
 
@@ -347,13 +352,19 @@ sshifter storeshifter(
     .rs2_out(read_data2_MEM),
     .mem_data_out_in(data_wdata)
 );
-/***************************forwarding unit**********************************/
+/***************************forwarding unit and hazard detection*******************/
 fowarding_unit forwarding_unit(
     .control_word_EX(control_word_EX),
     .control_word_MEM(control_word_MEM),
     .control_word_WB(control_word_WB),
     .forwardA(forwardA),
     .forwardB(forwardB)
+);
+
+hazard_detect_unit hazard_detect(
+    .control_word_ID((flush ? nop : ctrl_word)),
+    .control_word_EX(control_word_EX),
+    .control_word_mux_sel(control_word_mux_sel)
 );
 /****************************************************************************/
 
@@ -388,14 +399,14 @@ always_comb begin : MUXES
 
     //EX stage
     unique case (forwardA)
-        2'b00:  alumux1_out = read_data1_EX;
-        2'b01:  alumux1_out = pc_EX;
-        2'b10:  alumux1_out = alu_out_MEM;
-        2'b11:  alumux1_out = regfilemux_out;
-        default: alumux1_out = read_data1_EX;
+        2'b00:  fmuxA_out = alumux1_out;
+        2'b10:  fmuxA_out = alu_out_MEM;
+        2'b01:  fmuxA_out = regfilemux_out;
+        default: fmuxA_out = alumux1_out;
     endcase
 
     unique case (forwardB)
+<<<<<<< HEAD
         4'b0000: alumux2_out = i_imm_EX;  
         4'b0001: alumux2_out = u_imm_EX;
         4'b0010: alumux2_out = b_imm_EX;
@@ -404,6 +415,27 @@ always_comb begin : MUXES
         4'b0101: alumux2_out = read_data2_EX;
         4'b1000: alumux2_out = alu_out_MEM;
         4'b1001: alumux2_out = regfilemux_out;
+=======
+        2'b00: fmuxB_out = alumux2_out;
+        2'b10: fmuxB_out = alu_out_MEM;
+        2'b01: fmuxB_out = regfilemux_out;
+        default: fmuxB_out = alumux2_out;
+    endcase
+
+    unique case (control_word_EX.alu_muxsel1)
+        alumux::rs1_out:  alumux1_out = read_data1_EX;
+        alumux::pc_out:   alumux1_out = pc_EX;
+        default: alumux1_out = read_data1_EX;
+    endcase
+
+    unique case (control_word_EX.alu_muxsel2)
+        alumux::i_imm: alumux2_out = i_imm_EX;  
+        alumux::u_imm: alumux2_out = u_imm_EX;
+        alumux::b_imm: alumux2_out = b_imm_EX;
+        alumux::s_imm: alumux2_out = s_imm_EX;
+        alumux::j_imm: alumux2_out = j_imm_EX;
+        alumux::rs2_out: alumux2_out = read_data2_EX;
+>>>>>>> 2661b22be0af72bf192159ff6da11484cd503af4
         default: alumux2_out = i_imm_EX;
     endcase
 
@@ -445,7 +477,6 @@ always_comb begin : MUXES
 
         default:   pc_offset = pc_EX + b_imm_EX;
     endcase
-
 
 end
 /*****************************************************************************/

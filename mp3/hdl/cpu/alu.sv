@@ -12,7 +12,7 @@ always_comb begin
     unique case (aluop)
         alu_add_beq: begin 
             f = a + b;
-            z = a == b;
+            z = (a == b);
         end
         alu_sll_bne: begin 
             f = a << b[4:0];
