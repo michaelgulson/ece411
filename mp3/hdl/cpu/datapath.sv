@@ -406,16 +406,6 @@ always_comb begin : MUXES
     endcase
 
     unique case (forwardB)
-<<<<<<< HEAD
-        4'b0000: alumux2_out = i_imm_EX;  
-        4'b0001: alumux2_out = u_imm_EX;
-        4'b0010: alumux2_out = b_imm_EX;
-        4'b0011: alumux2_out = s_imm_EX;
-        4'b0100: alumux2_out = j_imm_EX;
-        4'b0101: alumux2_out = read_data2_EX;
-        4'b1000: alumux2_out = alu_out_MEM;
-        4'b1001: alumux2_out = regfilemux_out;
-=======
         2'b00: fmuxB_out = alumux2_out;
         2'b10: fmuxB_out = alu_out_MEM;
         2'b01: fmuxB_out = regfilemux_out;
@@ -435,7 +425,6 @@ always_comb begin : MUXES
         alumux::s_imm: alumux2_out = s_imm_EX;
         alumux::j_imm: alumux2_out = j_imm_EX;
         alumux::rs2_out: alumux2_out = read_data2_EX;
->>>>>>> 2661b22be0af72bf192159ff6da11484cd503af4
         default: alumux2_out = i_imm_EX;
     endcase
 

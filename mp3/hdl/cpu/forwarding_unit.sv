@@ -58,8 +58,4 @@ always_comb begin
         forwardB = 2'b00;
     end
 end
-<<<<<<< HEAD
-
-=======
->>>>>>> 2661b22be0af72bf192159ff6da11484cd503af4
 endmodule
