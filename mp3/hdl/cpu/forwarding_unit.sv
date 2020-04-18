@@ -18,8 +18,6 @@ logic load_regfile_MEM;
 logic load_regfile_WB;
 logic [4:0] rs1_EX;
 logic [4:0] rs2_EX;
-// alumux::alumux1_sel_t alu_muxsel1_EX;
-// alumux::alumux2_sel_t alu_muxsel2_EX;
 
 assign dest_MEM = control_word_MEM.dest;
 assign dest_WB = control_word_WB.dest;
@@ -27,8 +25,6 @@ assign load_regfile_MEM = control_word_MEM.load_regfile;
 assign load_regfile_WB = control_word_WB.load_regfile;
 assign rs1_EX = control_word_EX.instr[19:15];
 assign rs2_EX = control_word_EX.instr[24:20];
-// assign alumuxsel1_EX = control_word_EX.alu_muxsel1;
-// assign alumuxsel2_EX = control_word_EX.alu_muxsel2;
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 
 always_comb begin
