@@ -44,10 +44,12 @@ logic [3:0] data_mbe;
 logic data_resp;
 rv32i_word data_addr;
 rv32i_word data_rdata;
-logic l2_addr;
+logic [31:0] l2_addr;
 logic l2_read;
 logic l2_write;
-logic l2_wdata;
+logic [255:0] l2_rdata;
+logic [255:0] l2_wdata;
+logic [255:0] pmem_wdata_l2;
 logic l2_resp;
 
 
@@ -118,17 +120,18 @@ l2_cache(
     .clk(clk), 
     .rst(rst), 
     .mem_address(l2_addr),
-    .pmem_rdata(pmem_rdata),
+    .pmem_rdata(pmem_rdata256), //check again
     .mem_read(l2_read),
     .mem_write(l2_write),
     .pmem_resp(pmem_resp),
     .mem_wdata(l2_wdata), 
     .mem_byte_enable(4'b000), 
+    .pmem_wdata(pmem_wdata_l2), //check again
     .mem_rdata(l2_rdata), 
     .pmem_read(read_o),  //not sure
     .pmem_write(write_o), //not sure
     .mem_resp(l2_resp),
-    .pmem_address(addreess_o)
+    .pmem_address(address_o)
 );
 
 
