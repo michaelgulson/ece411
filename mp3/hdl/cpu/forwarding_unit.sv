@@ -8,8 +8,8 @@ module fowarding_unit
     input rv32i_control_word control_word_WB,
 
 
-    output logic [1:0] forwardA,
-    output logic [1:0] forwardB
+    output alumux::alumux1_sel_t forwardA,
+    output alumux::alumux2_sel_t forwardB
 );
 
 logic [4:0] dest_MEM;
@@ -31,32 +31,32 @@ assign opcode_EX = control_word_EX.instr[6:0];
 always_comb begin
     if(!((opcode_EX == op_lui) || (opcode_EX == op_auipc) || (opcode_EX == op_jal))) begin
         if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs1_EX)begin
-            forwardA = 2'b10;
+            forwardA = alumux::alu_out_MEM1;
         end
         else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs1_EX)begin
-            forwardA = 2'b01;
+            forwardA = alumux::alu_out_WB1;
         end
         else begin
-            forwardA = 2'b00;
+            forwardA = control_word_EX.alu_muxsel1;
         end
     end
     else begin
-        forwardA = 2'b00;
+        forwardA = control_word_EX.alu_muxsel1;
     end
 
     if((opcode_EX == op_reg)||(opcode_EX == op_store)||(opcode_EX == op_br)) begin
         if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs2_EX)begin
-            forwardB = 2'b10;
+            forwardB = alumux::alu_out_MEM2;
         end
         else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs2_EX)begin
-            forwardB = 2'b01;
+            forwardB = alumux::alu_out_WB2;
         end
         else begin
-            forwardB = 2'b00;
+            forwardB = control_word_EX.alu_muxsel2;
         end
     end
     else begin
-        forwardB = 2'b00;
+        forwardB = control_word_EX.alu_muxsel2;
     end
 end
 endmodule
