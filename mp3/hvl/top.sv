@@ -56,22 +56,22 @@ initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
 // assign rvfi.commit
-// assign rvfi.inst
-// assign rvfi.trap
-// assign rvfi.rs1_addr
-// assign rvfi.rs2_addr
-// assign rvfi.rs1_rdata
-// assign rvfi.rs2_rdata
-// assign rvfi.load_regfile
-// assign rvfi.rd_addr
-// assign rvfi.rd_wdata
-// assign rvfi.pc_rdata
-// assign rvfi.pc_wdata
-// assign rvfi.mem_addr
-// assign rvfi.mem_rmask
-// assign rvfi.mem_wmask
-// assign rvfi.mem_rdata
-// assign rvfi.mem_wdata
+assign rvfi.inst = dut.pipeline_datapath.control_word_WB.instr;
+assign rvfi.trap = dut.pipeline_datapath.control_word_WB.trap;
+assign rvfi.rs1_addr = dut.pipeline_datapath.control_word_WB.instr[19:15];
+assign rvfi.rs2_addr = dut.pipeline_datapath.control_word_WB.instr[24:20];
+assign rvfi.rs1_rdata = dut.pipeline_datapath.read_data1_WB;
+assign rvfi.rs2_rdata = dut.pipeline_datapath.read_data2_WB;
+assign rvfi.load_regfile = dut.pipeline_datapath.control_word_WB.load_regfile;
+assign rvfi.rd_addr = dut.pipeline_datapath.control_word_WB.dest;
+assign rvfi.rd_wdata = dut.pipeline_datapath.regfilemux_out;
+assign rvfi.pc_rdata = dut.pipeline_datapath.pc_WB;
+assign rvfi.pc_wdata = dut.pipeline_datapath.pc_wdata;
+assign rvfi.mem_addr = dut.pipeline_datapath.data_addr_WB;
+assign rvfi.mem_rmask = dut.pipeline_datapath.control_word_WB.rmask;
+assign rvfi.mem_wmask = dut.pipeline_datapath.control_word_WB.wmask;
+assign rvfi.mem_rdata = dut.pipeline_datapath.data_out_WB;
+assign rvfi.mem_wdata = dut.pipeline_datapath.data_wdata_WB;
 
 /**************************** End RVFIMON signals ****************************/
 

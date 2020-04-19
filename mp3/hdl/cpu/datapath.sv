@@ -521,11 +521,6 @@ always_comb begin : MUXES
 end
 /*****************************************************************************/
 
-always_comb begin
-
-
-end
-
 
 
 endmodule: datapath
