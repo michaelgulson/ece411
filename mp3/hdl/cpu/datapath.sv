@@ -395,27 +395,6 @@ always_comb begin : MUXES
         default: pcmux_out = pc_out;
     endcase
 
-    //EX stage
-    unique case (forwardA)
-        alumux::rs1_out:  alumux1_out = read_data1_EX;
-        alumux::pc_out:   alumux1_out = pc_EX;
-        alumux::alu_out_MEM1: alumux1_out = alu_out_MEM;
-        alumux::regfile_WB1: alumux1_out = regfilemux_out;
-        default: alumux1_out = read_data1_EX;
-    endcase
-
-    unique case (forwardB)
-        alumux::i_imm: alumux2_out = i_imm_EX;  
-        alumux::u_imm: alumux2_out = u_imm_EX;
-        alumux::b_imm: alumux2_out = b_imm_EX;
-        alumux::s_imm: alumux2_out = s_imm_EX;
-        alumux::j_imm: alumux2_out = j_imm_EX;
-        alumux::rs2_out: alumux2_out = read_data2_EX;
-        alumux::alu_out_MEM2: alumux2_out = alu_out_MEM;
-        alumux::regfile_WB2: alumux2_out = regfilemux_out;
-        default: alumux2_out = i_imm_EX;
-    endcase
-
     //WB stage
     unique case (control_word_WB.regfile_mux_sel)
         regfilemux::alu_out:    regfilemux_out = alu_out_WB;
@@ -453,6 +432,27 @@ always_comb begin : MUXES
         op_jalr:   pc_offset = pc_EX + j_imm_EX; 
 
         default:   pc_offset = pc_EX + b_imm_EX;
+    endcase
+
+    //EX stage
+    unique case (forwardA)
+        alumux::rs1_out:  alumux1_out = read_data1_EX;
+        alumux::pc_out:   alumux1_out = pc_EX;
+        alumux::alu_out_MEM1: alumux1_out = alu_out_MEM;
+        alumux::regfile_WB1: alumux1_out = regfilemux_out;
+        default: alumux1_out = read_data1_EX;
+    endcase
+
+    unique case (forwardB)
+        alumux::i_imm: alumux2_out = i_imm_EX;  
+        alumux::u_imm: alumux2_out = u_imm_EX;
+        alumux::b_imm: alumux2_out = b_imm_EX;
+        alumux::s_imm: alumux2_out = s_imm_EX;
+        alumux::j_imm: alumux2_out = j_imm_EX;
+        alumux::rs2_out: alumux2_out = read_data2_EX;
+        alumux::alu_out_MEM2: alumux2_out = alu_out_MEM;
+        alumux::regfile_WB2: alumux2_out = regfilemux_out;
+        default: alumux2_out = i_imm_EX;
     endcase
 
 end
