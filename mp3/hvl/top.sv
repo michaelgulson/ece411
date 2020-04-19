@@ -16,19 +16,13 @@ source_tb tb(
 );
 /****************************** End do not touch *****************************/
 
-/************************ Signals necessary for monitor **********************/
-// This section not required until CP3
+/****************************** Halting **************************************/
+
 // int timeout = 100000000;   // Feel Free to adjust the timeout value
 int halting = 0;
 int count = 0;
 logic prehalt;
 int delay = 5;
-
-assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
-assign prehalt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
-                    (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
-initial rvfi.order = 0;
-always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
 // Stop simulation on timeout (stall detection), halt
 always @(posedge itf.clk) begin
@@ -51,26 +45,34 @@ always @(posedge itf.clk) begin
     // end
     // timeout <= timeout - 1;
 end
+/*****************************************************************************/
 
-// writing dirty bits to physical memory at the end of execution
-// initial begin
-//     while(prehalt == 0) begin
-//         //do nothing
-//     end
-//     //after prehalt detected
-//     for(int i = 0; i < 8; ++i) begin
-//         //check way 0
-//         if(dut.d_cache.cache_datapath.valid_array_0.data[i] &
-//            dut.d_cache.cache_datapath.dirty_array_0.data[i]) begin
-//             tb.memory.mem._mem[dut.d_cache.cache_datapath.tag_array_0.data[i]] = dut.d_cache.cache_datapath.line_array_0.data[i];
-//         end
-//         //check way 1
-//         if(dut.d_cache.cache_datapath.valid_array_1.data[i] &
-//            dut.d_cache.cache_datapath.dirty_array_1.data[i]) begin
-//             tb.memory.mem._mem[dut.d_cache.cache_datapath.tag_array_1.data[i]] = dut.d_cache.cache_datapath.line_array_1.data[i];
-//         end
-//     end
-// end
+/************************ Signals necessary for monitor **********************/
+// This section not required until CP3
+assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
+assign prehalt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
+                    (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
+initial rvfi.order = 0;
+always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
+
+// assign rvfi.commit
+// assign rvfi.inst
+// assign rvfi.trap
+// assign rvfi.rs1_addr
+// assign rvfi.rs2_addr
+// assign rvfi.rs1_rdata
+// assign rvfi.rs2_rdata
+// assign rvfi.load_regfile
+// assign rvfi.rd_addr
+// assign rvfi.rd_wdata
+// assign rvfi.pc_rdata
+// assign rvfi.pc_wdata
+// assign rvfi.mem_addr
+// assign rvfi.mem_rmask
+// assign rvfi.mem_wmask
+// assign rvfi.mem_rdata
+// assign rvfi.mem_wdata
+
 /**************************** End RVFIMON signals ****************************/
 
 /********************* Assign Shadow Memory Signals Here *********************/
