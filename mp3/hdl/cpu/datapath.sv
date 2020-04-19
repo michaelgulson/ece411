@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 63
+`define CONTROL_WORD_SIZE 64
 
 import rv32i_types::*;
 //import control_word_types::*;
@@ -58,10 +58,8 @@ rv32i_word b_imm_EX;
 rv32i_word u_imm_EX;
 rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
-logic [1:0] forwardA;
-logic [1:0] forwardB;
-rv32i_word fmuxA_out;
-rv32i_word fmuxB_out;
+alumux::alumux1_sel_t forwardA;
+alumux::alumux2_sel_t forwardB;
 
 //MEM stage
 rv32i_word alu_out_MEM;
@@ -399,32 +397,22 @@ always_comb begin : MUXES
 
     //EX stage
     unique case (forwardA)
-        2'b00:  fmuxA_out = alumux1_out;
-        2'b10:  fmuxA_out = alu_out_MEM;
-        2'b01:  fmuxA_out = regfilemux_out;
-        default: fmuxA_out = alumux1_out;
-    endcase
-
-    unique case (forwardB)
-        2'b00: fmuxB_out = alumux2_out;
-        2'b10: fmuxB_out = alu_out_MEM;
-        2'b01: fmuxB_out = regfilemux_out;
-        default: fmuxB_out = alumux2_out;
-    endcase
-
-    unique case (control_word_EX.alu_muxsel1)
         alumux::rs1_out:  alumux1_out = read_data1_EX;
         alumux::pc_out:   alumux1_out = pc_EX;
+        alumux::alu_out_MEM1: alumux1_out = alu_out_MEM;
+        alumux::regfile_WB1: alumux1_out = regfilemux_out;
         default: alumux1_out = read_data1_EX;
     endcase
 
-    unique case (control_word_EX.alu_muxsel2)
+    unique case (forwardB)
         alumux::i_imm: alumux2_out = i_imm_EX;  
         alumux::u_imm: alumux2_out = u_imm_EX;
         alumux::b_imm: alumux2_out = b_imm_EX;
         alumux::s_imm: alumux2_out = s_imm_EX;
         alumux::j_imm: alumux2_out = j_imm_EX;
         alumux::rs2_out: alumux2_out = read_data2_EX;
+        alumux::alu_out_MEM2: alumux2_out = alu_out_MEM;
+        alumux::regfile_WB2: alumux2_out = regfilemux_out;
         default: alumux2_out = i_imm_EX;
     endcase
 
