@@ -44,13 +44,15 @@ logic [3:0] data_mbe;
 logic data_resp;
 rv32i_word data_addr;
 rv32i_word data_rdata;
-logic [31:0] l2_addr;
+
 logic l2_read;
 logic l2_write;
 logic [255:0] l2_rdata;
 logic [255:0] l2_wdata;
 logic [255:0] pmem_wdata_l2;
 logic l2_resp;
+rv32i_word  l2_addr;
+
 
 
 
@@ -111,8 +113,6 @@ cache d_cache(
 );
 
 
-
-
 cache #(.write_width(256),
         .s_index(2),
         .l2(1)) 
@@ -120,18 +120,18 @@ l2_cache(
     .clk(clk), 
     .rst(rst), 
     .mem_address(l2_addr),
-    .pmem_rdata(pmem_rdata256), //check again
+    .pmem_rdata(pmem_rdata256), //pmem_rdata
     .mem_read(l2_read),
     .mem_write(l2_write),
-    .pmem_resp(pmem_resp),
+    .pmem_resp(cacheline_adaptor_resp),
     .mem_wdata(l2_wdata), 
     .mem_byte_enable(4'b000), 
-    .pmem_wdata(pmem_wdata_l2), //check again
+    .pmem_wdata(pmem_wdata_l2), 
     .mem_rdata(l2_rdata), 
-    .pmem_read(read_o),  //not sure
-    .pmem_write(write_o), //not sure
-    .mem_resp(l2_resp),
-    .pmem_address(address_o)
+    .pmem_read(pmem_readin), //read_o 
+    .pmem_write(pmem_writein), //write_o
+    .mem_resp(l2_resp), 
+    .pmem_address(pmem_addressin) //?pmem_address
 );
 
 
@@ -141,18 +141,18 @@ arbiter arbiter(
     .mem_read_i(mem_read_i), 
     .mem_read_d(mem_read_d),
     .mem_write_d(mem_write_d),
-    .pmem_resp(cacheline_adaptor_resp), 
-    .pmem_rdata(pmem_rdata256),
+    .pmem_resp(l2_resp), 
+    .pmem_rdata(l2_rdata),
     .mem_addr_i(mem_addr_i),
     .mem_addr_d(mem_addr_d),
 
-    .pmem_read(pmem_readin),
-    .pmem_write(pmem_writein),
+    .pmem_read(l2_read),
+    .pmem_write(l2_write),
     .mem_resp_i(mem_resp_i),
     .mem_resp_d(mem_resp_d),
     .inst_rdata(inst_rdata_arb),
     .data_rdata(data_rdata_arb),
-    .pmem_addr(pmem_addressin)
+    .pmem_addr(l2_addr)
 );
 
 cacheline_adaptor cacheline_adaptor(
