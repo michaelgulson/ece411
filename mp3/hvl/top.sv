@@ -17,7 +17,6 @@ source_tb tb(
 /****************************** End do not touch *****************************/
 
 /****************************** Halting **************************************/
-
 // int timeout = 100000000;   // Feel Free to adjust the timeout value
 int halting = 0;
 int count = 0;
@@ -28,14 +27,11 @@ int delay = 5;
 always @(posedge itf.clk) begin
     if (prehalt) begin
         halting <= 1;
-        // $display("1");
     end
     if (halting == 1) begin
         count <= count + 1;
-        // $display("2");
     end
     if (count == delay) begin
-        // $display("3");
         rvfi.halt <= 1;
         $finish;
     end

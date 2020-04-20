@@ -25,7 +25,6 @@ module datapath(
 //IF stage
 rv32i_word pcmux_out;
 rv32i_word pc_ID;
-//logic load_pc;
 rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 
@@ -422,7 +421,6 @@ always_comb begin : MUXES
     unique case (control_word_MEM.data_addrmux_sel)
         datamux::pc_out:    data_addrmux_out = pc_MEM;
         datamux::alu_out:  data_addrmux_out = alu_out_MEM;
-        // etc.
         default: data_addrmux_out = pc_MEM;
     endcase
 
