@@ -29,8 +29,6 @@ rv32i_word pc_out;
 pcmux::pcmux_sel_t pcmux_sel; //based on the MEM stage br_en and control word
 
 //ID stage
-logic [4:0] rs1;
-logic [4:0] rs2;
 logic [2:0] funct3;
 logic [6:0] funct7;
 rv32i_opcode opcode;
@@ -59,7 +57,7 @@ rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
 alumux::alumux1_sel_t forwardA;
 alumux::alumux2_sel_t forwardB;
-rv32i_word read_data1_out;
+rv32i_word read_data1_out; //only for rv32i monitor
 rv32i_word read_data2_out;
 
 //MEM stage
@@ -144,8 +142,6 @@ assign data_mbe = control_word_MEM.wmask;
 assign funct3 = ir_ID[14:12];
 assign funct7 = ir_ID[31:25];
 assign opcode = rv32i_opcode'(ir_ID[6:0]);
-// assign rs1 = ir_ID[19:15];
-// assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 assign nop_sel = flush||control_word_mux_sel;
 
@@ -276,7 +272,7 @@ register read_data1_EX_MEM(     //only for rv32i monitor
     .out(read_data1_MEM)
 );
 
-register read_data2_EX_MEM(
+register read_data2_EX_MEM(  
     .clk(clk),
     .rst(rst),
     .load(loadReg),
@@ -519,7 +515,7 @@ always_comb begin : MUXES
 
     endcase
 
-    unique case(forwardA)
+    unique case(forwardA) //only for rv32i monitor
         alumux::rs1_out:  read_data1_out = read_data1_EX;
         alumux::pc_out:   read_data1_out = read_data1_EX;
         alumux::alu_out_MEM1: read_data1_out = alu_out_MEM;

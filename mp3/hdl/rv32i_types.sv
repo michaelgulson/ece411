@@ -71,8 +71,8 @@ typedef struct packed {
     logic [3:0] wmask;
     logic trap; //for branching
     rv32i_word instr;
-    logic [4:0] rs1;
-    logic [4:0] rs2;
+    logic [4:0] rs1; //source registers from regfile
+    logic [4:0] rs2; //source registers from regfile
 
     //muxes
     regfilemux::regfilemux_sel_t    regfile_mux_sel;
