@@ -45,6 +45,14 @@ logic data_resp;
 rv32i_word data_addr;
 rv32i_word data_rdata;
 
+logic l2_read;
+logic l2_write;
+logic [255:0] l2_rdata;
+logic l2_resp;
+rv32i_word  l2_addr;
+
+
+
 
 datapath pipeline_datapath(
     .clk(clk),
@@ -103,24 +111,47 @@ cache d_cache(
 );
 
 
+cache #(.write_width(256),
+        .s_index(2),
+        .l2(1)) 
+l2_cache(
+    .clk(clk), 
+    .rst(rst), 
+    .mem_address(l2_addr), //arbiter
+    .pmem_rdata(pmem_rdata256), //*
+    .mem_read(l2_read), //arbiter
+    .mem_write(l2_write), //arbiter
+    .pmem_resp(cacheline_adaptor_resp),//*
+    .mem_wdata(pmem_wdata256), //*connects directly to D-cache
+    .mem_byte_enable(4'b000), 
+    
+    .pmem_wdata(), //*
+    .mem_rdata(l2_rdata), //arbiter
+    .pmem_read(pmem_readin), //*
+    .pmem_write(pmem_writein), //write_o
+    .mem_resp(l2_resp), //arbiter
+    .pmem_address(pmem_addressin) //*
+);
+
+
 arbiter arbiter(   
     .clk(clk),
     .rst(rst),
     .mem_read_i(mem_read_i), 
     .mem_read_d(mem_read_d),
     .mem_write_d(mem_write_d),
-    .pmem_resp(cacheline_adaptor_resp), 
-    .pmem_rdata(pmem_rdata256),
+    .pmem_resp(l2_resp), 
+    .pmem_rdata(l2_rdata),
     .mem_addr_i(mem_addr_i),
     .mem_addr_d(mem_addr_d),
 
-    .pmem_read(pmem_readin),
-    .pmem_write(pmem_writein),
+    .pmem_read(l2_read),
+    .pmem_write(l2_write),
     .mem_resp_i(mem_resp_i),
     .mem_resp_d(mem_resp_d),
     .inst_rdata(inst_rdata_arb),
     .data_rdata(data_rdata_arb),
-    .pmem_addr(pmem_addressin)
+    .pmem_addr(l2_addr)
 );
 
 cacheline_adaptor cacheline_adaptor(
