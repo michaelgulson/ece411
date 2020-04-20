@@ -1,8 +1,9 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
 `define CONTROL_WORD_SIZE 74
+`define NON_SYNTHESIS //uncomment to use non synthesis for rvfi montior 
 
 import rv32i_types::*;
-//import control_word_types::*;
+
 
 module datapath(
     input logic clk,
@@ -57,7 +58,11 @@ rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
 alumux::alumux1_sel_t forwardA;
 alumux::alumux2_sel_t forwardB;
+`ifdef NON_SYNTHESIS
+// synthesis translate_off
 rv32i_word read_data1_out; //only for rv32i monitor
+// synthesis translate_on
+`endif
 rv32i_word read_data2_out;
 
 //MEM stage
@@ -65,7 +70,11 @@ rv32i_word alu_out_MEM;
 rv32i_word pc_MEM;
 rv32i_word pc_offset_MEM;
 rv32i_control_word control_word_MEM;
+`ifdef NON_SYNTHESIS
+// synthesis translate_off
 rv32i_word read_data1_MEM; //only for rv32i monitor
+// synthesis translate_on
+`endif
 rv32i_word read_data2_MEM;
 logic br_en_MEM;
 
@@ -82,11 +91,15 @@ rv32i_word dm_mask_w;
 rv32i_word pc_offset_WB;
 rv32i_word data_addrmux_out;
 rv32i_word u_imm_WB;
+`ifdef NON_SYNTHESIS
+// synthesis translate_off
 rv32i_word read_data1_WB; //only for rv32i monitor
 rv32i_word read_data2_WB; //only for rv32i monitor
 rv32i_word data_addr_WB;  //only for rv32i monitor
 rv32i_word data_wdata_WB;  //only for rv32i monitor
 rv32i_word pc_wdata;  //only for rv32i monitor
+// synthesis translate_on
+`endif
 
 //LoadReg signals
 logic loadReg;
@@ -264,6 +277,8 @@ register pc_offset_EX_MEM(
     .out(pc_offset_MEM)
 );
 
+`ifdef NON_SYNTHESIS
+// synthesis translate_off
 register read_data1_EX_MEM(     //only for rv32i monitor
     .clk(clk),
     .rst(rst),
@@ -271,6 +286,8 @@ register read_data1_EX_MEM(     //only for rv32i monitor
     .in(read_data1_out),
     .out(read_data1_MEM)
 );
+// synthesis translate_on
+`endif
 
 register read_data2_EX_MEM(  
     .clk(clk),
@@ -337,6 +354,8 @@ register alu_out_MEM_WB(
     .out(alu_out_WB)
 );
 
+`ifdef NON_SYNTHESIS
+// synthesis translate_off
 register read_data1_MEM_WB(     //only for rv32i monitor
     .clk(clk),
     .rst(rst),
@@ -368,6 +387,8 @@ register data_wdata_MEM_WB(   //only for rv32i monitor
     .in(data_wdata),
     .out(data_wdata_WB)
 );
+// synthesis translate_on
+`endif
 
 /****************************************************************************/
 
@@ -476,7 +497,6 @@ always_comb begin : MUXES
         op_br:     pc_offset = pc_EX + b_imm_EX; 
         op_jal:    pc_offset = pc_EX + j_imm_EX;
         op_jalr:   pc_offset = pc_EX + j_imm_EX; 
-
         default:   pc_offset = pc_EX + b_imm_EX;
     endcase
 
@@ -501,8 +521,9 @@ always_comb begin : MUXES
         default: alumux2_out = i_imm_EX;
     endcase
 
+    `ifdef NON_SYNTHESIS
+    // synthesis translate_off
     unique case(rv32i_opcode'(control_word_WB.instr[6:0])) //only for rv32i monitor 
-    
         op_br: begin
                 if(br_en_WB==1'b1)
                     pc_wdata = pc_offset_WB;
@@ -512,7 +533,6 @@ always_comb begin : MUXES
         op_jal: pc_wdata = pc_offset_WB;
         op_jalr: pc_wdata = {alu_out_WB[31:1],1'b0};
         default: pc_wdata = pc_WB +4;
-
     endcase
 
     unique case(forwardA) //only for rv32i monitor
@@ -522,6 +542,8 @@ always_comb begin : MUXES
         alumux::regfile_WB1: read_data1_out = regfilemux_out;
         default: read_data1_out = read_data1_EX;
     endcase
+    // synthesis translate_on
+    `endif
 
     unique case(forwardB)
         alumux::i_imm: read_data2_out = read_data2_EX;  
@@ -534,8 +556,6 @@ always_comb begin : MUXES
         alumux::regfile_WB2: read_data2_out = regfilemux_out;
         default: read_data2_out = read_data2_EX;    
     endcase
-
-
 end
 /*****************************************************************************/
 
