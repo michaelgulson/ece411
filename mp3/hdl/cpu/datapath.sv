@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 64
+`define CONTROL_WORD_SIZE 74
 
 import rv32i_types::*;
 //import control_word_types::*;
@@ -114,6 +114,8 @@ assign nop.pc_mux_sel = pcmux::pc_plus4;
 assign nop.alu_muxsel1 = alumux::rs1_out;
 assign nop.alu_muxsel2 = alumux::i_imm;
 assign nop.data_addrmux_sel = datamux::pc_out;
+assign nop.rs1 = 3'b0;
+assign nop.rs2 = 3'b0;
 
 //need this for loadReg.
 assign data_rw = data_read || data_write;
@@ -142,8 +144,8 @@ assign data_mbe = control_word_MEM.wmask;
 assign funct3 = ir_ID[14:12];
 assign funct7 = ir_ID[31:25];
 assign opcode = rv32i_opcode'(ir_ID[6:0]);
-assign rs1 = ir_ID[19:15];
-assign rs2 = ir_ID[24:20];
+// assign rs1 = ir_ID[19:15];
+// assign rs2 = ir_ID[24:20];
 assign opcode_EX = rv32i_opcode'(control_word_EX.instr[6:0]);
 assign nop_sel = flush||control_word_mux_sel;
 
@@ -164,7 +166,7 @@ regfile regfile(
     .rst(rst),
     .load(control_word_WB.load_regfile),
     .in(regfilemux_out),
-    .src_a(rs1), .src_b(rs2), .dest(control_word_WB.dest),
+    .src_a(ctrl_word.rs1), .src_b(ctrl_word.rs2), .dest(control_word_WB.dest),
     .reg_a(rs1_out), .reg_b(rs2_out)
 );
 /****************************************************************************/

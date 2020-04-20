@@ -51,11 +51,11 @@ initial rvfi.order = 0;
 initial rvfi.halt = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
-assign rvfi.commit = (dut.pipeline_datapath.control_word_WB.instr != 32'b0);
+assign rvfi.commit = (dut.pipeline_datapath.control_word_WB.instr != 32'b0) && dut.pipeline_datapath.loadReg;
 assign rvfi.inst = dut.pipeline_datapath.control_word_WB.instr;
 assign rvfi.trap = dut.pipeline_datapath.control_word_WB.trap;
-assign rvfi.rs1_addr = dut.pipeline_datapath.control_word_WB.instr[19:15];
-assign rvfi.rs2_addr = dut.pipeline_datapath.control_word_WB.instr[24:20];
+assign rvfi.rs1_addr = dut.pipeline_datapath.control_word_WB.rs1;
+assign rvfi.rs2_addr = dut.pipeline_datapath.control_word_WB.rs2;
 assign rvfi.rs1_rdata = dut.pipeline_datapath.read_data1_WB;
 assign rvfi.rs2_rdata = dut.pipeline_datapath.read_data2_WB;
 assign rvfi.load_regfile = dut.pipeline_datapath.control_word_WB.load_regfile;

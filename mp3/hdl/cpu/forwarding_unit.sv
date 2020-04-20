@@ -30,10 +30,10 @@ assign opcode_EX = control_word_EX.instr[6:0];
 
 always_comb begin
     if(!((opcode_EX == op_lui) || (opcode_EX == op_auipc) || (opcode_EX == op_jal))) begin
-        if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs1_EX)begin
+        if(load_regfile_MEM && (dest_MEM!=0) && (dest_MEM == rs1_EX))begin
             forwardA = alumux::alu_out_MEM1;
         end
-        else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs1_EX)begin
+        else if(load_regfile_WB && (dest_WB!=0) && (dest_WB == rs1_EX))begin
             forwardA = alumux::regfile_WB1;
         end
         else begin
@@ -45,10 +45,10 @@ always_comb begin
     end
 
     if((opcode_EX == op_reg)||(opcode_EX == op_store)||(opcode_EX == op_br)) begin
-        if(load_regfile_MEM && dest_MEM!=0 && dest_MEM == rs2_EX)begin
+        if(load_regfile_MEM && (dest_MEM!=0) && (dest_MEM == rs2_EX))begin
             forwardB = alumux::alu_out_MEM2;
         end
-        else if(load_regfile_WB && dest_WB!=0 && dest_WB == rs2_EX)begin
+        else if(load_regfile_WB && (dest_WB!=0) && (dest_WB == rs2_EX))begin
             forwardB = alumux::regfile_WB2;
         end
         else begin

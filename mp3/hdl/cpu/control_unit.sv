@@ -22,6 +22,8 @@ assign branch_funct3 = alu_ops'(funct3);
 assign load_funct3 = load_funct3_t'(funct3);
 assign store_funct3 = store_funct3_t'(funct3);
 
+logic pre_load_regfile;
+
 always_comb begin : trap_check
     ctrl_word.trap = 0;
     ctrl_word.rmask = '0;
@@ -103,56 +105,67 @@ always_comb begin
     ctrl_word.mem_read = 1'b0;
     ctrl_word.mem_write = 1'b0;
     ctrl_word.regfile_mux_sel = regfilemux::alu_out; 
-    ctrl_word.load_regfile = 1'b0;
+    pre_load_regfile = 1'b0;
     ctrl_word.pc_mux_sel = pcmux::pc_plus4;
     ctrl_word.alu_muxsel1 = alumux::rs1_out;
     ctrl_word.alu_muxsel2 = alumux::rs2_out;
     ctrl_word.dest = instr[11:7];
     ctrl_word.data_addrmux_sel = datamux::pc_out;
     ctrl_word.instr = instr;
+    ctrl_word.rs1 = instr[19:15]; //source for rs1
+    ctrl_word.rs2 = instr[24:20]; //source for rs2
     case (opcode)
         op_lui: begin
-            ctrl_word.load_regfile  = 1'b1;
+            pre_load_regfile  = 1'b1;
             ctrl_word.regfile_mux_sel = regfilemux::u_imm; 
+            ctrl_word.rs1 = 3'b0; //not using rs1
+            ctrl_word.rs2 = 3'b0; //not using rs2
         end
         op_auipc: begin
             ctrl_word.alu_op = alu_add_beq;
             ctrl_word.regfile_mux_sel = regfilemux::alu_out;
-            ctrl_word.load_regfile = 1'b1;
+            pre_load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::u_imm;
-            ctrl_word.pc_mux_sel = pcmux::pc_plus4;    
+            ctrl_word.pc_mux_sel = pcmux::pc_plus4;
+            ctrl_word.rs1 = 3'b0; //not using rs1
+            ctrl_word.rs2 = 3'b0; //not using rs2
         end
         op_jal: begin
             ctrl_word.alu_op = alu_add_beq;
             ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
-            ctrl_word.load_regfile = 1'b1;
+            pre_load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::pc_out;
             ctrl_word.alu_muxsel2 = alumux::j_imm;
-            ctrl_word.pc_mux_sel = pcmux::alu_out;    
+            ctrl_word.pc_mux_sel = pcmux::alu_out;
+            ctrl_word.rs1 = 3'b0; //not using rs1
+            ctrl_word.rs2 = 3'b0; //not using rs2
         end
         op_jalr: begin
             ctrl_word.alu_op = alu_add_beq;
             ctrl_word.regfile_mux_sel = regfilemux::pc_plus4;
-            ctrl_word.load_regfile = 1'b1;
+            pre_load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::i_imm;
-            ctrl_word.pc_mux_sel = pcmux::alu_mod2;    
+            ctrl_word.pc_mux_sel = pcmux::alu_mod2;
+            ctrl_word.rs2 = 3'b0; //not using rs2
         end
         op_br: begin
+            ctrl_word.dest = 3'b0; //don't use dest register
             ctrl_word.alu_op = branch_funct3;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::rs2_out;
-            ctrl_word.pc_mux_sel = pcmux::alu_out;    
+            ctrl_word.pc_mux_sel = pcmux::alu_out;
         end
         op_load: begin
             ctrl_word.alu_op = alu_add_beq;
             ctrl_word.mem_read = 1'b1;
-            ctrl_word.load_regfile = 1'b1;
+            pre_load_regfile = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
             ctrl_word.alu_muxsel2 = alumux::i_imm;
             ctrl_word.pc_mux_sel = pcmux::pc_plus4;  
-            ctrl_word.data_addrmux_sel = datamux::alu_out;  
+            ctrl_word.data_addrmux_sel = datamux::alu_out;
+            ctrl_word.rs2 = 3'b0; //not using rs2
             case(load_funct3)
                 lw: ctrl_word.regfile_mux_sel = regfilemux::lw;
                 lh: ctrl_word.regfile_mux_sel = regfilemux::lh;
@@ -163,6 +176,7 @@ always_comb begin
             endcase
         end
         op_store: begin
+            ctrl_word.dest = 3'b0; //don't use dest register
             ctrl_word.alu_op = alu_add_beq;
             ctrl_word.mem_write = 1'b1;
             ctrl_word.alu_muxsel1 = alumux::rs1_out;
@@ -171,8 +185,9 @@ always_comb begin
             ctrl_word.data_addrmux_sel = datamux::alu_out;
         end
         op_imm: begin
-            ctrl_word.load_regfile = 1'b1;
+            pre_load_regfile = 1'b1;
             ctrl_word.pc_mux_sel = pcmux::pc_plus4;
+            ctrl_word.rs2 = 3'b0; //not using rs2
             case(arith_funct3)
                 slt: ctrl_word.regfile_mux_sel = regfilemux::br_en;
                 sltu: ctrl_word.regfile_mux_sel = regfilemux::br_en;
@@ -181,7 +196,7 @@ always_comb begin
                     ctrl_word.regfile_mux_sel = regfilemux::alu_out;
                     ctrl_word.alu_muxsel1 = alumux::rs1_out;
                     ctrl_word.alu_muxsel2 = alumux::i_imm;
-                    ctrl_word.load_regfile = 1'b1;
+                    pre_load_regfile = 1'b1;
 
                     if (funct7 == 7'b0000000) //SRLI
                     begin
@@ -202,7 +217,7 @@ always_comb begin
         end
         op_reg: begin
             ctrl_word.regfile_mux_sel = regfilemux::alu_out;
-            ctrl_word.load_regfile = 1'b1;
+            pre_load_regfile = 1'b1;
             ctrl_word.pc_mux_sel = pcmux::pc_plus4;
             case(arith_funct3)
                 add:
@@ -273,6 +288,10 @@ always_comb begin
      default: ;
      endcase
  end
+
+//if dest reg = 0, then load_regfile is 0
+ assign ctrl_word.load_regfile = (instr[11:7] == 0) ? 1'b0 : pre_load_regfile;
+
  endmodule: control_unit
 
 
