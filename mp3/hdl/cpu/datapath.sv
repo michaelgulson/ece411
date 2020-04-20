@@ -60,6 +60,8 @@ rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
 alumux::alumux1_sel_t forwardA;
 alumux::alumux2_sel_t forwardB;
+rv32i_word read_data1_out;
+rv32i_word read_data2_out;
 
 //MEM stage
 rv32i_word alu_out_MEM;
@@ -269,7 +271,7 @@ register read_data1_EX_MEM(     //only for rv32i monitor
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in(read_data1_EX),
+    .in(read_data1_out),
     .out(read_data1_MEM)
 );
 
@@ -277,7 +279,7 @@ register read_data2_EX_MEM(
     .clk(clk),
     .rst(rst),
     .load(loadReg),
-    .in(read_data2_EX),
+    .in(read_data2_out),
     .out(read_data2_MEM)
 );
 
@@ -515,6 +517,26 @@ always_comb begin : MUXES
         op_jalr: pc_wdata = {alu_out_WB[31:1],1'b0};
         default: pc_wdata = pc_WB +4;
 
+    endcase
+
+    unique case(forwardA)
+        alumux::rs1_out:  read_data1_out = read_data1_EX;
+        alumux::pc_out:   read_data1_out = read_data1_EX;
+        alumux::alu_out_MEM1: read_data1_out = alu_out_MEM;
+        alumux::regfile_WB1: read_data1_out = regfilemux_out;
+        default: read_data1_out = read_data1_EX;
+    endcase
+
+    unique case(forwardB)
+        alumux::i_imm: read_data2_out = read_data2_EX;  
+        alumux::u_imm: read_data2_out = read_data2_EX;  
+        alumux::b_imm: read_data2_out = read_data2_EX;  
+        alumux::s_imm: read_data2_out = read_data2_EX;  
+        alumux::j_imm: read_data2_out = read_data2_EX;  
+        alumux::rs2_out: read_data2_out = read_data2_EX;
+        alumux::alu_out_MEM2: read_data2_out = alu_out_MEM;
+        alumux::regfile_WB2: read_data2_out = regfilemux_out;
+        default: read_data2_out = read_data2_EX;    
     endcase
 
 
