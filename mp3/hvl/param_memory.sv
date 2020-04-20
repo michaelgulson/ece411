@@ -22,7 +22,7 @@ logic [CACHE_LINE_WIDTH-1:0] _mem [logic [ADDRLEN-1:0]];
 int signed pageno;
 
 initial begin
-    int iteration = 0;
+    static int iteration = 0;
     forever begin
         @(itf.mcb iff (itf.mcb.rst || itf.mcb.read || itf.mcb.write))
         case ({itf.mcb.rst, itf.mcb.read, itf.mcb.write})
