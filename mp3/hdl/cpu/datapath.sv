@@ -65,6 +65,7 @@ rv32i_word alu_out_MEM;
 rv32i_word pc_MEM;
 rv32i_word pc_offset_MEM;
 rv32i_control_word control_word_MEM;
+rv32i_word read_data1_MEM; //only for rv32i monitor
 rv32i_word read_data2_MEM;
 logic br_en_MEM;
 
@@ -81,6 +82,11 @@ rv32i_word dm_mask_w;
 rv32i_word pc_offset_WB;
 rv32i_word data_addrmux_out;
 rv32i_word u_imm_WB;
+rv32i_word read_data1_WB; //only for rv32i monitor
+rv32i_word read_data2_WB; //only for rv32i monitor
+rv32i_word data_addr_WB;  //only for rv32i monitor
+rv32i_word data_wdata_WB;  //only for rv32i monitor
+rv32i_word pc_wdata;  //only for rv32i monitor
 
 //LoadReg signals
 logic loadReg;
@@ -190,6 +196,8 @@ register ir_IF_ID(
     .out(ir_ID)
 );
 
+//register
+
 //ID/EX
 register #(`CONTROL_WORD_SIZE) control_word_ID_EX(
     .clk(clk),
@@ -256,6 +264,14 @@ register pc_offset_EX_MEM(
     .out(pc_offset_MEM)
 );
 
+register read_data1_EX_MEM(     //only for rv32i monitor
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(read_data1_EX),
+    .out(read_data1_MEM)
+);
+
 register read_data2_EX_MEM(
     .clk(clk),
     .rst(rst),
@@ -319,6 +335,38 @@ register alu_out_MEM_WB(
     .load(loadReg),
     .in(alu_out_MEM),
     .out(alu_out_WB)
+);
+
+register read_data1_MEM_WB(     //only for rv32i monitor
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(read_data1_MEM),
+    .out(read_data1_WB)
+);
+
+register read_data2_MEM_WB(     //only for rv32i monitor
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(read_data2_MEM),
+    .out(read_data2_WB)
+);
+
+register data_addr_MEM_WB(      //only for rv32i monitor  
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(data_addrmux_out),
+    .out(data_addr_WB)
+);
+
+register data_wdata_MEM_WB(   //only for rv32i monitor 
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(data_wdata),
+    .out(data_wdata_WB)
 );
 
 /****************************************************************************/
@@ -453,7 +501,24 @@ always_comb begin : MUXES
         default: alumux2_out = i_imm_EX;
     endcase
 
+    unique case(rv32i_opcode'(control_word_WB.instr[6:0])) //only for rv32i monitor 
+    
+        op_br: begin
+                if(br_en_WB==1'b1)
+                    pc_wdata = pc_offset_WB;
+                else
+                    pc_wdata = pc_WB+4;
+                end
+        op_jal: pc_wdata = pc_offset_WB;
+        op_jalr: pc_wdata = {alu_out_WB[31:1],1'b0};
+        default: pc_wdata = pc_WB +4;
+
+    endcase
+
+
 end
 /*****************************************************************************/
+
+
 
 endmodule: datapath
