@@ -17,7 +17,6 @@ source_tb tb(
 /****************************** End do not touch *****************************/
 
 /****************************** Halting **************************************/
-
 // int timeout = 100000000;   // Feel Free to adjust the timeout value
 int halting = 0;
 int count = 0;
@@ -28,14 +27,11 @@ int delay = 5;
 always @(posedge itf.clk) begin
     if (prehalt) begin
         halting <= 1;
-        // $display("1");
     end
     if (halting == 1) begin
         count <= count + 1;
-        // $display("2");
     end
     if (count == delay) begin
-        // $display("3");
         rvfi.halt <= 1;
         $finish;
     end
@@ -52,6 +48,7 @@ end
 assign prehalt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
                     (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
 initial rvfi.order = 0;
+initial rvfi.halt = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
 assign rvfi.commit = (dut.pipeline_datapath.control_word_WB.instr != 32'b0);
