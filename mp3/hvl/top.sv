@@ -45,13 +45,12 @@ end
 
 /************************ Signals necessary for monitor **********************/
 // This section not required until CP3
-assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
 assign prehalt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
                     (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
-// assign rvfi.commit
+assign rvfi.commit = (dut.pipeline_datapath.control_word_WB.instr != 32'b0);
 assign rvfi.inst = dut.pipeline_datapath.control_word_WB.instr;
 assign rvfi.trap = dut.pipeline_datapath.control_word_WB.trap;
 assign rvfi.rs1_addr = dut.pipeline_datapath.control_word_WB.instr[19:15];
