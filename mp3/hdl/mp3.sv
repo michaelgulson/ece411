@@ -58,7 +58,7 @@ rv32i_word data_rdata;
 
 logic l2_read;
 logic l2_write;
-logic [l2_line-1:0] l2_rdata;
+logic [l2_mask-1:0] l2_rdata;
 logic l2_resp;
 rv32i_word  l2_addr;
 

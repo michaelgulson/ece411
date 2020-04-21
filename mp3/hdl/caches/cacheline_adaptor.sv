@@ -285,7 +285,7 @@ begin: cacheline_read
     end
     default:
     begin
-        ;
+        line_o <= 0;
     end
     endcase
 end
