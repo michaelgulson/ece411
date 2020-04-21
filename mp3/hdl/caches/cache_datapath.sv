@@ -27,7 +27,7 @@ module cache_datapath #(
     output logic dirty,
     output logic [s_line-1:0] mem_rdata256,
     output logic [s_line-1:0] pmem_wdata,
-    output logic [31:0] pmem_address
+    output rv32i_word pmem_address
 );  
 
 logic [s_tag-1:0] set_tag;
@@ -91,73 +91,73 @@ begin
     1'b0: //not dirty
     begin
         unique case (lru_out)
-        1'b0:  //way 0 was lru
-        begin 
-            unique case (load_data) 
-            1'b0:
+            1'b0:  //way 0 was lru
             begin 
-                line_0 = {s_mask*{1'b0}};
-            end 
-            1'b1:
-            begin 
-                line_0 = {s_mask*{1'b1}};
-            end 
-            endcase
-            line_1 = {s_mask*{1'b0}};
-        end 
-        1'b1: //way 1 was lru
-        begin 
-            unique case (load_data)
-            1'b0:
-            begin 
+                unique case (load_data) 
+                1'b0: line_0 = {s_mask*{1'b0}};
+                1'b1: line_0 = {s_mask*{1'b1}};
+                default: line_0 = {s_mask*{1'b0}};
+                endcase
                 line_1 = {s_mask*{1'b0}};
             end 
-            1'b1:
+            1'b1: //way 1 was lru
             begin 
-                line_1 = {s_mask*{1'b1}};
+                unique case (load_data)
+                1'b0: line_1 = {s_mask*{1'b0}};
+                1'b1: line_1 = {s_mask*{1'b1}};
+                default: line_1 = {s_mask*{1'b0}};
+                endcase
+                line_0 = {s_mask*{1'b0}};
+            end
+            default: //this should never happen
+            begin
+                line_0 = {s_mask*{1'b0}};
+                line_1 = {s_mask*{1'b0}};
             end 
-            endcase
-            line_0 = {s_mask*{1'b0}};
-        end
-        default: //this should never happen
-        begin
-            line_0 = {s_mask*{1'b0}};
-            line_1 = {s_mask*{1'b0}};
-        end 
         endcase 
     end 
     1'b1: //dirty
     begin  
-    // Line 0
-    unique case (h0)
-    1'b0: line_0 = {s_mask*{1'b0}};
-    1'b1:
-    begin
-        unique case (load_data)
-        1'b0: line_0 = {s_mask*{1'b0}};
-        1'b1: line_0 = mem_byte_enable256;
-        endcase  
-    end 
-    endcase 
-    // Line 1
-    unique case (h1)
-    1'b0: line_1 = {s_mask*{1'b0}};
-    1'b1:
-    begin
-        unique case (load_data)
+        // Line 0
+        unique case (h0)
+            1'b0: line_0 = {s_mask*{1'b0}};
+            1'b1: 
+            begin
+                unique case (load_data)
+                1'b0: line_0 = {s_mask*{1'b0}};
+                1'b1: line_0 = mem_byte_enable256;
+                default: line_0 = {s_mask*{1'b0}};
+                endcase  
+            end 
+        default: //this should never happen
+            begin
+                line_0 = {s_mask*{1'b0}};
+            end 
+        endcase 
+        // Line 1
+        unique case (h1)
         1'b0: line_1 = {s_mask*{1'b0}};
-        1'b1: line_1 = mem_byte_enable256;
-        endcase  
-    end 
-    endcase 
+        1'b1:
+        begin
+            unique case (load_data)
+            1'b0: line_1 = {s_mask*{1'b0}};
+            1'b1: line_1 = mem_byte_enable256;
+            default: line_1 = {s_mask*{1'b0}};
+            endcase  
+        end 
+        default:
+        begin 
+            line_1 = {s_mask*{1'b0}};
+        end 
+        endcase
     end 
     default:
-    begin 
+    begin
         line_0 = {s_mask*{1'b0}};
         line_1 = {s_mask*{1'b0}};
-    end 
+    end
     endcase 
-end 
+end
  
 data_array #( .s_offset(s_offset), .s_index(s_index)) line_array_1
 (
