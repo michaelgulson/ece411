@@ -20,13 +20,13 @@ module cache_datapath #(
     input logic load_data, 
     input logic pmem_write,
     input logic [31:0] mem_byte_enable256,
-    input logic [255:0] pmem_rdata,
-    input logic [255:0] mem_wdata256,
+    input logic [s_line-1:0] pmem_rdata,
+    input logic [s_line-1:0] mem_wdata256,
     output logic hit,
     output logic miss,
     output logic dirty,
-    output logic [255:0] mem_rdata256,
-    output logic[255:0] pmem_wdata,
+    output logic [s_line-1:0] mem_rdata256,
+    output logic [s_line-1:0] pmem_wdata,
     output logic [31:0] pmem_address
 );  
 
@@ -49,17 +49,17 @@ logic tl_0;
 logic tl_1;
 logic vl_0;
 logic vl_1;
-logic [255:0]data_mux_out;
-logic [31:0]line_0;
-logic [31:0]line_1;
-logic [255:0]data_array_out0;
-logic [255:0]data_array_out1;
+logic [s_line-1:0]data_mux_out;
+logic [s_mask-1:0]line_0;
+logic [s_mask-1:0]line_1;
+logic [s_line-1:0]data_array_out0;
+logic [s_line-1:0]data_array_out1;
 logic data_read;
 
 assign data_read = 1'b1;
 
-assign set_tag = mem_address[31:8];
-assign set_idx = mem_address[7:5];
+assign set_tag = mem_address[31:32-s_tag];
+assign set_idx = mem_address[32-s_tag-1:s_offset];
 
 assign h0 = ( (set_tag == t0) && v0 );
 assign h1 = ( (set_tag == t1) && v1 );
@@ -96,33 +96,33 @@ begin
             unique case (load_data) 
             1'b0:
             begin 
-                line_0 = 32'd0;
+                line_0 = {s_mask*{1'b0}};
             end 
             1'b1:
             begin 
-                line_0 = 32'hffffffff;
+                line_0 = {s_mask*{1'b1}};
             end 
             endcase
-            line_1 = 32'd0;
+            line_1 = {s_mask*{1'b0}};
         end 
         1'b1: //way 1 was lru
         begin 
             unique case (load_data)
             1'b0:
             begin 
-                line_1 = 32'd0;
+                line_1 = {s_mask*{1'b0}};
             end 
             1'b1:
             begin 
-                line_1 = 32'hffffffff;
+                line_1 = {s_mask*{1'b1}};
             end 
             endcase
-            line_0 = 32'd0;
+            line_0 = {s_mask*{1'b0}};
         end
         default: //this should never happen
         begin
-            line_0 = 32'd0;
-            line_1 = 32'd0; 
+            line_0 = {s_mask*{1'b0}};
+            line_1 = {s_mask*{1'b0}};
         end 
         endcase 
     end 
@@ -130,22 +130,22 @@ begin
     begin  
     // Line 0
     unique case (h0)
-    1'b0: line_0 = 32'd0;
+    1'b0: line_0 = {s_mask*{1'b0}};
     1'b1:
     begin
         unique case (load_data)
-        1'b0: line_0 = 32'd0;
+        1'b0: line_0 = {s_mask*{1'b0}};
         1'b1: line_0 = mem_byte_enable256;
         endcase  
     end 
     endcase 
     // Line 1
     unique case (h1)
-    1'b0: line_1 = 32'd0;
+    1'b0: line_1 = {s_mask*{1'b0}};
     1'b1:
     begin
         unique case (load_data)
-        1'b0: line_1 = 32'd0;
+        1'b0: line_1 = {s_mask*{1'b0}};
         1'b1: line_1 = mem_byte_enable256;
         endcase  
     end 
@@ -153,13 +153,13 @@ begin
     end 
     default:
     begin 
-        line_0 = 32'd0;
-        line_1 = 32'd0;
+        line_0 = {s_mask*{1'b0}};
+        line_1 = {s_mask*{1'b0}};
     end 
     endcase 
 end 
  
-data_array line_array_1
+data_array #( .s_offset(s_offset), .s_index(s_index)) line_array_1
 (
     .read(data_read),
     .write_en(line_1),
@@ -170,7 +170,7 @@ data_array line_array_1
     .*
 );
 
-data_array line_array_0
+data_array #( .s_offset(s_offset), .s_index(s_index)) line_array_0
 (
     .read(data_read),
     .write_en(line_0),
@@ -181,7 +181,7 @@ data_array line_array_0
     .*
 );
 
-array #(.width(s_tag)) tag_array_0(
+array #(.width(s_tag),.s_index(s_index)) tag_array_0(
     .read(data_read),
     .load(tl_0),
     .rindex(set_idx),
@@ -191,7 +191,7 @@ array #(.width(s_tag)) tag_array_0(
     .*
 );
 
-array #(.width(s_tag)) tag_array_1(
+array #(.width(s_tag),.s_index(s_index)) tag_array_1(
     .read(data_read),
     .load(tl_1),
     .rindex(set_idx),
@@ -252,32 +252,16 @@ array LRU(
             .*
 );
 
-mux2toParamOut #(.width(s_line)) data_mux_in(
-            .select(set_dirty),
-            .in1(pmem_rdata),
-            .in2(mem_wdata256),
-            .out(data_mux_out),
-            .*
-);
+always_comb
+begin
+    case(set_dirty)
+        1'd0:
+            data_mux_out = pmem_rdata;
+        1'd1:
+            data_mux_out = mem_wdata256; 
+        default:
+            data_mux_out = pmem_rdata;
+    endcase
+end
 
 endmodule : cache_datapath
-
-module mux2toParamOut #(parameter width = 32)(
-	input logic select, 
-	input logic [width-1:0] in1, in2,
-	output logic [width-1:0] out
-);
-
-	always_comb
-	begin
-		case(select)
-			1'd0:
-				out = in1;
-			1'd1:
-				out = in2; 
-			default:
-				out = in1;		
-		endcase
-	end
-
-endmodule : mux2toParamOut

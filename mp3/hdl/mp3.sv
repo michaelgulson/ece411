@@ -1,34 +1,44 @@
 //insert top level for mp3 here
 import rv32i_types::*;
 
-module mp3
+module mp3 #(
+    parameter pmem_mask = 64,
+    parameter l2_offset = 5,
+    parameter l2_index = 3,
+    parameter l2_mask = 2**l2_offset,
+    parameter l2_line = 8*l2_mask,
+    parameter l1_offset = 5,
+    parameter l1_index = 3,
+    parameter l1_mask = 2**l1_offset,
+    parameter l1_line = 8*l1_mask
+)
 (
     input clk,
     input rst,
     input pmem_resp,
-    input [63:0] pmem_rdata,
+    input [pmem_mask-1:0] pmem_rdata,
     output logic pmem_read,
     output logic pmem_write,
     output rv32i_word pmem_address,
-    output [63:0] pmem_wdata
+    output [pmem_mask-1:0] pmem_wdata
 );
 
-logic [255:0] pmem_rdata256;
-logic [255:0] pmem_wdata256;
+logic [l2_line-1:0] pmem_rdata256;
+logic [l2_line-1:0] pmem_wdata256;
 logic pmem_readin;
 logic pmem_writein;
 logic pmem_wdatain;
 rv32i_word pmem_addressin;
 logic pmem_resp_in;
 logic cacheline_adaptor_resp;
-logic [255:0] inst_rdata_arb;
+logic [l2_line-1:0] inst_rdata_arb;
 logic mem_resp_i;
-logic [255:0] wdata_i;
+logic [l2_line-1:0] wdata_i;
 logic mem_read_i;
 logic mem_write_i;
 rv32i_word mem_addr_i;
-logic [255:0] data_rdata_arb;
-logic [255:0] wdata_d;
+logic [l2_line-1:0] data_rdata_arb;
+logic [l2_line-1:0] wdata_d;
 logic mem_read_d;
 logic mem_write_d;
 rv32i_word mem_addr_d;
@@ -47,12 +57,9 @@ rv32i_word data_rdata;
 
 logic l2_read;
 logic l2_write;
-logic [255:0] l2_rdata;
+logic [l2_mask-1:0] l2_rdata;
 logic l2_resp;
 rv32i_word  l2_addr;
-
-
-
 
 datapath pipeline_datapath(
     .clk(clk),
@@ -74,7 +81,7 @@ datapath pipeline_datapath(
     .data_rdata(data_rdata)
 );
 
-cache i_cache(
+cache #(.s_offset(l1_offset),.s_index(l1_index)) i_cache(
     .clk(clk), 
     .rst(rst), 
     .mem_address(inst_addr),
@@ -92,7 +99,7 @@ cache i_cache(
     .pmem_address(mem_addr_i)
 );
 
-cache d_cache(    
+cache #(.s_offset(l1_offset),.s_index(l1_index)) d_cache(    
     .clk(clk), 
     .rst(rst), 
     .mem_address(data_addr),
@@ -109,30 +116,6 @@ cache d_cache(
     .mem_resp(data_resp),
     .pmem_address(mem_addr_d)
 );
-
-
-cache #(.write_width(256),
-        .s_index(2),
-        .l2(1)) 
-l2_cache(
-    .clk(clk), 
-    .rst(rst), 
-    .mem_address(l2_addr), //arbiter
-    .pmem_rdata(pmem_rdata256), //*
-    .mem_read(l2_read), //arbiter
-    .mem_write(l2_write), //arbiter
-    .pmem_resp(cacheline_adaptor_resp),//*
-    .mem_wdata(pmem_wdata256), //*connects directly to D-cache
-    .mem_byte_enable(4'b000), 
-    
-    .pmem_wdata(), //*
-    .mem_rdata(l2_rdata), //arbiter
-    .pmem_read(pmem_readin), //*
-    .pmem_write(pmem_writein), //write_o
-    .mem_resp(l2_resp), //arbiter
-    .pmem_address(pmem_addressin) //*
-);
-
 
 arbiter arbiter(   
     .clk(clk),
@@ -152,6 +135,28 @@ arbiter arbiter(
     .inst_rdata(inst_rdata_arb),
     .data_rdata(data_rdata_arb),
     .pmem_addr(l2_addr)
+);
+
+cache #(.s_offset(l2_offset),
+        .s_index(l2_index),
+        .l2(1)) 
+l2_cache(
+    .clk(clk), 
+    .rst(rst), 
+    .mem_address(l2_addr), //arbiter
+    .pmem_rdata(pmem_rdata256), //*
+    .mem_read(l2_read), //arbiter
+    .mem_write(l2_write), //arbiter
+    .pmem_resp(cacheline_adaptor_resp),//*
+    .mem_wdata(pmem_wdata256), //*connects directly to D-cache
+    .mem_byte_enable(4'b000), 
+    
+    .pmem_wdata(), //*
+    .mem_rdata(l2_rdata), //arbiter
+    .pmem_read(pmem_readin), //*
+    .pmem_write(pmem_writein), //write_o
+    .mem_resp(l2_resp), //arbiter
+    .pmem_address(pmem_addressin) //*
 );
 
 cacheline_adaptor cacheline_adaptor(
