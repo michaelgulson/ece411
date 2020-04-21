@@ -46,8 +46,8 @@ begin : state_actions
     unique case (state)
         IDLE:
         begin
-        resp_o = 1'b0 ;
-        burst_o = 64'b0;
+            resp_o = 1'b0 ;
+            burst_o = 64'b0;
         end
         
         READ_1:
@@ -71,44 +71,44 @@ begin : state_actions
 
         READ_4:
         begin
-            resp_o = 1'b0 ;
+            resp_o = 1'b0;
             burst_o = 64'b0;
         end
 
         READ:
         begin
-            resp_o = 1;
+            resp_o = 1'b1;
             burst_o = 64'b0;
         end
         WRITE_1:
         begin
-            resp_o = 0;
+            resp_o = 1'b0;
             burst_o = line_i[63:0];  
         end
 
         WRITE_2:
         begin
-            resp_o = 0;
+            resp_o = 1'b0;
             burst_o = line_i[127:64];
          
         end
 
         WRITE_3:
         begin
-              resp_o = 0;
+              resp_o = 1'b0;
             burst_o = line_i[191:128];
         end
 
         WRITE_4:
         begin
             burst_o = line_i[255:192];
-            resp_o = 1;
+            resp_o = 1'b1;
         end
 
         default:
         begin
             burst_o = 64'b0;
-            resp_o = 0;
+            resp_o = 1'b0;
         end
     endcase
 end 
@@ -285,7 +285,7 @@ begin: cacheline_read
     end
     default:
     begin
-        ;
+        line_o <= 0;
     end
     endcase
 end

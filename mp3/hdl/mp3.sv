@@ -25,6 +25,7 @@ module mp3 #(
 
 logic [l2_line-1:0] pmem_rdata256;
 logic [l2_line-1:0] pmem_wdata256;
+logic [l2_line-1:0] l2_pmem_wdata;
 logic pmem_readin;
 logic pmem_writein;
 logic pmem_wdatain;
@@ -61,6 +62,14 @@ logic [l2_mask-1:0] l2_rdata;
 logic l2_resp;
 rv32i_word  l2_addr;
 
+
+logic [l1_line-1:0] inst_rdata256;
+logic [l1_line-1:0] inst_wdata256;
+logic [l1_mask-1:0] inst_mbe256;
+logic [l1_line-1:0] data_rdata256;
+logic [l1_line-1:0] data_wdata256;
+logic [l1_mask-1:0] data_mbe256;
+
 datapath pipeline_datapath(
     .clk(clk),
     .rst(rst),
@@ -81,6 +90,17 @@ datapath pipeline_datapath(
     .data_rdata(data_rdata)
 );
 
+bus_adapter bus_adapter_inst
+(
+    .address(inst_addr),
+    .mem_wdata256(inst_wdata256),
+    .mem_rdata256(inst_rdata256),
+    .mem_wdata(32'b0),
+    .mem_rdata(inst_rdata),
+    .mem_byte_enable(4'b0),
+    .mem_byte_enable256(inst_mbe256)
+);
+
 cache #(.s_offset(l1_offset),.s_index(l1_index)) i_cache(
     .clk(clk), 
     .rst(rst), 
@@ -89,14 +109,25 @@ cache #(.s_offset(l1_offset),.s_index(l1_index)) i_cache(
     .mem_read(inst_read),
     .mem_write(1'b0),
     .pmem_resp(mem_resp_i),
-    .mem_wdata(32'd0), //data to the memory
-    .mem_byte_enable(4'b000), //masking, which byte in mem written(@mem write)
+    .mem_wdata256(inst_wdata256), //data to the memory
+    .mem_byte_enable256(inst_mbe256), //masking, which byte in mem written(@mem write)
     .pmem_wdata(wdata_i),
-    .mem_rdata(inst_rdata), 
+    .mem_rdata256(inst_rdata256), 
     .pmem_read(mem_read_i), 
     .pmem_write(mem_write_i),
     .mem_resp(inst_resp),
     .pmem_address(mem_addr_i)
+);
+
+bus_adapter bus_adapter_data
+(
+    .address(data_addr),
+    .mem_wdata256(data_wdata256),
+    .mem_rdata256(data_rdata256),
+    .mem_wdata(data_wdata),
+    .mem_rdata(data_rdata),
+    .mem_byte_enable(data_mbe),
+    .mem_byte_enable256(data_mbe256)
 );
 
 cache #(.s_offset(l1_offset),.s_index(l1_index)) d_cache(    
@@ -107,10 +138,10 @@ cache #(.s_offset(l1_offset),.s_index(l1_index)) d_cache(
     .mem_read(data_read),
     .mem_write(data_write),
     .pmem_resp(mem_resp_d),
-    .mem_wdata(data_wdata), //data to the memory
-    .mem_byte_enable(data_mbe), //masking, which byte in mem written(@mem write)
+    .mem_wdata256(data_wdata256), //data to the memory
+    .mem_byte_enable256(data_mbe256), //masking, which byte in mem written(@mem write)
     .pmem_wdata(pmem_wdata256),
-    .mem_rdata(data_rdata), 
+    .mem_rdata256(data_rdata256), 
     .pmem_read(mem_read_d), 
     .pmem_write(mem_write_d),
     .mem_resp(data_resp),
@@ -138,8 +169,7 @@ arbiter arbiter(
 );
 
 cache #(.s_offset(l2_offset),
-        .s_index(l2_index),
-        .l2(1)) 
+        .s_index(l2_index)) 
 l2_cache(
     .clk(clk), 
     .rst(rst), 
@@ -148,11 +178,11 @@ l2_cache(
     .mem_read(l2_read), //arbiter
     .mem_write(l2_write), //arbiter
     .pmem_resp(cacheline_adaptor_resp),//*
-    .mem_wdata(pmem_wdata256), //*connects directly to D-cache
-    .mem_byte_enable(4'b000), 
+    .mem_wdata256(pmem_wdata256), //*connects directly to D-cache
+    .mem_byte_enable256(32'b000), 
     
-    .pmem_wdata(), //*
-    .mem_rdata(l2_rdata), //arbiter
+    .pmem_wdata(l2_pmem_wdata), //*
+    .mem_rdata256(l2_rdata), //arbiter
     .pmem_read(pmem_readin), //*
     .pmem_write(pmem_writein), //write_o
     .mem_resp(l2_resp), //arbiter
@@ -164,7 +194,7 @@ cacheline_adaptor cacheline_adaptor(
    .reset_n(!rst), //cacheline_adaptor active low
 
     // Port to LLC (Lowest Level Cache)
-    .line_i(pmem_wdata256),
+    .line_i(l2_pmem_wdata),
 	.line_o(pmem_rdata256),
     .address_i(pmem_addressin),
     .read_i(pmem_readin),

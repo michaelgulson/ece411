@@ -19,7 +19,7 @@ module cache_datapath #(
     input logic set_lru,
     input logic load_data, 
     input logic pmem_write,
-    input logic [31:0] mem_byte_enable256,
+    input logic [s_mask-1:0] mem_byte_enable256,
     input logic [s_line-1:0] pmem_rdata,
     input logic [s_line-1:0] mem_wdata256,
     output logic hit,
@@ -61,8 +61,8 @@ assign data_read = 1'b1;
 assign set_tag = mem_address[31:32-s_tag];
 assign set_idx = mem_address[32-s_tag-1:s_offset];
 
-assign h0 = ( (set_tag == t0) && v0 );
-assign h1 = ( (set_tag == t1) && v1 );
+assign h0 = ( (set_tag == t0) && v0 ); //hit for way 0
+assign h1 = ( (set_tag == t1) && v1 ); //hit for way 1
 assign cache_hit = (h0 || h1);
 assign hit = cache_hit;
 assign miss = (!cache_hit);
