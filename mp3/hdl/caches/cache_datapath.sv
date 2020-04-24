@@ -94,25 +94,25 @@ begin
             1'b0:  //way 0 was lru
             begin 
                 unique case (load_data) 
-                1'b0: line_0 = {s_mask*{1'b0}};
-                1'b1: line_0 = {s_mask*{1'b1}};
-                default: line_0 = {s_mask*{1'b0}};
+                1'b0: line_0 = {s_mask{1'b0}};
+                1'b1: line_0 = {s_mask{1'b1}};
+                default: line_0 = {s_mask{1'b0}};
                 endcase
-                line_1 = {s_mask*{1'b0}};
+                line_1 = {s_mask{1'b0}};
             end 
             1'b1: //way 1 was lru
             begin 
                 unique case (load_data)
-                1'b0: line_1 = {s_mask*{1'b0}};
-                1'b1: line_1 = {s_mask*{1'b1}};
-                default: line_1 = {s_mask*{1'b0}};
+                1'b0: line_1 = {s_mask{1'b0}};
+                1'b1: line_1 = {s_mask{1'b1}};
+                default: line_1 = {s_mask{1'b0}};
                 endcase
-                line_0 = {s_mask*{1'b0}};
+                line_0 = {s_mask{1'b0}};
             end
             default: //this should never happen
             begin
-                line_0 = {s_mask*{1'b0}};
-                line_1 = {s_mask*{1'b0}};
+                line_0 = {s_mask{1'b0}};
+                line_1 = {s_mask{1'b0}};
             end 
         endcase 
     end 
@@ -120,45 +120,45 @@ begin
     begin  
         // Line 0
         unique case (h0)
-            1'b0: line_0 = {s_mask*{1'b0}};
+            1'b0: line_0 = {s_mask{1'b0}};
             1'b1: 
             begin
                 unique case (load_data)
-                1'b0: line_0 = {s_mask*{1'b0}};
+                1'b0: line_0 = {s_mask{1'b0}};
                 1'b1: line_0 = mem_byte_enable256;
-                default: line_0 = {s_mask*{1'b0}};
+                default: line_0 = {s_mask{1'b0}};
                 endcase  
             end 
         default: //this should never happen
             begin
-                line_0 = {s_mask*{1'b0}};
+                line_0 = {s_mask{1'b0}};
             end 
         endcase 
         // Line 1
         unique case (h1)
-        1'b0: line_1 = {s_mask*{1'b0}};
+        1'b0: line_1 = {s_mask{1'b0}};
         1'b1:
         begin
             unique case (load_data)
-            1'b0: line_1 = {s_mask*{1'b0}};
+            1'b0: line_1 = {s_mask{1'b0}};
             1'b1: line_1 = mem_byte_enable256;
-            default: line_1 = {s_mask*{1'b0}};
+            default: line_1 = {s_mask{1'b0}};
             endcase  
         end 
         default:
         begin 
-            line_1 = {s_mask*{1'b0}};
+            line_1 = {s_mask{1'b0}};
         end 
         endcase
     end 
     default:
     begin
-        line_0 = {s_mask*{1'b0}};
-        line_1 = {s_mask*{1'b0}};
+        line_0 = {s_mask{1'b0}};
+        line_1 = {s_mask{1'b0}};
     end
     endcase 
 end
- 
+
 data_array #( .s_offset(s_offset), .s_index(s_index)) line_array_1
 (
     .read(data_read),
