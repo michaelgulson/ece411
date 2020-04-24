@@ -4,7 +4,6 @@ module arbiter_datapath #(
 (
     input logic load_i,
     input logic load_d,
-    input logic mux_sel,
 
     //i cache
     input logic [31:0] mem_addr_i,
@@ -28,14 +27,14 @@ begin
     data_rdata = {s_line{1'b0}};
     pmem_wdata = {s_line{1'b0}};
     pmem_addr = {32{1'b0}};
-    unique case(mux_sel)
-        1'd0: //i cache
+    unique case({load_i,load_d})
+        2'b10: //i cache
         begin
             pmem_addr = mem_addr_i;
             pmem_wdata = inst_wdata;
             inst_rdata = pmem_rdata;
         end
-        1'd1: //d cache
+        2'b01: //d cache
         begin
             pmem_addr = mem_addr_d;
             pmem_wdata = data_wdata;

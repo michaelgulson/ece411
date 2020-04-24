@@ -33,7 +33,6 @@ module arbiter #(
     output logic pmem_write //from control
 );
     
-logic mux_sel;
 logic load_i;
 logic load_d;
 logic [s_line-1:0] buf_i_rdata;
