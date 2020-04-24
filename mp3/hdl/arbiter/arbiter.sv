@@ -7,115 +7,99 @@ module arbiter #(
 )(
     input logic clk,
     input logic rst,
+
+    //i cache
+    input logic [31:0] mem_addr_i,
     input logic mem_read_i, 
+    input logic mem_write_i,
+    input logic [s_line-1:0] inst_wdata,
+    output logic [s_line-1:0] inst_rdata,
+    output logic mem_resp_i,
+
+    //d cache
+    input logic [31:0] mem_addr_d,
     input logic mem_read_d,
     input logic mem_write_d,
-    input logic pmem_resp, 
-    input logic [s_line-1:0] pmem_rdata,
-    input logic [31:0] mem_addr_i,
-    input logic [31:0] mem_addr_d,
-
-    output logic pmem_read,
-    output logic pmem_write,
-    output logic mem_resp_i,
-    output logic mem_resp_d,
-    output logic [s_line-1:0] inst_rdata,
+    input logic [s_line-1:0] data_wdata,
     output logic [s_line-1:0] data_rdata,
-    output logic [31:0] pmem_addr
+    output logic mem_resp_d,
+
+    //l2 cache
+    input logic pmem_resp, //to control
+    input logic [s_line-1:0] pmem_rdata, //to datapath
+    output logic [s_line-1:0] pmem_wdata, //from datapath
+    output logic [31:0] pmem_addr, //from datapath
+    output logic pmem_read, //from control
+    output logic pmem_write //from control
 );
     
 logic mux_sel;
+logic load_i;
+logic load_d;
+logic [s_line-1:0] buf_i_rdata;
+logic [s_line-1:0] buf_d_rdata;
+logic buf_read_i;
+logic buf_write_i;
+logic buf_read_d;
+logic buf_write_d;
+logic [31:0] buf_addr_i;
+logic [31:0] buf_addr_d;
+logic buf_resp_i;
+logic buf_resp_d;
 
-logic [s_line-1:0] pmem_rdata_buffer;
-logic [31:0] mem_addr_i_buffer;
-logic [31:0] mem_addr_d_buffer;
-logic mem_read_i_buffer;
-logic mem_read_d_buffer;
-logic mem_write_d_buffer;
-logic pmem_resp_buffer;
+always_ff @(posedge clk) begin
+    if(rst)begin
+        buf_read_i <= 1'b0;
+        buf_write_i <= 1'b0;
+        buf_read_d <= 1'b0;
+        buf_write_d <= 1'b0;
+        buf_addr_i <= 1'b0;
+        buf_addr_d <= 1'b0;
+        mem_resp_i <= 1'b0;
+        mem_resp_d <= 1'b0;
+    end else begin
+        buf_read_i <= mem_read_i;
+        buf_write_i <= mem_write_i;
+        buf_read_d <= mem_read_d;
+        buf_write_d <= mem_write_d;
+        buf_addr_i <= mem_addr_i;
+        buf_addr_d <= mem_addr_d;
+        mem_resp_i <= buf_resp_i;
+        mem_resp_d <= buf_resp_d;
+    end
+end
 
-register #(s_line) register_pmem_rdata(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(pmem_rdata),
-    .out(pmem_rdata_buffer)
+register #(.width(s_line)) reg_i_rdata (
+    .*,
+    .load(load_i),
+    .in(buf_i_rdata),
+    .out(inst_rdata)
 );
 
-register  register_mem_addr_i(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(mem_addr_i),
-    .out(mem_addr_i_buffer)
+register #(.width(s_line)) reg_d_rdata (
+    .*,
+    .load(load_d),
+    .in(buf_d_rdata),
+    .out(data_rdata)
 );
-
-register  register_mem_addr_d(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(mem_addr_d),
-    .out(mem_addr_d_buffer)
-);
-
-register #(1) register_mem_read_i(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(mem_read_i),
-    .out(mem_read_i_buffer)
-);
-
-register #(1) register_mem_read_d(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(mem_read_d),
-    .out(mem_read_d_buffer)
-);
-
-register #(1) register_mem_write_d(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(mem_write_d),
-    .out(mem_write_d_buffer)
-);
-
-register #(1) register_pmem_resp(
-    .clk(clk),
-    .rst(rst),
-    .load(1'b1),
-    .in(pmem_resp),
-    .out(pmem_resp_buffer)
-);
-
-
-
-
 
 
 arbiter_datapath #(.s_line(s_line)) arbiter_datapath(
-    .mux_sel(mux_sel),
-    .mem_addr_i(mem_addr_i_buffer),
-    .mem_addr_d(mem_addr_d_buffer),
-    .pmem_rdata(pmem_rdata_buffer),
-    .pmem_addr(pmem_addr),
-    .inst_rdata(inst_rdata),
-    .data_rdata(data_rdata)
+    .*,
+    .inst_rdata(buf_i_rdata),
+    .data_rdata(buf_d_rdata),
+    .mem_addr_i(buf_addr_i),
+    .mem_addr_d(buf_addr_d)
 );
+
 arbiter_control arbiter_control(
-    .clk(clk), 
-    .rst(rst), 
-    .mem_read_i(mem_read_i_buffer), 
-    .mem_read_d(mem_read_d_buffer),
-    .mem_write_d(mem_write_d_buffer),
-    .pmem_resp(pmem_resp_buffer),
-    .pmem_read(pmem_read),
-    .pmem_write(pmem_write),
-    .mem_resp_i(mem_resp_i), 
-    .mem_resp_d(mem_resp_d), 
-    .mux_sel(mux_sel)
+    .*,
+    .mem_resp_i(buf_resp_i),
+    .mem_resp_d(buf_resp_d),
+    .mem_read_i(buf_read_i),
+    .mem_read_d(buf_read_d),
+    .mem_write_i(buf_write_i),
+    .mem_write_d(buf_write_d)
 );
 
 endmodule : arbiter

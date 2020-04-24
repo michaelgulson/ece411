@@ -58,10 +58,10 @@ rv32i_word data_rdata;
 
 logic l2_read;
 logic l2_write;
-logic [l2_line-1:0] l2_rdata;
+logic [l2_line-1:0] l2_rdata; //check size
 logic l2_resp;
 rv32i_word  l2_addr;
-
+logic [l2_line-1:0] l2_wdata; //check size 
 
 logic [l1_line-1:0] inst_rdata256;
 logic [l1_line-1:0] inst_wdata256;
@@ -104,19 +104,21 @@ bus_adapter bus_adapter_inst
 cache #(.s_offset(l1_offset),.s_index(l1_index)) i_cache(
     .clk(clk), 
     .rst(rst), 
+    //cpu
     .mem_address(inst_addr),
-    .pmem_rdata(inst_rdata_arb),
     .mem_read(inst_read),
     .mem_write(1'b0),
-    .pmem_resp(mem_resp_i),
     .mem_wdata256(inst_wdata256), //data to the memory
     .mem_byte_enable256(inst_mbe256), //masking, which byte in mem written(@mem write)
-    .pmem_wdata(wdata_i),
     .mem_rdata256(inst_rdata256), 
+    .mem_resp(inst_resp),
+    //arbitor
+    .pmem_address(mem_addr_i),
     .pmem_read(mem_read_i), 
     .pmem_write(mem_write_i),
-    .mem_resp(inst_resp),
-    .pmem_address(mem_addr_i)
+    .pmem_wdata(wdata_i),
+    .pmem_rdata(inst_rdata_arb),
+    .pmem_resp(mem_resp_i)
 );
 
 bus_adapter bus_adapter_data
@@ -133,39 +135,49 @@ bus_adapter bus_adapter_data
 cache #(.s_offset(l1_offset),.s_index(l1_index)) d_cache(    
     .clk(clk), 
     .rst(rst), 
+    //cpu
     .mem_address(data_addr),
-    .pmem_rdata(data_rdata_arb),
     .mem_read(data_read),
     .mem_write(data_write),
-    .pmem_resp(mem_resp_d),
     .mem_wdata256(data_wdata256), //data to the memory
     .mem_byte_enable256(data_mbe256), //masking, which byte in mem written(@mem write)
-    .pmem_wdata(pmem_wdata256),
     .mem_rdata256(data_rdata256), 
-    .pmem_read(mem_read_d), 
-    .pmem_write(mem_write_d),
     .mem_resp(data_resp),
-    .pmem_address(mem_addr_d)
+    //arbiter
+    .pmem_address(mem_addr_d),
+    .pmem_rdata(data_rdata_arb),
+    .pmem_write(mem_write_d),
+    .pmem_wdata(pmem_wdata256),
+    .pmem_read(mem_read_d), 
+    .pmem_resp(mem_resp_d)
 );
 
-arbiter arbiter(   
+arbiter #(.s_offset(l1_offset),.s_index(l1_index)) arbiter(
     .clk(clk),
     .rst(rst),
-    .mem_read_i(mem_read_i), 
+    //i cache
+    .mem_addr_i(mem_addr_i),
+    .mem_read_i(mem_read_i),
+    .mem_write_i(mem_write_i), //mem_write_i
+    .inst_wdata(wdata_i), //mem_wdata
+    .mem_resp_i(mem_resp_i),
+    .inst_rdata(inst_rdata_arb),
+
+    //d cache
+    .mem_addr_d(mem_addr_d),
     .mem_read_d(mem_read_d),
     .mem_write_d(mem_write_d),
-    .pmem_resp(l2_resp), 
-    .pmem_rdata(l2_rdata),
-    .mem_addr_i(mem_addr_i),
-    .mem_addr_d(mem_addr_d),
+    .data_rdata(data_rdata_arb),
+    .data_wdata(pmem_wdata256), //mem_wdata
+    .mem_resp_d(mem_resp_d),
 
+    //l2 cache
+    .pmem_rdata(l2_rdata),
+    .pmem_wdata(l2_wdata),//pmem_wdata
     .pmem_read(l2_read),
     .pmem_write(l2_write),
-    .mem_resp_i(mem_resp_i),
-    .mem_resp_d(mem_resp_d),
-    .inst_rdata(inst_rdata_arb),
-    .data_rdata(data_rdata_arb),
-    .pmem_addr(l2_addr)
+    .pmem_addr(l2_addr),
+    .pmem_resp(l2_resp) 
 );
 
 cache #(.s_offset(l2_offset),
@@ -173,20 +185,22 @@ cache #(.s_offset(l2_offset),
 l2_cache(
     .clk(clk), 
     .rst(rst), 
+    //arbiter
     .mem_address(l2_addr), //arbiter
-    .pmem_rdata(pmem_rdata256), //*
     .mem_read(l2_read), //arbiter
     .mem_write(l2_write), //arbiter
-    .pmem_resp(cacheline_adaptor_resp),//*
-    .mem_wdata256(pmem_wdata256), //*connects directly to D-cache
+    .mem_wdata256(l2_wdata), //*connects directly to D-cache
     .mem_byte_enable256(32'b000), 
-    
-    .pmem_wdata(l2_pmem_wdata), //*
     .mem_rdata256(l2_rdata), //arbiter
+    .mem_resp(l2_resp), //arbiter
+    
+    //pmem
+    .pmem_rdata(pmem_rdata256), //*
+    .pmem_wdata(l2_pmem_wdata), //*
     .pmem_read(pmem_readin), //*
     .pmem_write(pmem_writein), //write_o
-    .mem_resp(l2_resp), //arbiter
-    .pmem_address(pmem_addressin) //*
+    .pmem_address(pmem_addressin), //*
+    .pmem_resp(cacheline_adaptor_resp)//*
 );
 
 cacheline_adaptor cacheline_adaptor(

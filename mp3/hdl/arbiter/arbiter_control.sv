@@ -7,12 +7,15 @@ module arbiter_control
     input logic mem_read_i, 
     input logic mem_read_d,
     input logic mem_write_d,
+    input logic mem_write_i,
     input logic pmem_resp,
     output logic pmem_read, 
     output logic pmem_write,
     output logic mem_resp_i, 
     output logic mem_resp_d, 
-    output logic mux_sel
+    output logic mux_sel,
+    output logic load_i,
+    output logic load_d
 );
 
 enum int unsigned{
@@ -27,6 +30,8 @@ function void set_defaults();
     mem_resp_i = 1'b0;
     mem_resp_d = 1'b0;
     mux_sel = 1'b0;
+    load_i = 1'b0;
+    load_d = 1'b0;
 endfunction
 
 always_comb
@@ -35,14 +40,16 @@ begin: state_actions
 
     unique case (state)
         IDLE:;
-
         I_CACHE:
         begin
+            load_i = 1'b1;
             mem_resp_i = pmem_resp;
             pmem_read = mem_read_i;
+            pmem_write = mem_write_i;
         end
         D_CACHE:
         begin
+            load_d = 1'b1;
             mem_resp_d = pmem_resp;
             pmem_read = mem_read_d;
             pmem_write = mem_write_d;
