@@ -24,10 +24,10 @@ module arbiter_datapath #(
 
 always_comb
 begin
-    inst_rdata = {s_line*{1'b0}};
-    data_rdata = {s_line*{1'b0}};
-    pmem_wdata = {s_line*{1'b0}};
-    pmem_addr = {s_line*{1'b0}};
+    inst_rdata = {s_line{1'b0}};
+    data_rdata = {s_line{1'b0}};
+    pmem_wdata = {s_line{1'b0}};
+    pmem_addr = {32{1'b0}};
     unique case(mux_sel)
         1'd0: //i cache
         begin
@@ -43,10 +43,10 @@ begin
         end
         default: 
         begin
-            inst_rdata = {s_line*{1'b0}};
-            data_rdata = {s_line*{1'b0}};
-            pmem_wdata = {s_line*{1'b0}};
-            pmem_addr = {s_line*{1'b0}};
+            inst_rdata = {s_line{1'b0}};
+            data_rdata = {s_line{1'b0}};
+            pmem_wdata = {s_line{1'b0}};
+            pmem_addr = {32{1'b0}};
         end
     endcase
 end
