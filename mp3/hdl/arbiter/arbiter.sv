@@ -82,7 +82,6 @@ register #(.width(s_line)) reg_d_rdata (
     .out(data_rdata)
 );
 
-
 arbiter_datapath #(.s_line(s_line)) arbiter_datapath(
     .*,
     .inst_rdata(buf_i_rdata),
