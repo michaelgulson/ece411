@@ -91,13 +91,9 @@ begin : next_state_logic
         end
         D_CACHE:
         begin
-            if(pmem_resp && (!mem_read_i))
+            if(pmem_resp)
             begin
                 next_state = IDLE;
-            end
-            else if(pmem_resp && (mem_read_i))
-            begin 
-                next_state = I_CACHE;
             end
             else
             begin
