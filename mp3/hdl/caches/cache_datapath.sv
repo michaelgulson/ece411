@@ -171,7 +171,7 @@ begin
     begin  
     // Line 0
     unique case (h0)
-    1'b0: line_0 = {s_mask*{1'b0}};
+    1'b0: line_0 = {s_mask{1'b0}};
     1'b1:
     begin
         line_0 = {s_mask{1'b0}};
