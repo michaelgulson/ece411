@@ -39,6 +39,7 @@ rv32i_control_word ctrl_word;
 rv32i_word ir_ID;
 logic control_word_mux_sel;
 logic nop_sel;
+logic branch_taken;
 
 //EX stage
 rv32i_word alu_out;
@@ -433,28 +434,29 @@ hazard_detect_unit hazard_detect(
     .control_word_mux_sel(control_word_mux_sel)
 );
 
-/*
+
 branch_predictor branch_predict(
 
     .clk(clk),
     .rst(rst),
     .is_curr_branch(opcode == op_br || opcode == op_jal || opcode == op_jalr),
-    .is_prev_branch(control_word_MEM.instr[6:0] == 7'h6f || ),
-    input rv32i_word instruction,
-    input logic prev_branch_taken,
-    input logic btb_hit,
+    .is_prev_branch(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67 || control_word_MEM.instr[6:0] == 7'h63),
+    //input rv32i_word instruction,
+    .prev_branch_taken(((control_word_MEM.pc_mux_sel == pcmux::alu_out)&&(br_en_MEM))||(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67)),
+    .btb_hit(btb_hit),
+    .btb_resp(btb_resp),
 
     //output predict_address BTB
-    output logic branch_taken,
-    output logic [1:0] pcmux_sel
+    .branch_taken(branch_taken),
+    .pcmux_sel(pcmux_sel)
     //DO THIS TOMORROW
 
 )
-*/
+
 /****************************************************************************/
 
 
-
+/*
 //pcmux_sel branch detection
 always_comb begin : PC_MUX
     if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h6f)) begin
@@ -470,6 +472,7 @@ always_comb begin : PC_MUX
         flush = 1'b0;
     end
 end
+*/
 /*****************************************************************************/
 
 /*********************************Muxes***************************************/
