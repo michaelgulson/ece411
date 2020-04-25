@@ -1,14 +1,15 @@
 module predict_hist_tbl #(parameter n)
 (
+    input clk,
+    input rst,
     input is_prev_branch,
     input prev_branch_taken,
     input [n-1:0] bhr,
-    output [1:0] pht_out;
+    output [1:0] pht_out
 );
 
 
 logic [2**n-1:0] pht [1:0];
-logic [1:0] pht_out;
 logic [1:0] cnt_input;
 
 always_comb begin
@@ -45,3 +46,5 @@ always_ff @(posedge clk) begin
     end
     pht_out <= pht[bhr];
 end
+
+endmodule

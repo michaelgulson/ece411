@@ -432,6 +432,25 @@ hazard_detect_unit hazard_detect(
     .control_word_EX(control_word_EX),
     .control_word_mux_sel(control_word_mux_sel)
 );
+
+/*
+branch_predictor branch_predict(
+
+    .clk(clk),
+    .rst(rst),
+    .is_curr_branch(opcode == op_br || opcode == op_jal || opcode == op_jalr),
+    .is_prev_branch(control_word_MEM.instr[6:0] == 7'h6f || ),
+    input rv32i_word instruction,
+    input logic prev_branch_taken,
+    input logic btb_hit,
+
+    //output predict_address BTB
+    output logic branch_taken,
+    output logic [1:0] pcmux_sel
+    //DO THIS TOMORROW
+
+)
+*/
 /****************************************************************************/
 
 

@@ -157,7 +157,6 @@ begin
         line_1 = {s_mask{1'b0}};
     end
     endcase 
-    end
 end
 
 data_array #( .s_offset(s_offset), .s_index(s_index)) line_array_1
