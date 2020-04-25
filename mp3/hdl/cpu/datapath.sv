@@ -439,9 +439,8 @@ branch_predictor branch_predict(
 
     .clk(clk),
     .rst(rst),
-    .is_curr_branch(opcode == op_br || opcode == op_jal || opcode == op_jalr),
-    .is_prev_branch(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67 || control_word_MEM.instr[6:0] == 7'h63),
-    //input rv32i_word instruction,
+    .opcode_ID(opcode),
+    .contol_word_MEM(control_word_MEM),
     .prev_branch_taken(((control_word_MEM.pc_mux_sel == pcmux::alu_out)&&(br_en_MEM))||(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67)),
     .btb_hit(btb_hit),
     .btb_resp(btb_resp),
@@ -451,7 +450,7 @@ branch_predictor branch_predict(
     .pcmux_sel(pcmux_sel)
     //DO THIS TOMORROW
 
-)
+);
 
 /****************************************************************************/
 
