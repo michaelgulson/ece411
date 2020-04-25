@@ -82,6 +82,75 @@ register #(.width(s_line)) reg_d_rdata (
     .out(data_rdata)
 );
 
+logic [s_line-1:0] pmem_rdata_buffer;
+logic [31:0] mem_addr_i_buffer;
+logic [31:0] mem_addr_d_buffer;
+logic mem_read_i_buffer;
+logic mem_read_d_buffer;
+logic mem_write_d_buffer;
+logic pmem_resp_buffer;
+
+register #(s_line) register_pmem_rdata(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(pmem_rdata),
+    .out(pmem_rdata_buffer)
+);
+
+register  register_mem_addr_i(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(mem_addr_i),
+    .out(mem_addr_i_buffer)
+);
+
+register  register_mem_addr_d(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(mem_addr_d),
+    .out(mem_addr_d_buffer)
+);
+
+register #(1) register_mem_read_i(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(mem_read_i),
+    .out(mem_read_i_buffer)
+);
+
+register #(1) register_mem_read_d(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(mem_read_d),
+    .out(mem_read_d_buffer)
+);
+
+register #(1) register_mem_write_d(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(mem_write_d),
+    .out(mem_write_d_buffer)
+);
+
+register #(1) register_pmem_resp(
+    .clk(clk),
+    .rst(rst),
+    .load(1'b1),
+    .in(pmem_resp),
+    .out(pmem_resp_buffer)
+);
+
+
+
+
+
+
 arbiter_datapath #(.s_line(s_line)) arbiter_datapath(
     .*,
     .inst_rdata(buf_i_rdata),
