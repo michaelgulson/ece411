@@ -13,7 +13,7 @@ module bus_adapter #(
     input logic [31:0] address
 );
 
-assign mem_wdata256 = {segments*{mem_wdata}};
+assign mem_wdata256 = {segments{mem_wdata}};
 assign mem_rdata = mem_rdata256[(small_cache*address[4:2]) +: small_cache];
 assign mem_byte_enable256 = {28'h0, mem_byte_enable} << (address[4:2]*4);
 
