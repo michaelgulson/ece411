@@ -13,7 +13,6 @@ module arbiter_control
     output logic pmem_write,
     output logic mem_resp_i, 
     output logic mem_resp_d, 
-    output logic mux_sel,
     output logic load_i,
     output logic load_d
 );
@@ -29,7 +28,6 @@ function void set_defaults();
     pmem_write = 1'b0;
     mem_resp_i = 1'b0;
     mem_resp_d = 1'b0;
-    mux_sel = 1'b0;
     load_i = 1'b0;
     load_d = 1'b0;
 endfunction
@@ -53,7 +51,6 @@ begin: state_actions
             mem_resp_d = pmem_resp;
             pmem_read = mem_read_d;
             pmem_write = mem_write_d;
-            mux_sel = 1'b1;
         end
         default: ;
     endcase
@@ -83,7 +80,7 @@ begin : next_state_logic
             begin
                 next_state = IDLE;
             end
-            else if(pmem_resp&&(mem_read_d||mem_write_d))
+            else if(pmem_resp && (mem_read_d||mem_write_d))
             begin
                 next_state = D_CACHE; //wait for resp
             end
@@ -94,9 +91,13 @@ begin : next_state_logic
         end
         D_CACHE:
         begin
-            if(pmem_resp)
+            if(pmem_resp && (!mem_read_i))
             begin
                 next_state = IDLE;
+            end
+            else if(pmem_resp && (mem_read_i))
+            begin 
+                next_state = I_CACHE;
             end
             else
             begin
