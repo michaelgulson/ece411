@@ -17,6 +17,11 @@ module branch_predictor #(
 
     //output predict_address BTB
     //output logic branch_taken,
+    output btb_mem_address_r,
+    output btb_mem_address_w,
+    output rv32i_word btb_wdata,
+    output logic btb_mem_read,
+    output logic btb_mem_write,
     output logic flush,
     output logic flush_ID,
     output pcmux::pcmux_sel_t pcmux_sel
@@ -42,6 +47,9 @@ assign pred_branch_taken = pht_out[1];
 assign branch_hist_reg_next = (branch_hist_reg << 1) | prev_branch_taken;
 assign prev_branch_taken = ((control_word_MEM.pc_mux_sel == pcmux::alu_out)&&(br_en_MEM))||(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67);
 assign confirmation = pc_ID == pc_offset_MEM;
+assign btb_wdata = pc_offset_MEM;
+assign btb_mem_address_w = pc_MEM;
+assign btb_mem_address_r = pc_ID;
 
 register #(n) bhr_reg(
     .load(is_prev_branch),
@@ -91,34 +99,65 @@ always_comb begin
     end       
 end
 
-always_comb begin  
+function void set_defaults();
+    pcmux_sel = pcmux_sel_old;
+    flush_ID = 1'b0;
+    flush = 1'b0;
+    btb_mem_read = 1'b0;
+    btb_mem_write = 1'b0;
+endfunction
+
+always_comb begin 
+    set_defaults();
+
     if(is_prev_branch && prev_pred_branch_taken && prev_branch_taken && confirmation) begin //we predicted taken and previous branch taken
         if(is_curr_branch && pred_branch_taken && btb_hit) begin
             pcmux_sel = pcmux::btb_out;
             flush_ID = 1'b1;
             flush = 1'b0;
+            btb_mem_read = 1'b1;
+            btb_mem_write = 1'b1;
         end
         else begin
             pcmux_sel = pcmux::pc_plus4;
             flush = 1'b0;
             flush_ID = 1'b0;
+            btb_mem_write = 1'b1;
         end
     end
     else if(is_prev_branch && prev_pred_branch_taken && (!(confirmation && prev_branch_taken))) begin //we predicted taken and previous branch not taken
+        if(prev_branch_taken)begin
+            btb_mem_write = 1'b1;
+        end        
         pcmux_sel = pcmux::pc_mem_plus4;
         flush = 1'b1;
         flush_ID = 1'b0;
     end
-    else if(is_prev_branch)begin //we predicted branch not taken
+    else if(is_prev_branch && prev_branch_taken)begin //we predicted branch not taken and branch taken
         pcmux_sel = pcmux_sel_old;
         flush = flush_old;
         flush_ID = 1'b0;
+        btb_mem_write = 1'b1;
+    end
+    else if(is_prev_branch && !prev_branch_takne)begin //we predicted branch not taken and branch not taken
+        if(is_curr_branch && pred_branch_taken && btb_hit) begin
+            pcmux_sel = pcmux::btb_out;
+            flush_ID = 1'b1;
+            flush = 1'b0;
+            btb_mem_read = 1'b1;
+        end
+        else begin
+            pcmux_sel = pcmux_sel_old;
+            flush = flush_old;
+            flush_ID = 1'b0;
+        end
     end
 
     else if(pred_branch_taken && btb_hit && is_curr_branch) begin //pred branch taken
         pcmux_sel = pcmux::btb_out;
         flush = 1'b0;
         flush_ID = 1'b1;
+        btb_mem_read = 1'b1;
     end
     else begin //else
         pcmux_sel = pcmux_sel_old;

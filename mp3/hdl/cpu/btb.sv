@@ -1,5 +1,7 @@
-module cache #(
-    parameter s_offset = 5,
+
+//branch target buffer top level
+module btb #(
+    parameter s_offset = 2,
     parameter s_index  = 3,
     parameter s_tag    = 32 - s_offset - s_index,
     parameter s_mask   = 2**s_offset,
@@ -11,12 +13,13 @@ module cache #(
     input logic rst, 
 
     //to/from smaller cache
-    input logic [31:0] mem_address,
-    input logic mem_write
+    input logic [31:0] mem_address_r,
+    input logic [31:0] mem_address_w,
+    input logic mem_write,
     input logic mem_read,
     output logic [s_line-1:0] mem_rdata, 
     input logic [s_line-1:0] mem_wdata,
-    output logic hit,
+    output logic hit
 
 );
 
@@ -33,7 +36,7 @@ btb_control #(
     .s_mask(s_mask),
     .s_line(s_line),
     .num_sets(num_sets)
-) cache_control
+) btb_control
 (
     .*
     //mem_read,
@@ -60,7 +63,7 @@ btb_datapath #(
     .s_mask(s_mask),
     .s_line(s_line),
     .num_sets(num_sets)
-) cache_datapath
+) btb_datapath
 (
     .*
     // mem_address,

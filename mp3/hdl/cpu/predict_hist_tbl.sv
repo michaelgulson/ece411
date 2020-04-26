@@ -11,7 +11,6 @@ module predict_hist_tbl #(parameter n)
 
 logic [2**n-1:0] [1:0] pht;
 logic [1:0] cnt_input;
-logic [1:0] pht_out;
 
 always_comb begin
     if(prev_branch_taken) begin

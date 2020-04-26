@@ -1,4 +1,4 @@
-module cache_control #(
+module btb_control #(
     parameter s_offset = 5,
     parameter s_index  = 3,
     parameter s_tag    = 32 - s_offset - s_index,

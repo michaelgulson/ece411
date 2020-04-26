@@ -41,6 +41,11 @@ logic control_word_mux_sel;
 logic nop_sel;
 logic btb_hit;
 logic flush_ID;
+logic [31:0] btb_mem_address_r;
+logic [31:0] btb_mem_address_w;
+logic [31:0] btb_wdata;
+logic btb_mem_read;
+logic btb_mem_write;
 
 //EX stage
 rv32i_word alu_out;
@@ -445,9 +450,26 @@ branch_predictor #(3) branch_predict(
     .btb_hit(btb_hit),
     .pcmux_sel(pcmux_sel),
     .flush(flush),
-    .flush_ID(flush_ID)
+    .flush_ID(flush_ID),
+    .btb_mem_address_r(btb_mem_address_r),
+    .btb_mem_address_w(btb_mem_address_w),
+    .btb_wdata(btb_wdata),
+    .btb_mem_read(btb_mem_read),
+    .btb_mem_write(btb_mem_write),
 );
 
+btb branch_target_buffer(
+    .clk(clk), 
+    .rst(rst), 
+
+    //to/from smaller cache
+    .mem_address_r(btb_mem_address_r),
+    .mem_write(btb_mem_address_w),
+    .mem_read(btb_mem_read),
+    .mem_rdata(btb_rdata), 
+    .mem_wdata(btb_wdata),
+    .hit(btb_hit)
+);
 /****************************************************************************/
 
 
@@ -477,6 +499,8 @@ always_comb begin : MUXES
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out:  pcmux_out = pc_offset_MEM;
         pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
+        pcmux::btb_out:    pcmux_out = btb_rdata;
+        pcmux::pc_mem_plus4:  pcmux_out = pc_MEM +4;
         default: pcmux_out = pc_out;
     endcase
 
