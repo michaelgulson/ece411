@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 74
+`define CONTROL_WORD_SIZE 75
 `define NON_SYNTHESIS //uncomment to use non synthesis for rvfi montior 
 
 import rv32i_types::*;
@@ -39,7 +39,8 @@ rv32i_control_word ctrl_word;
 rv32i_word ir_ID;
 logic control_word_mux_sel;
 logic nop_sel;
-logic branch_taken;
+logic btb_hit;
+logic flush_ID;
 
 //EX stage
 rv32i_word alu_out;
@@ -206,7 +207,7 @@ register ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(loadReg && !control_word_mux_sel),
-    .in((flush ? 32'b0 : inst_rdata)),
+    .in(((flush||flush_ID) ? 32'b0 : inst_rdata)),
     .out(ir_ID)
 );
 
@@ -435,21 +436,16 @@ hazard_detect_unit hazard_detect(
 );
 
 
-branch_predictor branch_predict(
-
+branch_predictor #(3) branch_predict(
     .clk(clk),
     .rst(rst),
     .opcode_ID(opcode),
-    .contol_word_MEM(control_word_MEM),
-    .prev_branch_taken(((control_word_MEM.pc_mux_sel == pcmux::alu_out)&&(br_en_MEM))||(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67)),
+    .control_word_MEM(control_word_MEM),
+    .br_en_MEM(br_en_MEM),
     .btb_hit(btb_hit),
-    .btb_resp(btb_resp),
-
-    //output predict_address BTB
-    .branch_taken(branch_taken),
-    .pcmux_sel(pcmux_sel)
-    //DO THIS TOMORROW
-
+    .pcmux_sel(pcmux_sel),
+    .flush(flush),
+    .flush_ID(flush_ID)
 );
 
 /****************************************************************************/

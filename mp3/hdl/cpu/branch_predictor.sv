@@ -1,39 +1,47 @@
 import rv32i_types::*;
 
 module branch_predictor #(
-    parameter n  // size of BHT and PHT
+    parameter n// size of BHT and PHT
 
 )(
     input logic clk,
     input logic rst,
-
+    input rv32i_word pc_ID,
+    input rv32i_word pc_offset_MEM,
     input rv32i_control_word control_word_MEM,
     input rv32i_opcode opcode_ID,
-    input logic prev_branch_taken,
+    //input logic prev_branch_taken,
     input logic btb_hit,
-    input logic btb_resp,
+    input logic br_en_MEM,
+    //input logic btb_resp,
 
     //output predict_address BTB
     //output logic branch_taken,
-    output pcmux_sel_t [1:0] pcmux_sel
+    output logic flush,
+    output logic flush_ID,
+    output pcmux::pcmux_sel_t pcmux_sel
 );
 
 logic [n-1:0] branch_hist_reg;
 logic [n-1:0] branch_hist_reg_next;
 logic [1:0] pht_out;
-pcmux_sel_t pcmux_sel_old;
+pcmux::pcmux_sel_t pcmux_sel_old;
 logic flush_old;
 logic is_curr_branch;
 logic is_prev_branch;
 logic pred_branch_taken_reg_out;
+logic prev_branch_taken;
+logic confirmation;
+logic pred_branch_taken;
+logic prev_pred_branch_taken;
 
 assign is_curr_branch = opcode_ID == op_br || opcode_ID == op_jal || opcode_ID == op_jalr;
 assign is_prev_branch = control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67 || control_word_MEM.instr[6:0] == 7'h63;
 
-assign pred_branch_taken = pht_out / 2;
+assign pred_branch_taken = pht_out[1];
 assign branch_hist_reg_next = (branch_hist_reg << 1) | prev_branch_taken;
-
-
+assign prev_branch_taken = ((control_word_MEM.pc_mux_sel == pcmux::alu_out)&&(br_en_MEM))||(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67);
+assign confirmation = pc_ID == pc_offset_MEM;
 
 register #(n) bhr_reg(
     .load(is_prev_branch),
@@ -44,10 +52,18 @@ register #(n) bhr_reg(
 
 register #(1) pred_branch_taken_reg(
     .load(is_curr_branch),
-    .in(pred_branch_taken && btb_hit && btb_resp),
-    .out(pred_branch_taken_reg_out),
+    .in(pred_branch_taken && btb_hit),
+    .out(prev_pred_branch_taken),
     .*
 );
+
+/*
+register #(32) btb_target_address(
+    .load(is_curr_branch && btb_hit && btb_resp),
+    .in(btb_rdata),
+    .out(btb_target_address),
+    .*
+)*/
 
 
 predict_hist_tbl #(n) pht(
@@ -75,18 +91,40 @@ always_comb begin
     end       
 end
 
-always_comb begin  //what happens if we're predicting a branch at the same time we're resolving a previous branch???  resolving should have priority right?
-    if(is_prev_branch && pred_branch_taken_reg_out && prev_branch_taken) begin
-        pcmux_sel = pcmux::pc_plus4;
-        flush = 1'b0;
+always_comb begin  
+    if(is_prev_branch && prev_pred_branch_taken && prev_branch_taken && confirmation) begin //we predicted taken and previous branch taken
+        if(is_curr_branch && pred_branch_taken && btb_hit) begin
+            pcmux_sel = pcmux::btb_out;
+            flush_ID = 1'b1;
+            flush = 1'b0;
+        end
+        else begin
+            pcmux_sel = pcmux::pc_plus4;
+            flush = 1'b0;
+            flush_ID = 1'b0;
+        end
     end
-    else if
-    
-    
-    if(pred_branch_taken && btb_hit && btb_resp && is_curr_branch) //pred branch taken, what if curr_branch
+    else if(is_prev_branch && prev_pred_branch_taken && (!(confirmation && prev_branch_taken))) begin //we predicted taken and previous branch not taken
+        pcmux_sel = pcmux::pc_mem_plus4;
+        flush = 1'b1;
+        flush_ID = 1'b0;
+    end
+    else if(is_prev_branch)begin //we predicted branch not taken
+        pcmux_sel = pcmux_sel_old;
+        flush = flush_old;
+        flush_ID = 1'b0;
+    end
 
-
-
+    else if(pred_branch_taken && btb_hit && is_curr_branch) begin //pred branch taken
+        pcmux_sel = pcmux::btb_out;
+        flush = 1'b0;
+        flush_ID = 1'b1;
+    end
+    else begin //else
+        pcmux_sel = pcmux_sel_old;
+        flush = flush_old;
+        flush_ID = 1'b0;
+    end
 
 end
 
