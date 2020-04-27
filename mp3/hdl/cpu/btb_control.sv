@@ -14,7 +14,8 @@ module btb_control #(
     input logic hit,
     output logic set_valid,
     output logic load_tag,
-    output logic load_data,    
+    output logic load_data,
+    output logic set_lru   
 );
 
 /*
@@ -32,27 +33,27 @@ function void set_defaults();
 endfunction
 
 always_comb
-begin: state_actions
-       set_defaults();
-        unique case({mem_write, mem_read})
-            2'b00: ; 
-            2'b01: set_lru = 1'b1;
-            2'b10: begin
-                        set_valid = 1'b1;
-                        load_tag = 1'b1;
-                        load_data = 1'b1;
-                        set_lru = 1'b1;
-                    end
-            2'b11:  begin
-                        set_valid = 1'b1;
-                        load_tag = 1'b1;
-                        load_data = 1'b1;
-                        set_lru = 1'b1;
-                    end
-            default:;
-        endcase
-    end
+begin
+    set_defaults();
+    unique case({mem_write, mem_read})
+        2'b00: ; 
+        2'b01: set_lru = 1'b1;
+        2'b10: begin
+                    set_valid = 1'b1;
+                    load_tag = 1'b1;
+                    load_data = 1'b1;
+                    set_lru = 1'b1;
+                end
+        2'b11:  begin
+                    set_valid = 1'b1;
+                    load_tag = 1'b1;
+                    load_data = 1'b1;
+                    set_lru = 1'b1;
+                end
+        default:;
+    endcase
 end
+
 /*
 always_comb
 begin: next_state_logic

@@ -28,6 +28,7 @@ module btb #(
     logic set_valid;
     logic load_tag;
     logic load_data;
+    logic set_lru;
 
 btb_control #(
     .s_offset(s_offset),
@@ -85,4 +86,4 @@ btb_datapath #(
     // pmem_address
 );
 
-endmodule : cache
+endmodule : btb

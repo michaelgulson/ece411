@@ -46,6 +46,7 @@ logic [31:0] btb_mem_address_w;
 logic [31:0] btb_wdata;
 logic btb_mem_read;
 logic btb_mem_write;
+logic [31:0] btb_rdata;
 
 //EX stage
 rv32i_word alu_out;
@@ -456,6 +457,7 @@ branch_predictor #(3) branch_predict(
     .btb_wdata(btb_wdata),
     .btb_mem_read(btb_mem_read),
     .btb_mem_write(btb_mem_write),
+    .pc_MEM(pc_MEM)
 );
 
 btb branch_target_buffer(

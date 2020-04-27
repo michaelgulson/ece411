@@ -7,6 +7,7 @@ module branch_predictor #(
     input logic clk,
     input logic rst,
     input rv32i_word pc_ID,
+    input rv32i_word pc_MEM,
     input rv32i_word pc_offset_MEM,
     input rv32i_control_word control_word_MEM,
     input rv32i_opcode opcode_ID,
@@ -17,8 +18,8 @@ module branch_predictor #(
 
     //output predict_address BTB
     //output logic branch_taken,
-    output btb_mem_address_r,
-    output btb_mem_address_w,
+    output rv32i_word btb_mem_address_r,
+    output rv32i_word btb_mem_address_w,
     output rv32i_word btb_wdata,
     output logic btb_mem_read,
     output logic btb_mem_write,
@@ -139,7 +140,7 @@ always_comb begin
         flush_ID = 1'b0;
         btb_mem_write = 1'b1;
     end
-    else if(is_prev_branch && !prev_branch_takne)begin //we predicted branch not taken and branch not taken
+    else if(is_prev_branch && !prev_branch_taken)begin //we predicted branch not taken and branch not taken
         if(is_curr_branch && pred_branch_taken && btb_hit) begin
             pcmux_sel = pcmux::btb_out;
             flush_ID = 1'b1;

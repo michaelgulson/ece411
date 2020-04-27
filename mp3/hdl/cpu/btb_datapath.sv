@@ -18,11 +18,12 @@ module btb_datapath #(
     input [31:0] mem_address_r,
     input [31:0] mem_address_w,
     input logic set_valid,
+    input logic set_lru,
     input logic load_tag,
     input logic load_data, 
     input logic [s_line-1:0] mem_wdata,
     output logic hit,
-    output logic [s_line-1:0] mem_rdata,
+    output logic [s_line-1:0] mem_rdata
 );  
 
 logic [s_tag-1:0] set_tag_r;
@@ -30,6 +31,8 @@ logic [s_index-1:0] set_idx_r;
 logic [s_tag-1:0] set_tag_w;
 logic [s_index-1:0] set_idx_w;
 logic cache_hit;
+logic lru_in;
+logic lru_out;
 logic h0;
 logic h1;
 logic [s_tag-1:0]t0;
@@ -58,7 +61,7 @@ assign h0 = ( (set_tag_r == t0) && v0 ); //hit for way 0
 assign h1 = ( (set_tag_r == t1) && v1 ); //hit for way 1
 assign hit = (h0 || h1);
 
-assign lru_in = (hit) ? ((h0) ? 1'b1: 1'b0)) : lru_out;
+assign lru_in = (hit) ? ((h0) ? 1'b1: 1'b0) : lru_out;
 
 assign tl_0 = (load_tag && !lru_out);
 assign tl_1 = (load_tag && lru_out);
@@ -67,12 +70,11 @@ assign tl_1 = (load_tag && lru_out);
 assign vl_0 = (set_valid && !lru_out);
 assign vl_1  = (set_valid && lru_out);
 
-assign pmem_wdata = (miss)? ((h0)? data_array_out0: data_array_out1);
-
-assign mem_rdata256 = pmem_wdata;
+assign mem_rdata = ((h0)? data_array_out0: data_array_out1);
 
 
-always_comb 
+
+always_comb begin
 
 unique case (lru_out)
             1'b0:  //way 0 was lru
@@ -175,4 +177,4 @@ array LRU(
 );
 
 
-endmodule : cache_datapath
+endmodule : btb_datapath
