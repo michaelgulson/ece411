@@ -35,7 +35,7 @@ end
 
 always_ff @(posedge clk) begin
     if(rst) begin
-        for (int i =0;i<n ;i++ ) begin
+        for (int i =0;i<2**n ;i++ ) begin
             pht[i] <= 2'b00; 
         end
     end

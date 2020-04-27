@@ -35,7 +35,6 @@ pcmux::pcmux_sel_t pcmux_sel_old;
 logic flush_old;
 logic is_curr_branch;
 logic is_prev_branch;
-logic pred_branch_taken_reg_out;
 logic prev_branch_taken;
 logic confirmation;
 logic pred_branch_taken;
