@@ -43,7 +43,7 @@ logic prev_pred_branch_taken;
 assign is_curr_branch = opcode_ID == op_br || opcode_ID == op_jal || opcode_ID == op_jalr;
 assign is_prev_branch = control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67 || control_word_MEM.instr[6:0] == 7'h63;
 
-assign pred_branch_taken = pht_out[1];
+assign pred_branch_taken = ((opcode_ID == op_jal) || (opcode_ID == op_jalr)) ?  1'b1 : pht_out[1];
 assign branch_hist_reg_next = (branch_hist_reg << 1) | prev_branch_taken;
 assign prev_branch_taken = ((control_word_MEM.pc_mux_sel == pcmux::alu_out)&&(br_en_MEM))||(control_word_MEM.instr[6:0] == 7'h6f || control_word_MEM.instr[6:0] == 7'h67);
 assign confirmation = pc_ID == pc_offset_MEM;
