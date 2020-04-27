@@ -445,6 +445,8 @@ hazard_detect_unit hazard_detect(
 branch_predictor #(3) branch_predict(
     .clk(clk),
     .rst(rst),
+    .pc_ID(pc_ID),
+    .pc_offset_MEM(pc_offset_MEM),
     .opcode_ID(opcode),
     .control_word_MEM(control_word_MEM),
     .br_en_MEM(br_en_MEM),
@@ -466,8 +468,9 @@ btb branch_target_buffer(
 
     //to/from smaller cache
     .mem_address_r(btb_mem_address_r),
-    .mem_write(btb_mem_address_w),
+    .mem_address_w(btb_mem_address_w),
     .mem_read(btb_mem_read),
+    .mem_write(btb_mem_write),
     .mem_rdata(btb_rdata), 
     .mem_wdata(btb_wdata),
     .hit(btb_hit)

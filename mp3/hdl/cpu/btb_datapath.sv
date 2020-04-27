@@ -2,8 +2,6 @@
 //branch target datapath
 
 
-import rv32i_types::*;
-
 module btb_datapath #(
     parameter s_offset = 2,
     parameter s_index  = 3,
@@ -15,8 +13,8 @@ module btb_datapath #(
 (
     input logic clk,
     input logic rst,
-    input [31:0] mem_address_r,
-    input [31:0] mem_address_w,
+    input logic [31:0] mem_address_r,
+    input logic [31:0] mem_address_w,
     input logic set_valid,
     input logic set_lru,
     input logic load_tag,
