@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 75
+`define CONTROL_WORD_SIZE 67
 `define NON_SYNTHESIS //uncomment to use non synthesis for rvfi montior 
 
 import rv32i_types::*;
@@ -85,6 +85,8 @@ rv32i_word read_data1_MEM; //only for rv32i monitor
 `endif
 rv32i_word read_data2_MEM;
 logic br_en_MEM;
+logic [3:0] rmask_MEM;
+logic [3:0] wmask_MEM;
 
 //WB stage
 rv32i_word alu_out_WB;
@@ -106,6 +108,8 @@ rv32i_word read_data2_WB; //only for rv32i monitor
 rv32i_word data_addr_WB;  //only for rv32i monitor
 rv32i_word data_wdata_WB;  //only for rv32i monitor
 rv32i_word pc_wdata;  //only for rv32i monitor
+logic [3:0] rmask_WB;
+logic [3:0] wmask_WB;
 // synthesis translate_on
 `endif
 
@@ -124,9 +128,7 @@ assign nop.mem_read = 1'b0;
 assign nop.mem_write = 1'b0;
 assign nop.load_regfile = 1'b0;
 assign nop.dest = 5'b0;
-assign nop.rmask = 4'b0;
-assign nop.wmask = 4'b0;
-assign nop.trap = 1'b0;
+assign nop.trap = 1'b1;
 assign nop.instr = 32'b0;
 assign nop.regfile_mux_sel = regfilemux::alu_out;
 assign nop.pc_mux_sel = pcmux::pc_plus4;
@@ -157,7 +159,7 @@ assign data_write = control_word_MEM.mem_write;
 assign inst_read = 1'b1;
 assign inst_addr = pc_out;
 assign data_addr = data_addrmux_out;
-assign data_mbe = control_word_MEM.wmask;
+assign data_mbe = wmask_MEM;
 
 //assigned variables for IF stage
 assign funct3 = ir_ID[14:12];
@@ -395,6 +397,24 @@ register data_wdata_MEM_WB(   //only for rv32i monitor
     .in(data_wdata),
     .out(data_wdata_WB)
 );
+
+
+register #(4) rmask_MEM_WB(   //only for rv32i monitor 
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(rmask_MEM),
+    .out(rmask_WB)
+);
+
+
+register #(4) wmask_MEM_WB(   //only for rv32i monitor 
+    .clk(clk),
+    .rst(rst),
+    .load(loadReg),
+    .in(wmask_MEM),
+    .out(wmask_WB)
+);
 // synthesis translate_on
 `endif
 
@@ -413,7 +433,7 @@ alu ALU(
 /*******************************Other modules*********************************/
 //masking for the WB stage for regfile mux
 load_masking data_mem_masking(
-    .rmask(control_word_WB.rmask),
+    .rmask(rmask_MEM),
     .mdrreg_out(data_out_WB),
     .mdr_mask_h(dm_mask_h),
     .mdr_mask_b(dm_mask_b),
@@ -422,7 +442,7 @@ load_masking data_mem_masking(
 
 //masking for store
 sshifter storeshifter(
-    .wmask(control_word_MEM.wmask),
+    .wmask(wmask_MEM),
     .rs2_out(read_data2_MEM),
     .mem_data_out_in(data_wdata)
 );
@@ -474,6 +494,14 @@ btb branch_target_buffer(
     .mem_rdata(btb_rdata), 
     .mem_wdata(btb_wdata),
     .hit(btb_hit)
+);
+
+rsmask rsmask(
+    .addr_01(pc_offset_MEM[1:0]),
+    .funct3(control_word_MEM.instr[14:12]),
+    .opcode(control_word_MEM.instr[6:0]),
+    .rmask(rmask_MEM),
+    .wmask(wmask_MEM)
 );
 /****************************************************************************/
 

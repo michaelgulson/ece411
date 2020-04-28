@@ -1,7 +1,7 @@
 import rv32i_types::*;
 
 module branch_predictor #(
-    parameter n// size of BHT and PHT
+    parameter n  // size of BHT and PHT
 
 )(
     input logic clk,

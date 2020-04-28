@@ -67,8 +67,6 @@ typedef struct packed {
     logic mem_write;
     logic load_regfile;
     logic [4:0] dest;
-    logic [3:0] rmask;
-    logic [3:0] wmask;
     logic trap; //for branching
     rv32i_word instr;
     logic [4:0] rs1; //source registers from regfile

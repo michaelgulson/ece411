@@ -11,16 +11,16 @@ lw  x2, HUNDRED
 
 loop:
     addi x3, x3, 1
-    jal outside
-back:    
+    #jal outside
+#back:    
     blt  x3, x2, loop
 halt:
     beq x0, x0, halt
     lw x7, BAD
 
-outside:
-    bne x0, x0, back
-    jal back
+#outside:
+#    bne x0, x0, back
+#    jal back
 
 
 

@@ -26,8 +26,6 @@ logic pre_load_regfile;
 
 always_comb begin : trap_check
     ctrl_word.trap = 0;
-    ctrl_word.rmask = '0;
-    ctrl_word.wmask = '0;
 
     case (opcode)
         op_lui, op_auipc, op_imm, op_reg, op_jal, op_jalr:;
@@ -40,58 +38,18 @@ always_comb begin : trap_check
         end
 		op_load: begin
             case (load_funct3)
-                lw: ctrl_word.rmask = 4'b1111;
-                lh, lhu: 
-				begin
-					if(addr_01)
-						ctrl_word.rmask = 4'b1100;
-					else
-						ctrl_word.rmask = 4'b0011; 
-				end				
-                lb, lbu: 
-				begin
-					case (addr_01)
-						2'b00:
-							ctrl_word.rmask = 4'b0001;
-						2'b01:
-							ctrl_word.rmask = 4'b0010;
-						2'b10:
-							ctrl_word.rmask = 4'b0100;
-						2'b11:
-							ctrl_word.rmask = 4'b1000;
-						default:
-							ctrl_word.rmask = 4'b0001;
-					endcase				
-				end
+                lw: ;
+                lh, lhu: ;		
+                lb, lbu: ;
                 default: ctrl_word.trap = 1;
             endcase
         end
 
 		 op_store: begin
             case (store_funct3)
-                sw: ctrl_word.wmask = 4'b1111;
-                sh: 
-				begin
-					if(addr_01)
-						ctrl_word.wmask = 4'b1100; 
-					else
-						ctrl_word.wmask = 4'b0011 ;
-				end	
-                sb:
-				begin
-					case (addr_01)
-						2'b00:
-							ctrl_word.wmask = 4'b0001;
-						2'b01:
-							ctrl_word.wmask = 4'b0010;
-						2'b10:
-							ctrl_word.wmask = 4'b0100;
-						2'b11:
-							ctrl_word.wmask = 4'b1000;
-						default:
-							ctrl_word.wmask = 4'b0001;
-					endcase				
-				end 
+                sw: ;
+                sh: ;
+                sb: ;
                 default: ctrl_word.trap = 1;
             endcase
         end

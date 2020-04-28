@@ -22,6 +22,12 @@ int halting = 0;
 int count = 0;
 logic prehalt;
 int delay = 5;
+int branch_predict_taken_cnt;
+int branch_actually_taken_cnt;
+int total_branches;
+int btb_hits;
+int branch_predict_taken_taken;  //count of branches that predict taken and were btb_hits
+int branch_predict_taken_correct;
 
 // Stop simulation on timeout (stall detection), halt
 always @(posedge itf.clk) begin
@@ -64,8 +70,8 @@ assign rvfi.rd_wdata = dut.pipeline_datapath.regfilemux_out;
 assign rvfi.pc_rdata = dut.pipeline_datapath.pc_WB;
 assign rvfi.pc_wdata = dut.pipeline_datapath.pc_wdata;
 assign rvfi.mem_addr = dut.pipeline_datapath.data_addr_WB;
-assign rvfi.mem_rmask = dut.pipeline_datapath.control_word_WB.rmask;
-assign rvfi.mem_wmask = dut.pipeline_datapath.control_word_WB.wmask;
+assign rvfi.mem_rmask = dut.pipeline_datapath.rmask_WB;
+assign rvfi.mem_wmask = dut.pipeline_datapath.wmask_WB;
 assign rvfi.mem_rdata = dut.pipeline_datapath.data_out_WB;
 assign rvfi.mem_wdata = dut.pipeline_datapath.data_wdata_WB;
 
@@ -105,5 +111,38 @@ mp3 dut(
     .pmem_wdata(itf.mem_wdata)
 );
 /***************************** End Instantiation *****************************/
+
+/*****************************Performance Counters****************************/
+always @(posedge itf.clk) begin
+    if (itf.rst) begin
+        branch_predict_taken_cnt <= 32'b0;
+        branch_actually_taken_cnt <= 32'b0;
+        total_branches <= 32'b0;
+        btb_hits <= 32'b0;
+        branch_predict_taken_taken <= 32'b0;
+    end
+    else begin
+        if(dut.pipeline_datapath.branch_predict.pred_branch_taken && dut.pipeline_datapath.branch_predict.is_curr_branch && dut.pipeline_datapath.loadReg) begin
+            branch_predict_taken_cnt <= branch_predict_taken_cnt + 1;
+        end
+        if(dut.pipeline_datapath.branch_predict.prev_branch_taken && dut.pipeline_datapath.loadReg) begin
+           branch_actually_taken_cnt <=  branch_actually_taken_cnt + 1;
+        end
+        if(dut.pipeline_datapath.branch_predict.is_prev_branch && dut.pipeline_datapath.loadReg) begin
+            total_branches <= total_branches +1;
+        end
+        if(dut.pipeline_datapath.branch_predict.btb_hit && dut.pipeline_datapath.loadReg) begin
+            btb_hits <= btb_hits + 1;
+        end
+        if(dut.pipeline_datapath.branch_predict.btb_hit && dut.pipeline_datapath.branch_predict.pred_branch_taken && dut.pipeline_datapath.branch_predict.is_curr_branch && dut.pipeline_datapath.loadReg) begin
+            branch_predict_taken_taken <= branch_predict_taken_taken + 1;
+        end
+        if(dut.pipeline_datapath.branch_predict.prev_pred_branch_taken && dut.pipeline_datapath.branch_predict.is_prev_branch && dut.pipeline_datapath.loadReg && dut.pipeline_datapath.branch_predict.prev_branch_taken)begin
+            branch_predict_taken_correct <= branch_predict_taken_correct + 1;
+        end
+    end
+end
+/*****************************************************************************/
+
 
 endmodule
