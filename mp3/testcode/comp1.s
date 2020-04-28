@@ -1,3 +1,7 @@
+
+# COPYRIGHT 2020 University of Illinois at Urbana-Champaign
+# All rights reserved.
+
 	.file	"comp1.c"
 	.option nopic
 	.text

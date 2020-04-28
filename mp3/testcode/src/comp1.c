@@ -1,3 +1,10 @@
+/*
+
+COPYRIGHT 2020 University of Illinois at Urbana-Champaign
+All rights reserved.
+
+*/
+
 #include <stdint.h>
 #include "target.h"
 
