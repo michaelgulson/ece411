@@ -1,5 +1,5 @@
 `define BAD_MUX_SEL $fatal("%0t %s %0d: Illegal mux select", $time, `__FILE__, `__LINE__)
-`define CONTROL_WORD_SIZE 67
+`define CONTROL_WORD_SIZE 66
 `define NON_SYNTHESIS //uncomment to use non synthesis for rvfi montior 
 
 import rv32i_types::*;
@@ -64,13 +64,9 @@ rv32i_word b_imm_EX;
 rv32i_word u_imm_EX;
 rv32i_word j_imm_EX;
 rv32i_opcode opcode_EX;
-alumux::alumux1_sel_t forwardA;
-alumux::alumux2_sel_t forwardB;
-`ifdef NON_SYNTHESIS
-// synthesis translate_off
-rv32i_word read_data1_out; //only for rv32i monitor
-// synthesis translate_on
-`endif
+readdatamux::readdatamux_sel_t forwardA;
+readdatamux::readdatamux_sel_t forwardB;
+rv32i_word read_data1_out;
 rv32i_word read_data2_out;
 
 //MEM stage
@@ -108,10 +104,10 @@ rv32i_word read_data2_WB; //only for rv32i monitor
 rv32i_word data_addr_WB;  //only for rv32i monitor
 rv32i_word data_wdata_WB;  //only for rv32i monitor
 rv32i_word pc_wdata;  //only for rv32i monitor
-logic [3:0] rmask_WB;
 logic [3:0] wmask_WB;
 // synthesis translate_on
 `endif
+logic [3:0] rmask_WB;
 
 //LoadReg signals
 logic loadReg;
@@ -433,7 +429,7 @@ alu ALU(
 /*******************************Other modules*********************************/
 //masking for the WB stage for regfile mux
 load_masking data_mem_masking(
-    .rmask(rmask_MEM),
+    .rmask(rmask_WB),
     .mdrreg_out(data_out_WB),
     .mdr_mask_h(dm_mask_h),
     .mdr_mask_b(dm_mask_b),
@@ -497,7 +493,7 @@ btb branch_target_buffer(
 );
 
 rsmask rsmask(
-    .addr_01(pc_offset_MEM[1:0]),
+    .addr_01(alu_out_MEM[1:0]),
     .funct3(control_word_MEM.instr[14:12]),
     .opcode(control_word_MEM.instr[6:0]),
     .rmask(rmask_MEM),
@@ -575,23 +571,36 @@ always_comb begin : MUXES
     endcase
 
     //EX stage
-    unique case (forwardA)
-        alumux::rs1_out:  alumux1_out = read_data1_EX;
-        alumux::pc_out:   alumux1_out = pc_EX;
-        alumux::alu_out_MEM1: alumux1_out = alu_out_MEM;
-        alumux::regfile_WB1: alumux1_out = regfilemux_out;
-        default: alumux1_out = read_data1_EX;
+    unique case(forwardA)
+        readdatamux::alu_out_MEM:  read_data1_out = alu_out_MEM;
+        readdatamux::regfile_WB:  read_data1_out = regfilemux_out;
+        readdatamux::read_data:  read_data1_out = read_data1_EX;
+
+        default: read_data1_out = read_data1_EX;    
     endcase
 
-    unique case (forwardB)
+
+    unique case(forwardB)
+        readdatamux::alu_out_MEM:  read_data2_out = alu_out_MEM;
+        readdatamux::regfile_WB:  read_data2_out = regfilemux_out;
+        readdatamux::read_data:  read_data2_out = read_data2_EX;
+
+        default: read_data2_out = read_data2_EX;    
+    endcase
+
+    unique case (control_word_EX.alu_muxsel1)
+        alumux::rs1_out:  alumux1_out = read_data1_out;
+        alumux::pc_out:   alumux1_out = pc_EX;
+        default: alumux1_out = read_data1_out;
+    endcase
+
+    unique case (control_word_EX.alu_muxsel2)
         alumux::i_imm: alumux2_out = i_imm_EX;  
         alumux::u_imm: alumux2_out = u_imm_EX;
         alumux::b_imm: alumux2_out = b_imm_EX;
         alumux::s_imm: alumux2_out = s_imm_EX;
         alumux::j_imm: alumux2_out = j_imm_EX;
-        alumux::rs2_out: alumux2_out = read_data2_EX;
-        alumux::alu_out_MEM2: alumux2_out = alu_out_MEM;
-        alumux::regfile_WB2: alumux2_out = regfilemux_out;
+        alumux::rs2_out: alumux2_out = read_data2_out;
         default: alumux2_out = i_imm_EX;
     endcase
 
@@ -609,27 +618,9 @@ always_comb begin : MUXES
         default: pc_wdata = pc_WB +4;
     endcase
 
-    unique case(forwardA) //only for rv32i monitor
-        alumux::rs1_out:  read_data1_out = read_data1_EX;
-        alumux::pc_out:   read_data1_out = read_data1_EX;
-        alumux::alu_out_MEM1: read_data1_out = alu_out_MEM;
-        alumux::regfile_WB1: read_data1_out = regfilemux_out;
-        default: read_data1_out = read_data1_EX;
-    endcase
     // synthesis translate_on
     `endif
 
-    unique case(forwardB)
-        alumux::i_imm: read_data2_out = read_data2_EX;  
-        alumux::u_imm: read_data2_out = read_data2_EX;  
-        alumux::b_imm: read_data2_out = read_data2_EX;  
-        alumux::s_imm: read_data2_out = read_data2_EX;  
-        alumux::j_imm: read_data2_out = read_data2_EX;  
-        alumux::rs2_out: read_data2_out = read_data2_EX;
-        alumux::alu_out_MEM2: read_data2_out = alu_out_MEM;
-        alumux::regfile_WB2: read_data2_out = regfilemux_out;
-        default: read_data2_out = read_data2_EX;    
-    endcase
 end
 /*****************************************************************************/
 

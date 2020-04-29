@@ -7,6 +7,7 @@ import datamux::*;
 import cmpmux::*;
 import alumux::*;
 import regfilemux::*;
+import readdatamux::*;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
