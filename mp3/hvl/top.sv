@@ -35,12 +35,13 @@ always @(posedge itf.clk) begin
         halting <= 1;
     end
     if (halting == 1) begin
-        count <= count + 1;
-    end
-    if (count == delay) begin
         rvfi.halt <= 1;
         $finish;
     end
+ //   if (count == delay) begin
+//        rvfi.halt <= 1;
+ //       $finish;
+ //   end
     // if (timeout == 0) begin
     //     $display("TOP: Timed out");
     //     $finish;
