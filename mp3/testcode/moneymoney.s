@@ -3,8 +3,6 @@
 .globl _start
 
 _start:
-    
-    
     andi x7, x7, 0
     andi x6, x6, 0
     andi x5, x5, 0

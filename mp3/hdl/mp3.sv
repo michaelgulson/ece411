@@ -190,7 +190,7 @@ l2_cache(
     .mem_read(l2_read), //arbiter
     .mem_write(l2_write), //arbiter
     .mem_wdata256(l2_wdata), //*connects directly to D-cache
-    .mem_byte_enable256(32'hffffffff), 
+    .mem_byte_enable256(32'hFFFFFFFF), 
     .mem_rdata256(l2_rdata), //arbiter
     .mem_resp(l2_resp), //arbiter
     
