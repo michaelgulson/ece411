@@ -14,7 +14,8 @@ module cache_control #(
     input logic mem_write,
     input logic hit,
     input logic miss,
-    input logic dirty, 
+    input logic dirty,
+    // input logic valid,
     output logic set_dirty,
     output logic reset_dirty,
     output logic set_valid,
@@ -65,13 +66,13 @@ begin: state_actions
             begin
                 reset_dirty = pmem_resp;
                 pmem_read = pmem_resp;                
-                pmem_write= !(pmem_resp);
+                pmem_write = !(pmem_resp);
             end
             HIT:
             begin
-                mem_resp = (mem_read || mem_write) && hit;
+                mem_resp = (mem_read || mem_write) && hit; //one cycle hit
                 set_lru = (mem_read || mem_write) && hit;
-                set_dirty = mem_write && hit;
+                set_dirty = mem_write && hit; //&& valid;
                 load_data = mem_write && hit;
             end
             default:;

@@ -32,6 +32,7 @@ module cache #(
     logic hit;
     logic miss;
     logic dirty;
+    // logic valid;
     logic set_dirty;
     logic reset_dirty;
     logic set_valid;
@@ -54,6 +55,7 @@ cache_control #(
     //hit,
     //miss,
     //dirty, 
+    //valid, <>
     //set_dirty,
     //reset_dirty,
     //set_valid,
@@ -90,6 +92,7 @@ cache_datapath #(
     // hit,
     // miss,
     // dirty,
+    // valid, <>
     // mem_rdata256,
     // pmem_wdata,
     // pmem_address

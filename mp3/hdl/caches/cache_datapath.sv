@@ -25,6 +25,7 @@ module cache_datapath #(
     output logic hit,
     output logic miss,
     output logic dirty,
+    // output logic valid,
     output logic [s_line-1:0] mem_rdata256,
     output logic [s_line-1:0] pmem_wdata,
     output rv32i_word pmem_address
@@ -67,17 +68,19 @@ assign cache_hit = (h0 || h1);
 assign hit = cache_hit;
 assign miss = (!cache_hit);
 
-assign dl_0 = ((set_dirty || reset_dirty) && !lru_out);
-assign dl_1 = ((set_dirty || reset_dirty) && lru_out);
+assign dl_0 = (((set_dirty && h0) || reset_dirty) && !lru_out);
+assign dl_1 = (((set_dirty && h1) || reset_dirty) && lru_out);
 assign dirty = (lru_out)? d1 : d0;
 
-assign lru_in = (hit) ? ((h0) ? 1'b1: 1'b0) : lru_out;
+assign lru_in = (hit) ? ((h0) ? 1'b1 : 1'b0) : lru_out;
 
 assign tl_0 = (load_tag && !lru_out);
 assign tl_1 = (load_tag && lru_out);
 
 assign vl_0 = (set_valid && !lru_out);
 assign vl_1  = (set_valid && lru_out);
+
+// assign valid = (h0 && v0 && (lru_out == 1'b0)) || (h1 && v1 && (lru_out == 1'b1));
 
 assign pmem_wdata = (miss)? ((lru_out)? data_array_out1 : data_array_out0) : ((h0)? data_array_out0: data_array_out1);
 
