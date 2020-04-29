@@ -39,14 +39,14 @@ rv32i_control_word ctrl_word;
 rv32i_word ir_ID;
 logic control_word_mux_sel;
 logic nop_sel;
-logic btb_hit;
-logic flush_ID;
-logic [31:0] btb_mem_address_r;
-logic [31:0] btb_mem_address_w;
-logic [31:0] btb_wdata;
-logic btb_mem_read;
-logic btb_mem_write;
-logic [31:0] btb_rdata;
+// logic btb_hit;
+// logic flush_ID;
+// logic [31:0] btb_mem_address_r;
+// logic [31:0] btb_mem_address_w;
+// logic [31:0] btb_wdata;
+// logic btb_mem_read;
+// logic btb_mem_write;
+// logic [31:0] btb_rdata;
 
 //EX stage
 rv32i_word alu_out;
@@ -211,7 +211,8 @@ register ir_IF_ID(
     .clk(clk),
     .rst(rst),
     .load(loadReg && !control_word_mux_sel),
-    .in(((flush||flush_ID) ? 32'b0 : inst_rdata)),
+    //.in(((flush||flush_ID) ? 32'b0 : inst_rdata)),
+    .in(((flush) ? 32'b0 : inst_rdata)),
     .out(ir_ID)
 );
 
@@ -458,39 +459,39 @@ hazard_detect_unit hazard_detect(
 );
 
 
-branch_predictor #(3) branch_predict(
-    .clk(clk),
-    .rst(rst),
-    .pc_ID(pc_ID),
-    .pc_offset_MEM(pc_offset_MEM),
-    .opcode_ID(opcode),
-    .control_word_MEM(control_word_MEM),
-    .br_en_MEM(br_en_MEM),
-    .btb_hit(btb_hit),
-    .pcmux_sel(pcmux_sel),
-    .flush(flush),
-    .flush_ID(flush_ID),
-    .btb_mem_address_r(btb_mem_address_r),
-    .btb_mem_address_w(btb_mem_address_w),
-    .btb_wdata(btb_wdata),
-    .btb_mem_read(btb_mem_read),
-    .btb_mem_write(btb_mem_write),
-    .pc_MEM(pc_MEM)
-);
+// branch_predictor #(3) branch_predict(
+//     .clk(clk),
+//     .rst(rst),
+//     .pc_ID(pc_ID),
+//     .pc_offset_MEM(pc_offset_MEM),
+//     .opcode_ID(opcode),
+//     .control_word_MEM(control_word_MEM),
+//     .br_en_MEM(br_en_MEM),
+//     .btb_hit(btb_hit),
+//     .pcmux_sel(pcmux_sel),
+//     .flush(flush),
+//     .flush_ID(flush_ID),
+//     .btb_mem_address_r(btb_mem_address_r),
+//     .btb_mem_address_w(btb_mem_address_w),
+//     .btb_wdata(btb_wdata),
+//     .btb_mem_read(btb_mem_read),
+//     .btb_mem_write(btb_mem_write),
+//     .pc_MEM(pc_MEM)
+// );
 
-btb branch_target_buffer(
-    .clk(clk), 
-    .rst(rst), 
+// btb branch_target_buffer(
+//     .clk(clk), 
+//     .rst(rst), 
 
-    //to/from smaller cache
-    .mem_address_r(btb_mem_address_r),
-    .mem_address_w(btb_mem_address_w),
-    .mem_read(btb_mem_read),
-    .mem_write(btb_mem_write),
-    .mem_rdata(btb_rdata), 
-    .mem_wdata(btb_wdata),
-    .hit(btb_hit)
-);
+//     //to/from smaller cache
+//     .mem_address_r(btb_mem_address_r),
+//     .mem_address_w(btb_mem_address_w),
+//     .mem_read(btb_mem_read),
+//     .mem_write(btb_mem_write),
+//     .mem_rdata(btb_rdata), 
+//     .mem_wdata(btb_wdata),
+//     .hit(btb_hit)
+// );
 
 rsmask rsmask(
     .addr_01(alu_out_MEM[1:0]),
@@ -502,7 +503,7 @@ rsmask rsmask(
 /****************************************************************************/
 
 
-/*
+
 //pcmux_sel branch detection
 always_comb begin : PC_MUX
     if((control_word_MEM.pc_mux_sel == pcmux::alu_out) & (br_en_MEM || control_word_MEM.instr[6:0] == 7'h6f)) begin
@@ -518,7 +519,7 @@ always_comb begin : PC_MUX
         flush = 1'b0;
     end
 end
-*/
+
 /*****************************************************************************/
 
 /*********************************Muxes***************************************/
@@ -528,8 +529,8 @@ always_comb begin : MUXES
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out:  pcmux_out = pc_offset_MEM;
         pcmux::alu_mod2:  pcmux_out = {alu_out_MEM[31:1],1'b0};
-        pcmux::btb_out:    pcmux_out = btb_rdata;
-        pcmux::pc_mem_plus4:  pcmux_out = pc_MEM +4;
+        //pcmux::btb_out:    pcmux_out = btb_rdata;
+        // pcmux::pc_mem_plus4:  pcmux_out = pc_MEM +4;
         default: pcmux_out = pc_out;
     endcase
 
