@@ -237,7 +237,7 @@ default_set();
         address_o = address_i;
         if(resp_i)
         begin
-            write_o = 0;
+            write_o = 1;
             next_state = IDLE;
         end
         else

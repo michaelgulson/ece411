@@ -68,8 +68,8 @@ assign cache_hit = (h0 || h1);
 assign hit = cache_hit;
 assign miss = (!cache_hit);
 
-assign dl_0 = (((set_dirty && h0) || reset_dirty) && !lru_out);
-assign dl_1 = (((set_dirty && h1) || reset_dirty) && lru_out);
+assign dl_0 = (((set_dirty && h0) || reset_dirty));
+assign dl_1 = (((set_dirty && h1) || reset_dirty));
 assign dirty = (lru_out)? d1 : d0;
 
 assign lru_in = (hit) ? ((h0) ? 1'b1 : 1'b0) : lru_out;
@@ -246,7 +246,7 @@ array dirty_array_1(
 
 array LRU(
             .clk(clk),
-            .read(!set_lru),
+            .read(data_read),
             .load(set_lru),
             .rindex(set_idx),
             .windex(set_idx),
