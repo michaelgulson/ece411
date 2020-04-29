@@ -61,7 +61,7 @@ begin: state_actions
                 load_tag = pmem_resp;
                 load_data = pmem_resp;
                 pmem_read = !(pmem_resp);
-                mem_resp = pmem_resp;
+                //mem_resp = pmem_resp;
             end
             STORE:
             begin

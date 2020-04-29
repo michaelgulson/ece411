@@ -21,6 +21,8 @@ module cacheline_adaptor
     input resp_i
 );
 
+logic [31:0] address_buffer;
+
 enum int unsigned
 {
     IDLE,
@@ -36,7 +38,7 @@ enum int unsigned
 } state, next_state;
 
 function void default_set();
-    address_o = address_i;
+    //address_o = address_i;
     read_o = read_i;
     write_o = write_i;
 endfunction
@@ -119,6 +121,7 @@ default_set();
     unique case(state)
     IDLE:
     begin
+        address_o = address_i;
         read_o = 0;
         write_o = 0;
         if(read_i)
@@ -219,7 +222,7 @@ default_set();
     begin
         read_o = 0;
         write_o = 1;
-        address_o = address_i;
+        address_o = address_buffer;
         if(resp_i)
         begin
             next_state = WRITE_4;
@@ -234,7 +237,7 @@ default_set();
     begin 
         read_o = 0;
         write_o = 1;
-        address_o = address_i;
+        address_o = address_buffer;
         if(resp_i)
         begin
             write_o = 1;
@@ -266,6 +269,10 @@ end
 
 always_ff@(posedge clk)
 begin: cacheline_read
+    if(!reset_n)begin
+        address_buffer <= 32'b0;
+    end
+
     unique case(state)
     READ_1:
     begin
@@ -283,6 +290,19 @@ begin: cacheline_read
     begin
         line_o[255:192] <= burst_i;
     end
+
+    WRITE_1:
+    begin
+        address_buffer <= address_i;
+    end
+
+    WRITE_2:
+    begin
+        address_buffer <= address_i;
+    end
+
+    
+
     default:
     begin
         ;
