@@ -82,6 +82,11 @@ always_comb begin
             endcase
         end
 
+        default: begin
+                rmask = 4'b0;
+                wmask = 4'b0;
+                end
+
     endcase
 end    
 

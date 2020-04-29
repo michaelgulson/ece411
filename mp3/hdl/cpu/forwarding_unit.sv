@@ -9,8 +9,7 @@ module fowarding_unit
 
 
     output readdatamux::readdatamux_sel_t forwardA,
-    output readdatamux::readdatamux_sel_t forwardB,
-    output [1:0] forwardC
+    output readdatamux::readdatamux_sel_t forwardB
 );
 
 logic [4:0] dest_MEM;
@@ -59,21 +58,6 @@ always_comb begin
     else begin
         forwardB = readdatamux::read_data;
     end
- /*   if (opcode_EX == op_store) begin
-        if(load_regfile_MEM && (dest_MEM!=0) && (dest_MEM == rs2_EX))begin
-            forwardC = 2'b11;  //alu_out_MEM2
-        end
-        else if(load_regfile_WB && (dest_WB!=0) && (dest_WB == rs2_EX))begin
-            forwardC = 2'b10;  //regfile_WB2
-        end
-        else begin
-            forwardC = 2'b00;
-        end
-    end
-    else begin
-        forwardC = 2'b00;
-    end
-*/
 
 end
 endmodule
