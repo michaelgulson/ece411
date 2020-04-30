@@ -16,7 +16,7 @@ assign rs2_ID = control_word_ID.instr[24:20];
 always_comb begin
     if(control_word_EX.mem_read && ((control_word_EX.dest == rs1_ID) || (control_word_EX.dest == rs2_ID)))
         control_word_mux_sel = 1'b1;
-    else if(control_word_EX.instr[6:0] == op_lui && ((control_word_EX.dest == control_word_ID.rs2_ID)|| (control_word_EX == rs1_ID)))
+    else if(control_word_EX.instr[6:0] == op_lui && ((control_word_EX.dest == rs1_ID)||(control_word_EX.dest == rs2_ID)))
         control_word_mux_sel = 1'b1;
     else
         control_word_mux_sel = 1'b0;
