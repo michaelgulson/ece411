@@ -18,10 +18,10 @@ source_tb tb(
 
 /****************************** Halting **************************************/
 // int timeout = 100000000;   // Feel Free to adjust the timeout value
-int halting = 0;
-int count = 0;
-logic prehalt;
-int delay = 5;
+// int halting = 0;
+// int count = 0;
+logic halt;
+// int delay = 1;
 // int branch_predict_taken_cnt;
 // int branch_actually_taken_cnt;
 // int total_branches;
@@ -31,16 +31,18 @@ int delay = 5;
 
 // Stop simulation on timeout (stall detection), halt
 always @(posedge itf.clk) begin
-    if (prehalt) begin
-        halting <= 1;
-    end
-    if (halting == 1) begin
-        count <= count + 1;
-    end
-    if (count == delay) begin
+    if (halt) begin
         rvfi.halt <= 1;
         $finish;
+        // halting <= 1;
     end
+    // if (halting == 1) begin
+    //     count <= count + 1;
+    // end
+    // if (count == delay) begin
+    //     rvfi.halt <= 1;
+    //     $finish;
+    // end
     // if (timeout == 0) begin
     //     $display("TOP: Timed out");
     //     $finish;
@@ -51,7 +53,7 @@ end
 
 /************************ Signals necessary for monitor **********************/
 // This section not required until CP3
-assign prehalt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
+assign halt = (dut.pipeline_datapath.control_word_MEM.instr[6:0] == 7'h63) & 
                     (dut.pipeline_datapath.pc_MEM == dut.pipeline_datapath.pc_offset_MEM);   // Set high when you detect an infinite loop
 initial rvfi.order = 0;
 initial rvfi.halt = 0;
